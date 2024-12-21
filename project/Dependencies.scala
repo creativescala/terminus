@@ -1,0 +1,45 @@
+import sbt.*
+import org.scalajs.sbtplugin.ScalaJSPlugin
+import org.scalajs.sbtplugin.ScalaJSPlugin.autoImport.*
+import org.portablescala.sbtplatformdeps.PlatformDepsPlugin.autoImport.*
+
+object Dependencies {
+  // Library Versions
+  val catsVersion = "2.12.0"
+  val catsEffectVersion = "3.5.7"
+  val fs2Version = "3.11.0"
+
+  val scalatagsVersion = "0.13.1"
+  val scalajsDomVersion = "2.8.0"
+
+  val jlineVersion = "3.28.0"
+
+  val scalaCheckVersion = "1.15.4"
+  val munitVersion = "1.0.3"
+  val munitScalacheckVersion = "1.0.0"
+  val munitCatsEffectVersion = "2.0.0"
+
+  // Libraries
+  val catsEffect =
+    Def.setting("org.typelevel" %%% "cats-effect" % catsEffectVersion)
+  val catsCore = Def.setting("org.typelevel" %%% "cats-core" % catsVersion)
+  val catsFree = Def.setting("org.typelevel" %%% "cats-free" % catsVersion)
+  val fs2 = Def.setting("co.fs2" %%% "fs2-core" % fs2Version)
+
+  val scalatags = Def.setting("com.lihaoyi" %%% "scalatags" % scalatagsVersion)
+  val scalajsDom =
+    Def.setting("org.scala-js" %%% "scalajs-dom" % scalajsDomVersion)
+
+  val jline =
+    Def.setting("org.jline" % "jline" % jlineVersion)
+
+  val munit = Def.setting("org.scalameta" %%% "munit" % munitVersion % "test")
+  val munitScalaCheck =
+    Def.setting(
+      "org.scalameta" %%% "munit-scalacheck" % munitScalacheckVersion % "test"
+    )
+  val munitCatsEffect =
+    Def.setting(
+      "org.typelevel" %%% "munit-cats-effect" % munitCatsEffectVersion % Test
+    )
+}
