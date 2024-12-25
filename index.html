@@ -38,7 +38,27 @@
     <div id="content">
         <main class="content">
             <h1 id="terminus" class="title">Terminus</h1>
-            <p>Terminus is a functional Scala library for working with the terminal.</p>
+            <p>Terminus is a Scala 3 library for working with the terminal.
+            It currently supports the JVM, via <a href="https://jline.org/">JLine</a>. 
+            We intend to add <a href="https://scala-native.org/en/stable/">Scala Native</a> and <a href="https://www.scala-js.org/">Scala.js</a> support .</p>
+            
+            <h2 id="installation" class="section">Installation</h2>
+            <p>To use Terminus, add the following to your <code>build.sbt</code></p>
+            <pre><code class="nohighlight"><span class="identifier">libraryDependencies</span><span> += </span><span class="string-literal">&quot;org.creativescala&quot;</span><span> %% </span><span class="string-literal">&quot;terminus&quot;</span><span> % </span><span class="string-literal">&quot;0.27-d08ae67-SNAPSHOT&quot;</span></code></pre>
+            
+            <h2 id="usage" class="section">Usage</h2>
+            <p>Import Terminus</p>
+            <pre><code class="nohighlight"><span class="keyword">import</span><span> </span><span class="identifier">terminus</span><span>.*</span></code></pre>
+            <p>Now create and run a program that uses the <code>Terminal</code> object.</p>
+            <pre><code class="nohighlight"><span class="type-name">Terminal</span><span>.</span><span class="identifier">run</span><span> {
+  </span><span class="type-name">Terminal</span><span>.</span><span class="identifier">write</span><span>(</span><span class="string-literal">&quot;This is Terminus!&quot;</span><span>)
+  </span><span class="type-name">Terminal</span><span>.</span><span class="identifier">flush</span><span>()
+}</span></code></pre>
+            
+            <h2 id="design" class="section">Design</h2>
+            
+            <h2 id="notes" class="section">Notes</h2>
+            <p>Forking in SBT won&#39;t give you a standard input that works.</p>
             <div class="flex flex-row justify-between">
                  
             </div>
