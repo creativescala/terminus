@@ -42,23 +42,153 @@
             It currently supports the JVM, via <a href="https://jline.org/">JLine</a>. 
             We intend to add <a href="https://scala-native.org/en/stable/">Scala Native</a> and <a href="https://www.scala-js.org/">Scala.js</a> support .</p>
             
-            <h2 id="installation" class="section">Installation</h2>
+            <h2 id="setup" class="section">Setup</h2>
             <p>To use Terminus, add the following to your <code>build.sbt</code></p>
-            <pre><code class="nohighlight"><span class="identifier">libraryDependencies</span><span> += </span><span class="string-literal">&quot;org.creativescala&quot;</span><span> %% </span><span class="string-literal">&quot;terminus&quot;</span><span> % </span><span class="string-literal">&quot;0.27-d08ae67-SNAPSHOT&quot;</span></code></pre>
+            <pre><code class="nohighlight"><span class="identifier">libraryDependencies</span><span> += </span><span class="string-literal">&quot;org.creativescala&quot;</span><span> %% </span><span class="string-literal">&quot;terminus&quot;</span><span> % </span><span class="string-literal">&quot;0.27-70aadf7-SNAPSHOT&quot;</span></code></pre>
             
             <h2 id="usage" class="section">Usage</h2>
             <p>Import Terminus</p>
             <pre><code class="nohighlight"><span class="keyword">import</span><span> </span><span class="identifier">terminus</span><span>.*</span></code></pre>
-            <p>Now create and run a program that uses the <code>Terminal</code> object.</p>
+            <p>Now you can call methods on the <code>Terminal</code> object. The core methods are <code>read</code> and <code>write</code>, but there are also methods to change color, move the cursor, erase content, and so on. Don&#39;t forget to call <code>flush</code> or your output won&#39;t appear. Wrap a call to <code>run</code> around your entire program. Here&#39;s a small example that prints bright red text.</p>
             <pre><code class="nohighlight"><span class="type-name">Terminal</span><span>.</span><span class="identifier">run</span><span> {
-  </span><span class="type-name">Terminal</span><span>.</span><span class="identifier">write</span><span>(</span><span class="string-literal">&quot;This is Terminus!&quot;</span><span>)
+  </span><span class="type-name">Terminal</span><span>.</span><span class="identifier">foreground</span><span>.</span><span class="identifier">brightRed</span><span>{
+    </span><span class="type-name">Terminal</span><span>.</span><span class="identifier">write</span><span>(</span><span class="string-literal">&quot;This is Terminus!&quot;</span><span>)
+    </span><span class="type-name">Terminal</span><span>.</span><span class="identifier">flush</span><span>()
+  }
+}</span></code></pre>
+            <p>Here&#39;s a more involved example that demonstrates interactivity. It displays a prompt that asks the user to choose between three choices.</p>
+            <pre><code class="nohighlight"><span class="keyword">import</span><span> </span><span class="identifier">terminus</span><span>.*
+</span><span class="keyword">import</span><span> </span><span class="identifier">terminus</span><span>.</span><span class="identifier">effect</span><span>.</span><span class="type-name">Eof</span><span>
+
+</span><span class="identifier">enum</span><span> </span><span class="type-name">KeyCode</span><span> {
+  </span><span class="keyword">case</span><span> </span><span class="type-name">Down</span><span>
+  </span><span class="keyword">case</span><span> </span><span class="type-name">Up</span><span>
+  </span><span class="keyword">case</span><span> </span><span class="type-name">Enter</span><span>
+}
+
+</span><span class="keyword">def</span><span> </span><span class="declaration-name">clear</span><span>(): </span><span class="type-name">Program</span><span>[</span><span class="type-name">Unit</span><span>] = {
+  </span><span class="type-name">Terminal</span><span>.</span><span class="identifier">erase</span><span>.</span><span class="identifier">screen</span><span>()
+  </span><span class="type-name">Terminal</span><span>.</span><span class="identifier">cursor</span><span>.</span><span class="identifier">to</span><span>(</span><span class="number-literal">1</span><span>, </span><span class="number-literal">1</span><span>)
+}
+
+</span><span class="keyword">def</span><span> </span><span class="declaration-name">writeChoice</span><span>(</span><span class="identifier">description</span><span>: </span><span class="type-name">String</span><span>, </span><span class="identifier">selected</span><span>: </span><span class="type-name">Boolean</span><span>): </span><span class="type-name">Program</span><span>[</span><span class="type-name">Unit</span><span>] =
+  </span><span class="keyword">if</span><span> </span><span class="identifier">selected</span><span> </span><span class="identifier">then</span><span> </span><span class="type-name">Terminal</span><span>.</span><span class="identifier">display</span><span>.</span><span class="identifier">bold</span><span>(</span><span class="type-name">Terminal</span><span>.</span><span class="identifier">write</span><span>(</span><span class="string-literal">s&quot;&gt; </span><span class="substitution">${description}</span><span class="escape-sequence">\r\n</span><span class="string-literal">&quot;</span><span>))
+  </span><span class="keyword">else</span><span> </span><span class="type-name">Terminal</span><span>.</span><span class="identifier">write</span><span>(</span><span class="string-literal">s&quot;  </span><span class="substitution">${description}</span><span class="escape-sequence">\r\n</span><span class="string-literal">&quot;</span><span>)
+
+</span><span class="comment">// Write the UI, with the currently selected option in inverse video
+</span><span class="keyword">def</span><span> </span><span class="declaration-name">write</span><span>(</span><span class="identifier">selected</span><span>: </span><span class="type-name">Int</span><span>): </span><span class="type-name">Program</span><span>[</span><span class="type-name">Unit</span><span>] = {
+  </span><span class="type-name">Terminal</span><span>.</span><span class="identifier">write</span><span>(</span><span class="string-literal">&quot;How cool is this?</span><span class="escape-sequence">\r\n</span><span class="string-literal">&quot;</span><span>)
+  </span><span class="identifier">writeChoice</span><span>(</span><span class="string-literal">&quot;Very cool&quot;</span><span>, </span><span class="identifier">selected</span><span> == </span><span class="number-literal">0</span><span>)
+  </span><span class="identifier">writeChoice</span><span>(</span><span class="string-literal">&quot;Way cool&quot;</span><span>, </span><span class="identifier">selected</span><span> == </span><span class="number-literal">1</span><span>)
+  </span><span class="identifier">writeChoice</span><span>(</span><span class="string-literal">&quot;So cool&quot;</span><span>, </span><span class="identifier">selected</span><span> == </span><span class="number-literal">2</span><span>)
   </span><span class="type-name">Terminal</span><span>.</span><span class="identifier">flush</span><span>()
+}
+
+</span><span class="keyword">def</span><span> </span><span class="declaration-name">read</span><span>(): </span><span class="type-name">Program</span><span>[</span><span class="type-name">KeyCode</span><span>] = {
+  </span><span class="type-name">Terminal</span><span>.</span><span class="identifier">read</span><span>() </span><span class="keyword">match</span><span> {
+    </span><span class="keyword">case</span><span> </span><span class="type-name">Eof</span><span> =&gt;
+      </span><span class="keyword">throw</span><span> </span><span class="keyword">new</span><span> </span><span class="type-name">Exception</span><span>(</span><span class="string-literal">&quot;Received an EOF&quot;</span><span>)
+    </span><span class="keyword">case</span><span> </span><span class="identifier">char</span><span>: </span><span class="type-name">Char</span><span> =&gt;
+      </span><span class="identifier">char</span><span> </span><span class="keyword">match</span><span> {
+        </span><span class="keyword">case</span><span> </span><span class="number-literal">10</span><span> | </span><span class="number-literal">13</span><span> =&gt; </span><span class="type-name">KeyCode</span><span>.</span><span class="type-name">Enter</span><span>
+        </span><span class="keyword">case</span><span> </span><span class="char-literal">&#39;</span><span class="escape-sequence">\u001b</span><span class="char-literal">&#39;</span><span> =&gt;
+          </span><span class="type-name">Terminal</span><span>.</span><span class="identifier">read</span><span>() </span><span class="keyword">match</span><span> {
+            </span><span class="comment">// Normal mode
+</span><span>            </span><span class="keyword">case</span><span> </span><span class="char-literal">&#39;[&#39;</span><span> =&gt;
+              </span><span class="type-name">Terminal</span><span>.</span><span class="identifier">read</span><span>() </span><span class="keyword">match</span><span> {
+                </span><span class="keyword">case</span><span> </span><span class="char-literal">&#39;A&#39;</span><span>   =&gt; </span><span class="type-name">KeyCode</span><span>.</span><span class="type-name">Up</span><span>
+                </span><span class="keyword">case</span><span> </span><span class="char-literal">&#39;B&#39;</span><span>   =&gt; </span><span class="type-name">KeyCode</span><span>.</span><span class="type-name">Down</span><span>
+                </span><span class="keyword">case</span><span> </span><span class="identifier">other</span><span> =&gt; </span><span class="identifier">read</span><span>()
+              }
+
+            </span><span class="comment">// Application mode
+</span><span>            </span><span class="keyword">case</span><span> </span><span class="char-literal">&#39;O&#39;</span><span> =&gt;
+              </span><span class="type-name">Terminal</span><span>.</span><span class="identifier">read</span><span>() </span><span class="keyword">match</span><span> {
+                </span><span class="keyword">case</span><span> </span><span class="char-literal">&#39;A&#39;</span><span>   =&gt; </span><span class="type-name">KeyCode</span><span>.</span><span class="type-name">Up</span><span>
+                </span><span class="keyword">case</span><span> </span><span class="char-literal">&#39;B&#39;</span><span>   =&gt; </span><span class="type-name">KeyCode</span><span>.</span><span class="type-name">Down</span><span>
+                </span><span class="keyword">case</span><span> </span><span class="identifier">other</span><span> =&gt; </span><span class="identifier">read</span><span>()
+              }
+
+            </span><span class="keyword">case</span><span> </span><span class="identifier">other</span><span> =&gt; </span><span class="identifier">read</span><span>()
+          }
+        </span><span class="keyword">case</span><span> </span><span class="identifier">other</span><span> =&gt; </span><span class="identifier">read</span><span>()
+      }
+  }
+}
+
+</span><span class="keyword">def</span><span> </span><span class="declaration-name">loop</span><span>(</span><span class="identifier">idx</span><span>: </span><span class="type-name">Int</span><span>): </span><span class="type-name">Program</span><span>[</span><span class="type-name">Int</span><span>] = {
+  </span><span class="identifier">write</span><span>(</span><span class="identifier">idx</span><span>)
+  </span><span class="identifier">read</span><span>() </span><span class="keyword">match</span><span> {
+    </span><span class="keyword">case</span><span> </span><span class="type-name">KeyCode</span><span>.</span><span class="type-name">Up</span><span> =&gt;
+      </span><span class="identifier">clear</span><span>()
+      </span><span class="identifier">loop</span><span>(
+        </span><span class="keyword">if</span><span> </span><span class="identifier">idx</span><span> == </span><span class="number-literal">0</span><span> </span><span class="identifier">then</span><span> </span><span class="number-literal">2</span><span>
+        </span><span class="keyword">else</span><span> </span><span class="identifier">idx</span><span> - </span><span class="number-literal">1</span><span>
+      )
+
+    </span><span class="keyword">case</span><span> </span><span class="type-name">KeyCode</span><span>.</span><span class="type-name">Down</span><span> =&gt;
+      </span><span class="identifier">clear</span><span>()
+      </span><span class="identifier">loop</span><span>(
+        </span><span class="keyword">if</span><span> </span><span class="identifier">idx</span><span> == </span><span class="number-literal">2</span><span> </span><span class="identifier">then</span><span> </span><span class="number-literal">0</span><span>
+        </span><span class="keyword">else</span><span> </span><span class="identifier">idx</span><span> + </span><span class="number-literal">1</span><span>
+      )
+
+    </span><span class="keyword">case</span><span> </span><span class="type-name">KeyCode</span><span>.</span><span class="type-name">Enter</span><span> =&gt; </span><span class="identifier">idx</span><span>
+  }
+}
+
+</span><span class="annotation">@main</span><span> </span><span class="keyword">def</span><span> </span><span class="declaration-name">prompt</span><span>(): </span><span class="type-name">Unit</span><span> = {
+  </span><span class="keyword">val</span><span> </span><span class="identifier">idx</span><span> =
+    </span><span class="type-name">Terminal</span><span>.</span><span class="identifier">run</span><span>(
+      </span><span class="type-name">Terminal</span><span>.</span><span class="identifier">raw</span><span> { </span><span class="identifier">loop</span><span>(</span><span class="number-literal">0</span><span>) }
+    )
+
+  </span><span class="identifier">println</span><span>(</span><span class="string-literal">s&quot;Selected </span><span class="substitution">$idx</span><span class="string-literal">&quot;</span><span>)
 }</span></code></pre>
             
             <h2 id="design" class="section">Design</h2>
+            <p>The API in the <code>terminus</code> package provides a functional API for working with the terminal.
+            Methods consume and return context functions with type</p>
+            <pre><code class="nohighlight"><span class="keyword">type</span><span> </span><span class="type-name">Program</span><span>[</span><span class="type-name">A</span><span>] = </span><span class="type-name">Terminal</span><span> ?=&gt; </span><span class="type-name">A</span></code></pre>
+            <p>where <code>Terminal</code> is a backend specific implementation that handles interfacing with the terminal. A <code>Program</code> represents a function that, when run, will do something with the terminal.</p>
+            <p>Context functions are new to Scala 3, so many developers may not be familiar with how they work. There are three rules for working with them:</p>
+            <ol class="arabic">
+              <li>
+                <p>If the compiler can tell that a context function is expected it will automatically create one. We can do this putting a <code>Program</code> type annotation. Here are some examples</p>
+                <pre><code class="nohighlight"><span class="comment">// Most of the methods on Terminal return programs
+</span><span class="keyword">val</span><span> </span><span class="identifier">aTerminalOperation</span><span>: </span><span class="type-name">Program</span><span>[</span><span class="type-name">Unit</span><span>] = </span><span class="type-name">Terminal</span><span>.</span><span class="identifier">write</span><span>(</span><span class="string-literal">&quot;Some text&quot;</span><span>)
+
+</span><span class="comment">// Any expression can be a Program with a type annotation
+</span><span class="keyword">val</span><span> </span><span class="identifier">aProgram</span><span>: </span><span class="type-name">Program</span><span>[</span><span class="type-name">Int</span><span>] = </span><span class="number-literal">1</span><span> + </span><span class="number-literal">1</span></code></pre>
+              </li>
+              <li>
+                <p>If there is a <code>given</code> value of the appropriate type in scope, any context functions will be automatically applied to that <code>given</code>. This is what allows us to write effectful code in so-called <em>direct-style</em>, which just means writing normal code without monads or other complications. Here&#39;s an example that mixes effectful code, using the terminal, with some normal code. Notice that the entire result is a <code>Program</code>. This type annotation means the compiler constructs a context function around the entire block.</p>
+                <pre><code class="nohighlight"><span class="keyword">val</span><span> </span><span class="identifier">writeSomeStuff</span><span>: </span><span class="type-name">Program</span><span>[</span><span class="type-name">Unit</span><span>] = {
+</span><span class="type-name">Terminal</span><span>.</span><span class="identifier">write</span><span>(</span><span class="string-literal">&quot;Some output&quot;</span><span>)
+</span><span class="comment">// We can mix normal code in
+</span><span class="number-literal">1</span><span> + </span><span class="number-literal">1</span><span>
+</span><span class="type-name">Terminal</span><span>.</span><span class="identifier">write</span><span>(</span><span class="string-literal">&quot;More output&quot;</span><span>)
+</span><span class="type-name">Terminal</span><span>.</span><span class="identifier">flush</span><span>()
+}</span></code></pre>
+                <p>We can do the same thing with a method, by specifying the return type is a <code>Program</code>. Here&#39;s an example.</p>
+                <pre><code class="nohighlight"><span class="keyword">def</span><span> </span><span class="declaration-name">doSomeStuff</span><span>(): </span><span class="type-name">Program</span><span>[</span><span class="type-name">Unit</span><span>] = {
+</span><span class="type-name">Terminal</span><span>.</span><span class="identifier">write</span><span>(</span><span class="string-literal">&quot;Some output&quot;</span><span>)
+</span><span class="number-literal">1</span><span> + </span><span class="number-literal">1</span><span>
+</span><span class="type-name">Terminal</span><span>.</span><span class="identifier">write</span><span>(</span><span class="string-literal">&quot;More output&quot;</span><span>)
+</span><span class="type-name">Terminal</span><span>.</span><span class="identifier">flush</span><span>()
+}</span></code></pre>
+              </li>
+              <li>
+                <p>If we don&#39;t tell the compiler we&#39;re expecting a context function, we may get an error when the compiler attempts to apply a context function to a given value that does not exist.</p>
+                <pre><code class="nohighlight"><span class="type-name">Terminal</span><span>.</span><span class="identifier">write</span><span>(</span><span class="string-literal">&quot;Some output&quot;</span><span>)</span></code></pre>
+              </li>
+            </ol>
+            <p>If you want to work directly with the terminal, without working with context functions, you can work with the types in <code>terminus.effect</code>.</p>
             
             <h2 id="notes" class="section">Notes</h2>
-            <p>Forking in SBT won&#39;t give you a standard input that works.</p>
+            <p>You won&#39;t be able to run terminal programs from sbt if the JVM forks when running. That is, if you have the setting</p>
+            <pre><code class="nohighlight"><span class="identifier">run</span><span> / </span><span class="identifier">fork</span><span> := </span><span class="boolean-literal">true</span></code></pre>
+            <p>the forked JVM won&#39;t have access to a terminal and therefore any terminal programs will not work as expected.</p>
             <div class="flex flex-row justify-between">
                  
             </div>
