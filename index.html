@@ -44,7 +44,7 @@
             
             <h2 id="setup" class="section">Setup</h2>
             <p>To use Terminus, add the following to your <code>build.sbt</code></p>
-            <pre><code class="nohighlight"><span class="identifier">libraryDependencies</span><span> += </span><span class="string-literal">&quot;org.creativescala&quot;</span><span> %% </span><span class="string-literal">&quot;terminus&quot;</span><span> % </span><span class="string-literal">&quot;0.27-70aadf7-SNAPSHOT&quot;</span></code></pre>
+            <pre><code class="nohighlight"><span class="identifier">libraryDependencies</span><span> += </span><span class="string-literal">&quot;org.creativescala&quot;</span><span> %% </span><span class="string-literal">&quot;terminus&quot;</span><span> % </span><span class="string-literal">&quot;0.27-87472bb-SNAPSHOT&quot;</span></code></pre>
             
             <h2 id="usage" class="section">Usage</h2>
             <p>Import Terminus</p>
@@ -151,38 +151,38 @@
             Methods consume and return context functions with type</p>
             <pre><code class="nohighlight"><span class="keyword">type</span><span> </span><span class="type-name">Program</span><span>[</span><span class="type-name">A</span><span>] = </span><span class="type-name">Terminal</span><span> ?=&gt; </span><span class="type-name">A</span></code></pre>
             <p>where <code>Terminal</code> is a backend specific implementation that handles interfacing with the terminal. A <code>Program</code> represents a function that, when run, will do something with the terminal.</p>
-            <p>Context functions are new to Scala 3, so many developers may not be familiar with how they work. There are three rules for working with them:</p>
-            <ol class="arabic">
-              <li>
-                <p>If the compiler can tell that a context function is expected it will automatically create one. We can do this putting a <code>Program</code> type annotation. Here are some examples</p>
-                <pre><code class="nohighlight"><span class="comment">// Most of the methods on Terminal return programs
+            <p>Context functions are new to Scala 3, so many developers may not be familiar with how they work. There are three rules for working with them, described below.</p>
+            <p>The first rule is that if the compiler can tell that a context function is expected it will automatically create one. We can do this with a <code>Program</code> type annotation. Here are some examples</p>
+            <pre><code class="nohighlight"><span class="comment">// Most of the methods on Terminal return programs
 </span><span class="keyword">val</span><span> </span><span class="identifier">aTerminalOperation</span><span>: </span><span class="type-name">Program</span><span>[</span><span class="type-name">Unit</span><span>] = </span><span class="type-name">Terminal</span><span>.</span><span class="identifier">write</span><span>(</span><span class="string-literal">&quot;Some text&quot;</span><span>)
 
 </span><span class="comment">// Any expression can be a Program with a type annotation
 </span><span class="keyword">val</span><span> </span><span class="identifier">aProgram</span><span>: </span><span class="type-name">Program</span><span>[</span><span class="type-name">Int</span><span>] = </span><span class="number-literal">1</span><span> + </span><span class="number-literal">1</span></code></pre>
-              </li>
-              <li>
-                <p>If there is a <code>given</code> value of the appropriate type in scope, any context functions will be automatically applied to that <code>given</code>. This is what allows us to write effectful code in so-called <em>direct-style</em>, which just means writing normal code without monads or other complications. Here&#39;s an example that mixes effectful code, using the terminal, with some normal code. Notice that the entire result is a <code>Program</code>. This type annotation means the compiler constructs a context function around the entire block.</p>
-                <pre><code class="nohighlight"><span class="keyword">val</span><span> </span><span class="identifier">writeSomeStuff</span><span>: </span><span class="type-name">Program</span><span>[</span><span class="type-name">Unit</span><span>] = {
-</span><span class="type-name">Terminal</span><span>.</span><span class="identifier">write</span><span>(</span><span class="string-literal">&quot;Some output&quot;</span><span>)
-</span><span class="comment">// We can mix normal code in
-</span><span class="number-literal">1</span><span> + </span><span class="number-literal">1</span><span>
-</span><span class="type-name">Terminal</span><span>.</span><span class="identifier">write</span><span>(</span><span class="string-literal">&quot;More output&quot;</span><span>)
-</span><span class="type-name">Terminal</span><span>.</span><span class="identifier">flush</span><span>()
+            <p>The second rule is that context functions will be automatically applied if there is a <code>given</code> value of the appropriate type in scope. This is what allows us to write effectful code in so-called <em>direct-style</em>, which just means writing normal code without monads or other complications. Here&#39;s an example that mixes effectful code, using the terminal, with some normal code. Notice that the entire result is a <code>Program</code>. This type annotation means the compiler constructs a context function around the entire block.</p>
+            <pre><code class="nohighlight"><span class="keyword">val</span><span> </span><span class="identifier">writeSomeStuff</span><span>: </span><span class="type-name">Program</span><span>[</span><span class="type-name">Int</span><span>] = {
+  </span><span class="type-name">Terminal</span><span>.</span><span class="identifier">write</span><span>(</span><span class="string-literal">&quot;Some output&quot;</span><span>)
+  </span><span class="comment">// We can mix normal code in
+</span><span>  </span><span class="keyword">val</span><span> </span><span class="identifier">result</span><span> = </span><span class="number-literal">1</span><span> + </span><span class="number-literal">1</span><span>
+  </span><span class="type-name">Terminal</span><span>.</span><span class="identifier">write</span><span>(</span><span class="string-literal">&quot;More output&quot;</span><span>)
+  </span><span class="type-name">Terminal</span><span>.</span><span class="identifier">flush</span><span>()
+  </span><span class="identifier">result</span><span>
 }</span></code></pre>
-                <p>We can do the same thing with a method, by specifying the return type is a <code>Program</code>. Here&#39;s an example.</p>
-                <pre><code class="nohighlight"><span class="keyword">def</span><span> </span><span class="declaration-name">doSomeStuff</span><span>(): </span><span class="type-name">Program</span><span>[</span><span class="type-name">Unit</span><span>] = {
-</span><span class="type-name">Terminal</span><span>.</span><span class="identifier">write</span><span>(</span><span class="string-literal">&quot;Some output&quot;</span><span>)
-</span><span class="number-literal">1</span><span> + </span><span class="number-literal">1</span><span>
-</span><span class="type-name">Terminal</span><span>.</span><span class="identifier">write</span><span>(</span><span class="string-literal">&quot;More output&quot;</span><span>)
-</span><span class="type-name">Terminal</span><span>.</span><span class="identifier">flush</span><span>()
+            <p>We can do the same thing with a method, by specifying the return type is a <code>Program</code>. Here&#39;s an example.</p>
+            <pre><code class="nohighlight"><span class="keyword">def</span><span> </span><span class="declaration-name">doSomeStuff</span><span>(): </span><span class="type-name">Program</span><span>[</span><span class="type-name">Int</span><span>] = {
+  </span><span class="type-name">Terminal</span><span>.</span><span class="identifier">write</span><span>(</span><span class="string-literal">&quot;Some output&quot;</span><span>)
+  </span><span class="keyword">val</span><span> </span><span class="identifier">result</span><span> = </span><span class="number-literal">1</span><span> + </span><span class="number-literal">1</span><span>
+  </span><span class="type-name">Terminal</span><span>.</span><span class="identifier">write</span><span>(</span><span class="string-literal">&quot;More output&quot;</span><span>)
+  </span><span class="type-name">Terminal</span><span>.</span><span class="identifier">flush</span><span>()
+  </span><span class="identifier">result</span><span>
 }</span></code></pre>
-              </li>
-              <li>
-                <p>If we don&#39;t tell the compiler we&#39;re expecting a context function, we may get an error when the compiler attempts to apply a context function to a given value that does not exist.</p>
-                <pre><code class="nohighlight"><span class="type-name">Terminal</span><span>.</span><span class="identifier">write</span><span>(</span><span class="string-literal">&quot;Some output&quot;</span><span>)</span></code></pre>
-              </li>
-            </ol>
+            <p>The final rule is if we don&#39;t tell the compiler we&#39;re expecting a context function, we may get an error when the compiler attempts to apply a context function to a given value that does not exist.</p>
+            <pre><code class="nohighlight"><span class="type-name">Terminal</span><span>.</span><span class="identifier">write</span><span>(</span><span class="string-literal">&quot;Some output&quot;</span><span>)
+</span><span class="comment">// error: 
+// No given instance of type terminus.effect.Writer was found for parameter of (terminus.effect.Writer) ?=&gt; Unit</span></code></pre>
+            <p>We can solve this by either adding a context function type annotation</p>
+            <pre><code class="nohighlight"><span class="keyword">val</span><span> </span><span class="identifier">ok</span><span>: </span><span class="type-name">Program</span><span>[</span><span class="type-name">Unit</span><span>] = </span><span class="type-name">Terminal</span><span>.</span><span class="identifier">write</span><span>(</span><span class="string-literal">&quot;Some output&quot;</span><span>)</span></code></pre>
+            <p>or by providing a <code>given</code> value of the required type, which is what <code>Terminal.run</code> does.</p>
+            <pre><code class="nohighlight"><span class="type-name">Terminal</span><span>.</span><span class="identifier">run</span><span>(</span><span class="type-name">Terminal</span><span>.</span><span class="identifier">write</span><span>(</span><span class="string-literal">&quot;Some output&quot;</span><span>))</span></code></pre>
             <p>If you want to work directly with the terminal, without working with context functions, you can work with the types in <code>terminus.effect</code>.</p>
             
             <h2 id="notes" class="section">Notes</h2>
