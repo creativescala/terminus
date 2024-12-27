@@ -44,7 +44,7 @@
             
             <h2 id="setup" class="section">Setup</h2>
             <p>To use Terminus, add the following to your <code>build.sbt</code></p>
-            <pre><code class="nohighlight"><span class="identifier">libraryDependencies</span><span> += </span><span class="string-literal">&quot;org.creativescala&quot;</span><span> %% </span><span class="string-literal">&quot;terminus&quot;</span><span> % </span><span class="string-literal">&quot;0.27-87472bb-SNAPSHOT&quot;</span></code></pre>
+            <pre><code class="nohighlight"><span class="identifier">libraryDependencies</span><span> += </span><span class="string-literal">&quot;org.creativescala&quot;</span><span> %% </span><span class="string-literal">&quot;terminus&quot;</span><span> % </span><span class="string-literal">&quot;0.27-50f0225-SNAPSHOT&quot;</span></code></pre>
             
             <h2 id="usage" class="section">Usage</h2>
             <p>Import Terminus</p>
@@ -56,7 +56,7 @@
     </span><span class="type-name">Terminal</span><span>.</span><span class="identifier">flush</span><span>()
   }
 }</span></code></pre>
-            <p>Here&#39;s a more involved example that demonstrates interactivity. It displays a prompt that asks the user to choose between three choices.</p>
+            <p>Here&#39;s a more involved example that demonstrates interactivity. It displays a prompt that asks the user to select one of three choices.</p>
             <pre><code class="nohighlight"><span class="keyword">import</span><span> </span><span class="identifier">terminus</span><span>.*
 </span><span class="keyword">import</span><span> </span><span class="identifier">terminus</span><span>.</span><span class="identifier">effect</span><span>.</span><span class="type-name">Eof</span><span>
 
@@ -66,16 +66,20 @@
   </span><span class="keyword">case</span><span> </span><span class="type-name">Enter</span><span>
 }
 
+</span><span class="comment">// Clear the text we&#39;ve written
 </span><span class="keyword">def</span><span> </span><span class="declaration-name">clear</span><span>(): </span><span class="type-name">Program</span><span>[</span><span class="type-name">Unit</span><span>] = {
-  </span><span class="type-name">Terminal</span><span>.</span><span class="identifier">erase</span><span>.</span><span class="identifier">screen</span><span>()
-  </span><span class="type-name">Terminal</span><span>.</span><span class="identifier">cursor</span><span>.</span><span class="identifier">to</span><span>(</span><span class="number-literal">1</span><span>, </span><span class="number-literal">1</span><span>)
+  </span><span class="type-name">Terminal</span><span>.</span><span class="identifier">cursor</span><span>.</span><span class="identifier">move</span><span>(</span><span class="number-literal">1</span><span>, -</span><span class="number-literal">4</span><span>)
+  </span><span class="type-name">Terminal</span><span>.</span><span class="identifier">erase</span><span>.</span><span class="identifier">down</span><span>()
+  </span><span class="type-name">Terminal</span><span>.</span><span class="identifier">cursor</span><span>.</span><span class="identifier">column</span><span>(</span><span class="number-literal">1</span><span>)
 }
 
+</span><span class="comment">// Write an option the user can choose. The currently selected option is highlighted.
 </span><span class="keyword">def</span><span> </span><span class="declaration-name">writeChoice</span><span>(</span><span class="identifier">description</span><span>: </span><span class="type-name">String</span><span>, </span><span class="identifier">selected</span><span>: </span><span class="type-name">Boolean</span><span>): </span><span class="type-name">Program</span><span>[</span><span class="type-name">Unit</span><span>] =
-  </span><span class="keyword">if</span><span> </span><span class="identifier">selected</span><span> </span><span class="identifier">then</span><span> </span><span class="type-name">Terminal</span><span>.</span><span class="identifier">display</span><span>.</span><span class="identifier">bold</span><span>(</span><span class="type-name">Terminal</span><span>.</span><span class="identifier">write</span><span>(</span><span class="string-literal">s&quot;&gt; </span><span class="substitution">${description}</span><span class="escape-sequence">\r\n</span><span class="string-literal">&quot;</span><span>))
+  </span><span class="keyword">if</span><span> </span><span class="identifier">selected</span><span> </span><span class="identifier">then</span><span>
+    </span><span class="type-name">Terminal</span><span>.</span><span class="identifier">display</span><span>.</span><span class="identifier">bold</span><span>(</span><span class="type-name">Terminal</span><span>.</span><span class="identifier">write</span><span>(</span><span class="string-literal">s&quot;&gt; </span><span class="substitution">${description}</span><span class="escape-sequence">\r\n</span><span class="string-literal">&quot;</span><span>))
   </span><span class="keyword">else</span><span> </span><span class="type-name">Terminal</span><span>.</span><span class="identifier">write</span><span>(</span><span class="string-literal">s&quot;  </span><span class="substitution">${description}</span><span class="escape-sequence">\r\n</span><span class="string-literal">&quot;</span><span>)
 
-</span><span class="comment">// Write the UI, with the currently selected option in inverse video
+</span><span class="comment">// Write the UI
 </span><span class="keyword">def</span><span> </span><span class="declaration-name">write</span><span>(</span><span class="identifier">selected</span><span>: </span><span class="type-name">Int</span><span>): </span><span class="type-name">Program</span><span>[</span><span class="type-name">Unit</span><span>] = {
   </span><span class="type-name">Terminal</span><span>.</span><span class="identifier">write</span><span>(</span><span class="string-literal">&quot;How cool is this?</span><span class="escape-sequence">\r\n</span><span class="string-literal">&quot;</span><span>)
   </span><span class="identifier">writeChoice</span><span>(</span><span class="string-literal">&quot;Very cool&quot;</span><span>, </span><span class="identifier">selected</span><span> == </span><span class="number-literal">0</span><span>)
@@ -121,17 +125,11 @@
   </span><span class="identifier">read</span><span>() </span><span class="keyword">match</span><span> {
     </span><span class="keyword">case</span><span> </span><span class="type-name">KeyCode</span><span>.</span><span class="type-name">Up</span><span> =&gt;
       </span><span class="identifier">clear</span><span>()
-      </span><span class="identifier">loop</span><span>(
-        </span><span class="keyword">if</span><span> </span><span class="identifier">idx</span><span> == </span><span class="number-literal">0</span><span> </span><span class="identifier">then</span><span> </span><span class="number-literal">2</span><span>
-        </span><span class="keyword">else</span><span> </span><span class="identifier">idx</span><span> - </span><span class="number-literal">1</span><span>
-      )
+      </span><span class="identifier">loop</span><span>(</span><span class="keyword">if</span><span> </span><span class="identifier">idx</span><span> == </span><span class="number-literal">0</span><span> </span><span class="identifier">then</span><span> </span><span class="number-literal">2</span><span> </span><span class="keyword">else</span><span> </span><span class="identifier">idx</span><span> - </span><span class="number-literal">1</span><span>)
 
     </span><span class="keyword">case</span><span> </span><span class="type-name">KeyCode</span><span>.</span><span class="type-name">Down</span><span> =&gt;
       </span><span class="identifier">clear</span><span>()
-      </span><span class="identifier">loop</span><span>(
-        </span><span class="keyword">if</span><span> </span><span class="identifier">idx</span><span> == </span><span class="number-literal">2</span><span> </span><span class="identifier">then</span><span> </span><span class="number-literal">0</span><span>
-        </span><span class="keyword">else</span><span> </span><span class="identifier">idx</span><span> + </span><span class="number-literal">1</span><span>
-      )
+      </span><span class="identifier">loop</span><span>(</span><span class="keyword">if</span><span> </span><span class="identifier">idx</span><span> == </span><span class="number-literal">2</span><span> </span><span class="identifier">then</span><span> </span><span class="number-literal">0</span><span> </span><span class="keyword">else</span><span> </span><span class="identifier">idx</span><span> + </span><span class="number-literal">1</span><span>)
 
     </span><span class="keyword">case</span><span> </span><span class="type-name">KeyCode</span><span>.</span><span class="type-name">Enter</span><span> =&gt; </span><span class="identifier">idx</span><span>
   }
@@ -189,6 +187,27 @@
             <p>You won&#39;t be able to run terminal programs from sbt if the JVM forks when running. That is, if you have the setting</p>
             <pre><code class="nohighlight"><span class="identifier">run</span><span> / </span><span class="identifier">fork</span><span> := </span><span class="boolean-literal">true</span></code></pre>
             <p>the forked JVM won&#39;t have access to a terminal and therefore any terminal programs will not work as expected.</p>
+            
+            <h2 id="related-work" class="section">Related Work</h2>
+            <p><a href="https://github.com/com-lihaoyi/fansi">Fansi</a> may be a better choice if your only interest in styling output printed to a terminal.</p>
+            <p><a href="https://github.com/neandertech/cue4s/">Cue4s</a> provides higher level abstractions for building UIs on the terminal.</p>
+            
+            <h2 id="further-reading" class="section">Further Reading</h2>
+            <p>The terminal is much more evolved than designed. I haven&#39;t been able to find a single document that describes all the features. Here are a few resources that I&#39;ve found useful for piecing together how things should work:</p>
+            <ul>
+              <li>
+                <p>Wikipedia has reasonable documentation of the <a href="https://en.wikipedia.org/wiki/ANSI_escape_code">ANSI escape codes</a>, though it doesn&#39;t cover semantics in detail (e.g. erasing seems to move the cursor but Wikipedia doesn&#39;t describe this in all cases.)</p>
+              </li>
+              <li>
+                <p><a href="http://web.archive.org/web/20160407191115/http://homes.mpimf-heidelberg.mpg.de/~rohm/computing/mpimf/notes/terminal.html">This article</a> describes a bit about cursor and application mode.</p>
+              </li>
+              <li>
+                <p><a href="https://sw.kovidgoyal.net/kitty/keyboard-protocol/">The Kitty Keyboard Protocol</a> describes the goofiness in the basic terminal key handling and also describes a fix.</p>
+              </li>
+              <li>
+                <p><a href="https://vt100.net/emu/dec_ansi_parser">A state machine for parsing terminal input</a> will also be handy.</p>
+              </li>
+            </ul>
             <div class="flex flex-row justify-between">
                  
             </div>
