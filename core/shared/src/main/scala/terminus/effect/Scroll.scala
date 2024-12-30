@@ -17,16 +17,16 @@
 package terminus.effect
 
 /** Functionality for scrolling the terminal. */
-trait Scroll extends Csi {
+trait Scroll extends Writer {
   object scroll {
 
     /** Scroll the display up the given number of rows. Defaults to 1 row. */
     def up(lines: Int = 1): Unit =
-      (0.until(lines)).foreach(_ => csi("S"))
+      write(AnsiCodes.scroll.up(lines))
 
     /** Scroll the display down the given number of rows. Defaults to 1 row. */
     def down(lines: Int = 1): Unit =
-      (0.until(lines)).foreach(_ => csi("T"))
+      write(AnsiCodes.scroll.down(lines))
   }
 
 }

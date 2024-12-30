@@ -195,6 +195,20 @@ Terminal.run(Terminal.write("Some output"))
 If you want to work directly with the terminal, without working with context functions, you can work with the types in `terminus.effect`.
 
 
+## Low-level Code
+
+All the ANSI escape codes used by Terminus are defined in `terminus.effect.AnsiCodes`.
+This can be useful if you want to write [escape codes][ansi-escape-codes] directly to the terminal without the abstractions provided by the Terminus DSL.
+Here's a simple example.
+
+```scala mdoc:silent
+import terminus.effect.AnsiCodes
+
+AnsiCodes.foreground.red
+AnsiCodes.erase.line
+```
+
+
 ## Notes
 
 You won't be able to run terminal programs from sbt if the JVM forks when running. That is, if you have the setting
@@ -210,14 +224,14 @@ the forked JVM won't have access to a terminal and therefore any terminal progra
 
 [Fansi][fansi] may be a better choice if your only interest in styling output printed to a terminal.
 
-[Cue4s][cue4s] provides higher level abstractions for building UIs on the terminal.
+[Cue4s][cue4s] provides higher level abstractions for building UIs in the terminal.
 
 
 ## Further Reading
 
 The terminal is much more evolved than designed. I haven't been able to find a single document that describes all the features. Here are a few resources that I've found useful for piecing together how things should work:
 
-- Wikipedia has reasonable documentation of the [ANSI escape codes](https://en.wikipedia.org/wiki/ANSI_escape_code), though it doesn't cover semantics in detail (e.g. erasing seems to move the cursor but Wikipedia doesn't describe this in all cases.)
+- Wikipedia has reasonable documentation of the [ANSI escape codes][ansi-escape-codes], though it doesn't cover semantics in detail (e.g. erasing seems to move the cursor but Wikipedia doesn't describe this in all cases.)
 
 - [This article](http://web.archive.org/web/20160407191115/http://homes.mpimf-heidelberg.mpg.de/~rohm/computing/mpimf/notes/terminal.html) describes a bit about cursor and application mode.
 
@@ -225,6 +239,7 @@ The terminal is much more evolved than designed. I haven't been able to find a s
 
 - [A state machine for parsing terminal input](https://vt100.net/emu/dec_ansi_parser) will also be handy.
 
+[ansi-escape-codes]: https://en.wikipedia.org/wiki/ANSI_escape_code
 [jline]: https://jline.org/
 [scala-native]: https://scala-native.org/en/stable/
 [scala-js]: https://www.scala-js.org/

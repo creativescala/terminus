@@ -17,15 +17,15 @@
 package terminus.effect
 
 /** Terminal effects that can change display properties. */
-trait Display[+F <: Writer] extends Sgr[F] { self: F =>
+trait Display[+F <: Writer] extends WithEffect[F] { self: F =>
   object display {
     def bold[A](f: F ?=> A): A =
-      withSgr("1")(f)
+      withEffect(AnsiCodes.display.bold.on, AnsiCodes.display.bold.off)(f)
 
     def light[A](f: F ?=> A): A =
-      withSgr("2")(f)
+      withEffect(AnsiCodes.display.light.on, AnsiCodes.display.light.off)(f)
 
     def invert[A](f: F ?=> A): A =
-      withSgr("7")(f)
+      withEffect(AnsiCodes.display.invert.on, AnsiCodes.display.invert.off)(f)
   }
 }
