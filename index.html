@@ -44,7 +44,7 @@
             
             <h2 id="setup" class="section">Setup</h2>
             <p>To use Terminus, add the following to your <code>build.sbt</code></p>
-            <pre><code class="nohighlight"><span class="identifier">libraryDependencies</span><span> += </span><span class="string-literal">&quot;org.creativescala&quot;</span><span> %% </span><span class="string-literal">&quot;terminus-core&quot;</span><span> % </span><span class="string-literal">&quot;0.1-aca05f9-SNAPSHOT&quot;</span></code></pre>
+            <pre><code class="nohighlight"><span class="identifier">libraryDependencies</span><span> += </span><span class="string-literal">&quot;org.creativescala&quot;</span><span> %% </span><span class="string-literal">&quot;terminus-core&quot;</span><span> % </span><span class="string-literal">&quot;0.1&quot;</span></code></pre>
             
             <h2 id="usage" class="section">Usage</h2>
             <p>Import Terminus</p>
@@ -183,6 +183,15 @@
             <pre><code class="nohighlight"><span class="type-name">Terminal</span><span>.</span><span class="identifier">run</span><span>(</span><span class="type-name">Terminal</span><span>.</span><span class="identifier">write</span><span>(</span><span class="string-literal">&quot;Some output&quot;</span><span>))</span></code></pre>
             <p>If you want to work directly with the terminal, without working with context functions, you can work with the types in <code>terminus.effect</code>.</p>
             
+            <h2 id="low-level-code" class="section">Low-level Code</h2>
+            <p>All the ANSI escape codes used by Terminus are defined in <code>terminus.effect.AnsiCodes</code>.
+            This can be useful if you want to write <a href="https://en.wikipedia.org/wiki/ANSI_escape_code">escape codes</a> directly to the terminal without the abstractions provided by the Terminus DSL.
+            Here&#39;s a simple example.</p>
+            <pre><code class="nohighlight"><span class="keyword">import</span><span> </span><span class="identifier">terminus</span><span>.</span><span class="identifier">effect</span><span>.</span><span class="type-name">AnsiCodes</span><span>
+
+</span><span class="type-name">AnsiCodes</span><span>.</span><span class="identifier">foreground</span><span>.</span><span class="identifier">red</span><span>
+</span><span class="type-name">AnsiCodes</span><span>.</span><span class="identifier">erase</span><span>.</span><span class="identifier">line</span></code></pre>
+            
             <h2 id="notes" class="section">Notes</h2>
             <p>You won&#39;t be able to run terminal programs from sbt if the JVM forks when running. That is, if you have the setting</p>
             <pre><code class="nohighlight"><span class="identifier">run</span><span> / </span><span class="identifier">fork</span><span> := </span><span class="boolean-literal">true</span></code></pre>
@@ -190,7 +199,7 @@
             
             <h2 id="related-work" class="section">Related Work</h2>
             <p><a href="https://github.com/com-lihaoyi/fansi">Fansi</a> may be a better choice if your only interest in styling output printed to a terminal.</p>
-            <p><a href="https://github.com/neandertech/cue4s/">Cue4s</a> provides higher level abstractions for building UIs on the terminal.</p>
+            <p><a href="https://github.com/neandertech/cue4s/">Cue4s</a> provides higher level abstractions for building UIs in the terminal.</p>
             
             <h2 id="further-reading" class="section">Further Reading</h2>
             <p>The terminal is much more evolved than designed. I haven&#39;t been able to find a single document that describes all the features. Here are a few resources that I&#39;ve found useful for piecing together how things should work:</p>
