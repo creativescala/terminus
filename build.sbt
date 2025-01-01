@@ -81,6 +81,7 @@ lazy val core = crossProject(JSPlatform, JVMPlatform, NativePlatform)
     name := "terminus-core"
   )
   .jvmSettings(libraryDependencies += Dependencies.jline.value)
+  .jsSettings(libraryDependencies += Dependencies.scalajsDom.value)
 
 lazy val docs =
   project
@@ -97,7 +98,8 @@ lazy val docs =
       mdocIn := file("docs/src/pages"),
       Laika / sourceDirectories ++= Seq(),
       laikaTheme := CreativeScalaTheme.empty
-        .addJs(laika.ast.Path.Root / "main.js")
+        .addJs(laika.ast.Path.Root / "src" / "js" / "xterm.js")
+        .addCss(laika.ast.Path.Root / "src" / "css" / "xterm.css")
         .build,
       laikaExtensions ++= Seq(
         laika.format.Markdown.GitHubFlavor,
