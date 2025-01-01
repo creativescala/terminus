@@ -17,23 +17,23 @@
 package terminus.effect
 
 /** Functionality for clearing contents on the terminal. */
-trait Erase extends Csi {
+trait Erase extends Writer {
   object erase {
 
     /** Erase the entire screen and move the cursor to the top-left. */
     def screen(): Unit =
-      csi("J", "2")
+      write(AnsiCodes.erase.screen)
 
     /** Erase from current cursor position to the end of the screen. */
     def down(): Unit =
-      csi("J", "0")
+      write(AnsiCodes.erase.down)
 
     /** Erase from current cursor position to the start of the screen. */
     def up(): Unit =
-      csi("J", "1")
+      write(AnsiCodes.erase.up)
 
     /** Erase the current line. */
     def line(): Unit =
-      csi("K", "2")
+      write(AnsiCodes.erase.line)
   }
 }

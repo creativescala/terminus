@@ -17,40 +17,40 @@
 package terminus.effect
 
 /** Functionality for manipulating the terminal's cursor. */
-trait Cursor extends Csi {
+trait Cursor extends Writer {
   object cursor {
 
     /** Move cursor to given column. The left-most column is 1, and coordinates
       * increase to the right.
       */
     def column(x: Int = 1): Unit =
-      csi("G", x.toString)
+      write(AnsiCodes.cursor.column(x))
 
     /** Move absolute cursor position, where (1, 1) is the top left corner and
       * coordinates increase to the right and down.
       */
     def to(x: Int, y: Int): Unit =
-      csi("H", x.toString, y.toString)
+      write(AnsiCodes.cursor.to(x, y))
 
     /** Move the cursor position relative to the current position. Coordinates
       * are given in characters / cells.
       */
     def move(x: Int, y: Int): Unit = {
-      if x < 0 then csi("D", (-x).toString)
-      else csi("C", x.toString)
+      if x < 0 then write(AnsiCodes.cursor.backward(-x))
+      else write(AnsiCodes.cursor.forward(x))
 
-      if y < 0 then csi("A", (-y).toString)
-      else csi("B", y.toString)
+      if y < 0 then write(AnsiCodes.cursor.up(-y))
+      else write(AnsiCodes.cursor.down(y))
     }
 
     /** Move the cursor up the given number of rows. The column of the cursor
       * remains unchanged. Defaults to 1 row.
       */
     def up(lines: Int = 1): Unit =
-      csi("A", lines.toString)
+      write(AnsiCodes.cursor.up(lines))
 
     /** Move the cursor down the given number of rows. Defaults to 1 row. */
     def down(lines: Int = 1): Unit =
-      csi("B", lines.toString)
+      write(AnsiCodes.cursor.down(lines))
   }
 }

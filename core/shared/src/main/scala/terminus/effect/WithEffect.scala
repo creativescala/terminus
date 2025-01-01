@@ -16,19 +16,18 @@
 
 package terminus.effect
 
-/** Provides a utility for writing a CSI escape code. Intended to be extended by
-  * other effects that use this escape code.
-  */
-trait Csi extends Writer {
-  private val csiString = "\u001b["
+trait WithEffect[+F <: Writer] { self: F =>
+  protected def withEffect[A](on: String, off: String)(f: F ?=> A): A = {
+    write(on)
+    try {
+      f(using this)
+    } finally {
+      write(off)
+    }
+  }
 
-  /** Write a CSI escape code. The terminator must be specifed first, followed
-    * by zero or more arguments. The arguments will printed semi-colon separated
-    * before the terminator.
-    */
-  protected def csi(terminator: String, args: String*): Unit = {
-    write(csiString)
-    write(args.mkString(";"))
-    write(terminator)
+  protected def withEffect[A](on: String)(f: F ?=> A): A = {
+    write(on)
+    f(using this)
   }
 }

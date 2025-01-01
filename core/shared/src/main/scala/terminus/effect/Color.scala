@@ -16,117 +16,109 @@
 
 package terminus.effect
 
-trait Color[+F <: Writer] extends Sgr[F] { self: F =>
+trait Color[+F <: Writer] extends WithEffect[F] { self: F =>
   object foreground {
     def default[A](f: F ?=> A): A =
-      withColor("39")(f)
+      withEffect("39")(f)
 
     def black[A](f: F ?=> A): A =
-      withColor("30")(f)
+      withEffect("30")(f)
 
     def red[A](f: F ?=> A): A =
-      withColor("31")(f)
+      withEffect("31")(f)
 
     def green[A](f: F ?=> A): A =
-      withColor("32")(f)
+      withEffect("32")(f)
 
     def yellow[A](f: F ?=> A): A =
-      withColor("33")(f)
+      withEffect("33")(f)
 
     def blue[A](f: F ?=> A): A =
-      withColor("34")(f)
+      withEffect("34")(f)
 
     def magenta[A](f: F ?=> A): A =
-      withColor("35")(f)
+      withEffect("35")(f)
 
     def cyan[A](f: F ?=> A): A =
-      withColor("36")(f)
+      withEffect("36")(f)
 
     def white[A](f: F ?=> A): A =
-      withColor("37")(f)
+      withEffect("37")(f)
 
     def brightBlack[A](f: F ?=> A): A =
-      withColor("90")(f)
+      withEffect("90")(f)
 
     def brightRed[A](f: F ?=> A): A =
-      withColor("91")(f)
+      withEffect("91")(f)
 
     def brightGreen[A](f: F ?=> A): A =
-      withColor("92")(f)
+      withEffect("92")(f)
 
     def brightYellow[A](f: F ?=> A): A =
-      withColor("93")(f)
+      withEffect("93")(f)
 
     def brightBlue[A](f: F ?=> A): A =
-      withColor("94")(f)
+      withEffect("94")(f)
     def brightMagenta[A](f: F ?=> A): A =
-      withColor("95")(f)
+      withEffect("95")(f)
 
     def brightCyan[A](f: F ?=> A): A =
-      withColor("96")(f)
+      withEffect("96")(f)
 
     def brightWhite[A](f: F ?=> A): A =
-      withColor("97")(f)
+      withEffect("97")(f)
   }
 
   object background {
     def default[A](f: F ?=> A): A =
-      withColor("49")(f)
+      withEffect("49")(f)
 
     def black[A](f: F ?=> A): A =
-      withColor("40")(f)
+      withEffect("40")(f)
 
     def red[A](f: F ?=> A): A =
-      withColor("41")(f)
+      withEffect("41")(f)
 
     def green[A](f: F ?=> A): A =
-      withColor("42")(f)
+      withEffect("42")(f)
 
     def yellow[A](f: F ?=> A): A =
-      withColor("43")(f)
+      withEffect("43")(f)
 
     def blue[A](f: F ?=> A): A =
-      withColor("44")(f)
+      withEffect("44")(f)
 
     def magenta[A](f: F ?=> A): A =
-      withColor("45")(f)
+      withEffect("45")(f)
 
     def cyan[A](f: F ?=> A): A =
-      withColor("46")(f)
+      withEffect("46")(f)
 
     def white[A](f: F ?=> A): A =
-      withColor("47")(f)
+      withEffect("47")(f)
 
     def brightBlack[A](f: F ?=> A): A =
-      withColor("100")(f)
+      withEffect("100")(f)
 
     def brightRed[A](f: F ?=> A): A =
-      withColor("101")(f)
+      withEffect("101")(f)
 
     def brightGreen[A](f: F ?=> A): A =
-      withColor("102")(f)
+      withEffect("102")(f)
 
     def brightYellow[A](f: F ?=> A): A =
-      withColor("103")(f)
+      withEffect("103")(f)
 
     def brightBlue[A](f: F ?=> A): A =
-      withColor("104")(f)
+      withEffect("104")(f)
 
     def brightMagenta[A](f: F ?=> A): A =
-      withColor("105")(f)
+      withEffect("105")(f)
 
     def brightCyan[A](f: F ?=> A): A =
-      withColor("106")(f)
+      withEffect("106")(f)
 
     def brightWhite[A](f: F ?=> A): A =
-      withColor("107")(f)
-  }
-
-  private def withColor[A](code: String)(f: F ?=> A): A = {
-    sgr(code)
-    val result = f(using this)
-    reset()
-
-    result
+      withEffect("107")(f)
   }
 }
