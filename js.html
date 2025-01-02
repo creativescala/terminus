@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="">
+
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="generator" content="Laika 1.0.0" />
+    <title>Javascript Backend</title>
+    
+    
+    <meta name="description" content="docs" />
+    
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <link href="https://fonts.googleapis.com/css?family=Source+Code+Pro:400|Source+Sans+Pro:300,400,600"
+        rel="stylesheet" type="text/css">
+    <link href="https://fonts.googleapis.com/css?family=Crimson+Pro:400" rel="stylesheet" type="text/css">
+    <link rel="stylesheet" type="text/css" href="css/creative-scala.css" /><link rel="stylesheet" type="text/css" href="xterm.css" />
+    <script src="js/toc.js"></script><script src="js/solution.js"></script><script src="main.js"></script><script src="xterm.js"></script>
+    <script> /* for avoiding page load transitions */</script>
+</head>
+
+<body>
+    <nav id="topbar">
+      <details>
+        <summary>Terminus</summary>
+        <ul class="nav-list">
+          <li class="level1 nav-leaf"><a href="examples.html">Examples</a></li>
+          <li class="level1 nav-leaf"><a href="jvm.html">JVM Backend</a></li>
+          <li class="level1 active nav-leaf"><a href="#">Javascript Backend</a></li>
+        </ul>
+      </details>
+    </nav>
+    <nav id="sidebar">
+        <ul class="nav-list">
+          <li class="level1 nav-leaf"><a href="index.html">Terminus</a></li>
+          <li class="level1 nav-leaf"><a href="examples.html">Examples</a></li>
+          <li class="level1 nav-leaf"><a href="jvm.html">JVM Backend</a></li>
+          <li class="level1 active nav-leaf"><a href="#">Javascript Backend</a></li>
+        </ul>
+    </nav>
+
+    <div id="content">
+        <main class="content">
+            <h1 id="javascript-backend" class="title">Javascript Backend</h1>
+            <p>The Javascript backend uses <a href="https://xtermjs.org">xterm.js</a>, which allows terminal applications to be embedded in websites. It&#39;s what is used for all the examples in this documentation. Running in the web browser means there are some differences from standard terminal applications, but the majority of the Terminus interface stays the same.</p>
+            
+            <h2 id="running-a-terminal" class="section">Running a Terminal</h2>
+            <p>When running a <code>Terminal</code> you need to provide the ID of a DOM element where you want the terminal mounted. For example, if you have the following within a web page</p>
+            <pre><code class="nohighlight"><span class="tag-punctuation">&lt;</span><span class="tag-name">div</span><span class="tag-punctuation"> </span><span class="attribute-name">id</span><span class="tag-punctuation">=</span><span class="string-literal">&quot;terminal&quot;</span><span class="tag-punctuation">&gt;&lt;/</span><span class="tag-name">div</span><span class="tag-punctuation">&gt;</span></code></pre>
+            <p>you would construct a <code>Terminal</code> with the following.</p>
+            <pre><code class="nohighlight"><span class="type-name">Terminal</span><span>.</span><span class="identifier">run</span><span>(</span><span class="string-literal">&quot;id&quot;</span><span>){ 
+  </span><span class="comment">// Terminal code here
+</span><span>}</span></code></pre>
+            <p>There are optional arguments to specify the number of rows and columns the terminal occupies.</p>
+            <pre><code class="nohighlight"><span class="type-name">Terminal</span><span>.</span><span class="identifier">run</span><span>(</span><span class="string-literal">&quot;id&quot;</span><span>, </span><span class="identifier">rows</span><span> = </span><span class="number-literal">24</span><span>, </span><span class="identifier">cols</span><span> = </span><span class="number-literal">80</span><span>){ 
+  </span><span class="comment">// Terminal code here
+</span><span>}</span></code></pre>
+            
+            <h2 id="user-input" class="section">User Input</h2>
+            <p>User input is asynchronous in the web browser, so the normal <a class="api" href="https://javadoc.io/doc/org.creativescala/terminus-docs_3/latest/terminus/Reader.html">Reader</a> interface doesn&#39;t work. Instead, Terminus provides a <code>readKey</code> method, which returns a <code>Future[String]</code>, where the <code>String</code> is the <a href="https://developer.mozilla.org/en-US/docs/Web/API/KeyboardEvent/key">key from a DOM <code>KeyboardEvent</code></a>.</p>
+            <div class="flex flex-row justify-between">
+                <a class="pageNavigation" href="jvm.html">←JVM Backend</a> 
+            </div>
+        </main>
+        <footer>Creative Scala is copyright Noel Welsh</footer>
+    </div>
+
+    </div>
+</body>
+
+</html>

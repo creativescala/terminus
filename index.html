@@ -16,8 +16,8 @@
     <link href="https://fonts.googleapis.com/css?family=Source+Code+Pro:400|Source+Sans+Pro:300,400,600"
         rel="stylesheet" type="text/css">
     <link href="https://fonts.googleapis.com/css?family=Crimson+Pro:400" rel="stylesheet" type="text/css">
-    <link rel="stylesheet" type="text/css" href="css/creative-scala.css" />
-    <script src="js/toc.js"></script><script src="js/solution.js"></script><script src="main.js"></script>
+    <link rel="stylesheet" type="text/css" href="css/creative-scala.css" /><link rel="stylesheet" type="text/css" href="xterm.css" />
+    <script src="js/toc.js"></script><script src="js/solution.js"></script><script src="main.js"></script><script src="xterm.js"></script>
     <script> /* for avoiding page load transitions */</script>
 </head>
 
@@ -26,12 +26,18 @@
       <details>
         <summary>Terminus</summary>
         <ul class="nav-list">
+          <li class="level1 nav-leaf"><a href="examples.html">Examples</a></li>
+          <li class="level1 nav-leaf"><a href="jvm.html">JVM Backend</a></li>
+          <li class="level1 nav-leaf"><a href="js.html">Javascript Backend</a></li>
         </ul>
       </details>
     </nav>
     <nav id="sidebar">
         <ul class="nav-list">
           <li class="level1 active nav-leaf"><a href="#">Terminus</a></li>
+          <li class="level1 nav-leaf"><a href="examples.html">Examples</a></li>
+          <li class="level1 nav-leaf"><a href="jvm.html">JVM Backend</a></li>
+          <li class="level1 nav-leaf"><a href="js.html">Javascript Backend</a></li>
         </ul>
     </nav>
 
@@ -39,8 +45,8 @@
         <main class="content">
             <h1 id="terminus" class="title">Terminus</h1>
             <p>Terminus is a Scala 3 library for working with the terminal.
-            It currently supports the JVM, via <a href="https://jline.org/">JLine</a>. 
-            We intend to add <a href="https://scala-native.org/en/stable/">Scala Native</a> and <a href="https://www.scala-js.org/">Scala.js</a> support .</p>
+            It currently supports JVM and Javascript backends.
+            We intend to add <a href="https://scala-native.org/en/stable/">Scala Native</a> support .</p>
             
             <h2 id="setup" class="section">Setup</h2>
             <p>To use Terminus, add the following to your <code>build.sbt</code></p>
@@ -49,100 +55,19 @@
             <h2 id="usage" class="section">Usage</h2>
             <p>Import Terminus</p>
             <pre><code class="nohighlight"><span class="keyword">import</span><span> </span><span class="identifier">terminus</span><span>.*</span></code></pre>
-            <p>Now you can call methods on the <code>Terminal</code> object. The core methods are <code>read</code> and <code>write</code>, but there are also methods to change color, move the cursor, erase content, and so on. Don&#39;t forget to call <code>flush</code> or your output won&#39;t appear. Wrap a call to <code>run</code> around your entire program. Here&#39;s a small example that prints bright red text.</p>
+            <p>Now you can call methods on the <code>Terminal</code> object. The core methods are <code>read</code> and <code>write</code>, but there are also methods to change color, move the cursor, erase content, and so on. On most terminals you will need to call <code>flush</code> or your output won&#39;t appear. Wrap a call to <code>run</code> around your entire program. Here&#39;s a small example that prints green text.</p>
             <pre><code class="nohighlight"><span class="type-name">Terminal</span><span>.</span><span class="identifier">run</span><span> {
-  </span><span class="type-name">Terminal</span><span>.</span><span class="identifier">foreground</span><span>.</span><span class="identifier">brightRed</span><span>{
-    </span><span class="type-name">Terminal</span><span>.</span><span class="identifier">write</span><span>(</span><span class="string-literal">&quot;This is Terminus!&quot;</span><span>)
-    </span><span class="type-name">Terminal</span><span>.</span><span class="identifier">flush</span><span>()
+  </span><span class="type-name">Terminal</span><span>.</span><span class="identifier">display</span><span>.</span><span class="identifier">bold</span><span> {
+    </span><span class="type-name">Terminal</span><span>.</span><span class="identifier">foreground</span><span>.</span><span class="identifier">green</span><span> {
+      </span><span class="type-name">Terminal</span><span>.</span><span class="identifier">write</span><span>(</span><span class="string-literal">&quot;This is Terminus!&quot;</span><span>)
+      </span><span class="type-name">Terminal</span><span>.</span><span class="identifier">flush</span><span>()
+    }
   }
 }</span></code></pre>
-            <p>Here&#39;s a more involved example that demonstrates interactivity. It displays a prompt that asks the user to select one of three choices.</p>
-            <pre><code class="nohighlight"><span class="keyword">import</span><span> </span><span class="identifier">terminus</span><span>.*
-</span><span class="keyword">import</span><span> </span><span class="identifier">terminus</span><span>.</span><span class="identifier">effect</span><span>.</span><span class="type-name">Eof</span><span>
-
-</span><span class="identifier">enum</span><span> </span><span class="type-name">KeyCode</span><span> {
-  </span><span class="keyword">case</span><span> </span><span class="type-name">Down</span><span>
-  </span><span class="keyword">case</span><span> </span><span class="type-name">Up</span><span>
-  </span><span class="keyword">case</span><span> </span><span class="type-name">Enter</span><span>
-}
-
-</span><span class="comment">// Clear the text we&#39;ve written
-</span><span class="keyword">def</span><span> </span><span class="declaration-name">clear</span><span>(): </span><span class="type-name">Program</span><span>[</span><span class="type-name">Unit</span><span>] = {
-  </span><span class="type-name">Terminal</span><span>.</span><span class="identifier">cursor</span><span>.</span><span class="identifier">move</span><span>(</span><span class="number-literal">1</span><span>, -</span><span class="number-literal">4</span><span>)
-  </span><span class="type-name">Terminal</span><span>.</span><span class="identifier">erase</span><span>.</span><span class="identifier">down</span><span>()
-  </span><span class="type-name">Terminal</span><span>.</span><span class="identifier">cursor</span><span>.</span><span class="identifier">column</span><span>(</span><span class="number-literal">1</span><span>)
-}
-
-</span><span class="comment">// Write an option the user can choose. The currently selected option is highlighted.
-</span><span class="keyword">def</span><span> </span><span class="declaration-name">writeChoice</span><span>(</span><span class="identifier">description</span><span>: </span><span class="type-name">String</span><span>, </span><span class="identifier">selected</span><span>: </span><span class="type-name">Boolean</span><span>): </span><span class="type-name">Program</span><span>[</span><span class="type-name">Unit</span><span>] =
-  </span><span class="keyword">if</span><span> </span><span class="identifier">selected</span><span> </span><span class="identifier">then</span><span>
-    </span><span class="type-name">Terminal</span><span>.</span><span class="identifier">display</span><span>.</span><span class="identifier">bold</span><span>(</span><span class="type-name">Terminal</span><span>.</span><span class="identifier">write</span><span>(</span><span class="string-literal">s&quot;&gt; </span><span class="substitution">${description}</span><span class="escape-sequence">\r\n</span><span class="string-literal">&quot;</span><span>))
-  </span><span class="keyword">else</span><span> </span><span class="type-name">Terminal</span><span>.</span><span class="identifier">write</span><span>(</span><span class="string-literal">s&quot;  </span><span class="substitution">${description}</span><span class="escape-sequence">\r\n</span><span class="string-literal">&quot;</span><span>)
-
-</span><span class="comment">// Write the UI
-</span><span class="keyword">def</span><span> </span><span class="declaration-name">write</span><span>(</span><span class="identifier">selected</span><span>: </span><span class="type-name">Int</span><span>): </span><span class="type-name">Program</span><span>[</span><span class="type-name">Unit</span><span>] = {
-  </span><span class="type-name">Terminal</span><span>.</span><span class="identifier">write</span><span>(</span><span class="string-literal">&quot;How cool is this?</span><span class="escape-sequence">\r\n</span><span class="string-literal">&quot;</span><span>)
-  </span><span class="identifier">writeChoice</span><span>(</span><span class="string-literal">&quot;Very cool&quot;</span><span>, </span><span class="identifier">selected</span><span> == </span><span class="number-literal">0</span><span>)
-  </span><span class="identifier">writeChoice</span><span>(</span><span class="string-literal">&quot;Way cool&quot;</span><span>, </span><span class="identifier">selected</span><span> == </span><span class="number-literal">1</span><span>)
-  </span><span class="identifier">writeChoice</span><span>(</span><span class="string-literal">&quot;So cool&quot;</span><span>, </span><span class="identifier">selected</span><span> == </span><span class="number-literal">2</span><span>)
-  </span><span class="type-name">Terminal</span><span>.</span><span class="identifier">flush</span><span>()
-}
-
-</span><span class="keyword">def</span><span> </span><span class="declaration-name">read</span><span>(): </span><span class="type-name">Program</span><span>[</span><span class="type-name">KeyCode</span><span>] = {
-  </span><span class="type-name">Terminal</span><span>.</span><span class="identifier">read</span><span>() </span><span class="keyword">match</span><span> {
-    </span><span class="keyword">case</span><span> </span><span class="type-name">Eof</span><span> =&gt;
-      </span><span class="keyword">throw</span><span> </span><span class="keyword">new</span><span> </span><span class="type-name">Exception</span><span>(</span><span class="string-literal">&quot;Received an EOF&quot;</span><span>)
-    </span><span class="keyword">case</span><span> </span><span class="identifier">char</span><span>: </span><span class="type-name">Char</span><span> =&gt;
-      </span><span class="identifier">char</span><span> </span><span class="keyword">match</span><span> {
-        </span><span class="keyword">case</span><span> </span><span class="number-literal">10</span><span> | </span><span class="number-literal">13</span><span> =&gt; </span><span class="type-name">KeyCode</span><span>.</span><span class="type-name">Enter</span><span>
-        </span><span class="keyword">case</span><span> </span><span class="char-literal">&#39;</span><span class="escape-sequence">\u001b</span><span class="char-literal">&#39;</span><span> =&gt;
-          </span><span class="type-name">Terminal</span><span>.</span><span class="identifier">read</span><span>() </span><span class="keyword">match</span><span> {
-            </span><span class="comment">// Normal mode
-</span><span>            </span><span class="keyword">case</span><span> </span><span class="char-literal">&#39;[&#39;</span><span> =&gt;
-              </span><span class="type-name">Terminal</span><span>.</span><span class="identifier">read</span><span>() </span><span class="keyword">match</span><span> {
-                </span><span class="keyword">case</span><span> </span><span class="char-literal">&#39;A&#39;</span><span>   =&gt; </span><span class="type-name">KeyCode</span><span>.</span><span class="type-name">Up</span><span>
-                </span><span class="keyword">case</span><span> </span><span class="char-literal">&#39;B&#39;</span><span>   =&gt; </span><span class="type-name">KeyCode</span><span>.</span><span class="type-name">Down</span><span>
-                </span><span class="keyword">case</span><span> </span><span class="identifier">other</span><span> =&gt; </span><span class="identifier">read</span><span>()
-              }
-
-            </span><span class="comment">// Application mode
-</span><span>            </span><span class="keyword">case</span><span> </span><span class="char-literal">&#39;O&#39;</span><span> =&gt;
-              </span><span class="type-name">Terminal</span><span>.</span><span class="identifier">read</span><span>() </span><span class="keyword">match</span><span> {
-                </span><span class="keyword">case</span><span> </span><span class="char-literal">&#39;A&#39;</span><span>   =&gt; </span><span class="type-name">KeyCode</span><span>.</span><span class="type-name">Up</span><span>
-                </span><span class="keyword">case</span><span> </span><span class="char-literal">&#39;B&#39;</span><span>   =&gt; </span><span class="type-name">KeyCode</span><span>.</span><span class="type-name">Down</span><span>
-                </span><span class="keyword">case</span><span> </span><span class="identifier">other</span><span> =&gt; </span><span class="identifier">read</span><span>()
-              }
-
-            </span><span class="keyword">case</span><span> </span><span class="identifier">other</span><span> =&gt; </span><span class="identifier">read</span><span>()
-          }
-        </span><span class="keyword">case</span><span> </span><span class="identifier">other</span><span> =&gt; </span><span class="identifier">read</span><span>()
-      }
-  }
-}
-
-</span><span class="keyword">def</span><span> </span><span class="declaration-name">loop</span><span>(</span><span class="identifier">idx</span><span>: </span><span class="type-name">Int</span><span>): </span><span class="type-name">Program</span><span>[</span><span class="type-name">Int</span><span>] = {
-  </span><span class="identifier">write</span><span>(</span><span class="identifier">idx</span><span>)
-  </span><span class="identifier">read</span><span>() </span><span class="keyword">match</span><span> {
-    </span><span class="keyword">case</span><span> </span><span class="type-name">KeyCode</span><span>.</span><span class="type-name">Up</span><span> =&gt;
-      </span><span class="identifier">clear</span><span>()
-      </span><span class="identifier">loop</span><span>(</span><span class="keyword">if</span><span> </span><span class="identifier">idx</span><span> == </span><span class="number-literal">0</span><span> </span><span class="identifier">then</span><span> </span><span class="number-literal">2</span><span> </span><span class="keyword">else</span><span> </span><span class="identifier">idx</span><span> - </span><span class="number-literal">1</span><span>)
-
-    </span><span class="keyword">case</span><span> </span><span class="type-name">KeyCode</span><span>.</span><span class="type-name">Down</span><span> =&gt;
-      </span><span class="identifier">clear</span><span>()
-      </span><span class="identifier">loop</span><span>(</span><span class="keyword">if</span><span> </span><span class="identifier">idx</span><span> == </span><span class="number-literal">2</span><span> </span><span class="identifier">then</span><span> </span><span class="number-literal">0</span><span> </span><span class="keyword">else</span><span> </span><span class="identifier">idx</span><span> + </span><span class="number-literal">1</span><span>)
-
-    </span><span class="keyword">case</span><span> </span><span class="type-name">KeyCode</span><span>.</span><span class="type-name">Enter</span><span> =&gt; </span><span class="identifier">idx</span><span>
-  }
-}
-
-</span><span class="annotation">@main</span><span> </span><span class="keyword">def</span><span> </span><span class="declaration-name">prompt</span><span>(): </span><span class="type-name">Unit</span><span> = {
-  </span><span class="keyword">val</span><span> </span><span class="identifier">idx</span><span> =
-    </span><span class="type-name">Terminal</span><span>.</span><span class="identifier">run</span><span>(
-      </span><span class="type-name">Terminal</span><span>.</span><span class="identifier">raw</span><span> { </span><span class="identifier">loop</span><span>(</span><span class="number-literal">0</span><span>) }
-    )
-
-  </span><span class="identifier">println</span><span>(</span><span class="string-literal">s&quot;Selected </span><span class="substitution">$idx</span><span class="string-literal">&quot;</span><span>)
-}</span></code></pre>
+            <p>This produces the following output.</p>
+            <div class="doodle" id="color-foreground-green"></div>
+            <script>ColorForegroundGreen.go("color-foreground-green")</script>
+            <p>See the <a href="examples.html">Examples</a> for more involved use cases.</p>
             
             <h2 id="design" class="section">Design</h2>
             <p>The API in the <code>terminus</code> package provides a functional API for working with the terminal.
@@ -190,7 +115,9 @@
             <pre><code class="nohighlight"><span class="keyword">import</span><span> </span><span class="identifier">terminus</span><span>.</span><span class="identifier">effect</span><span>.</span><span class="type-name">AnsiCodes</span><span>
 
 </span><span class="type-name">AnsiCodes</span><span>.</span><span class="identifier">foreground</span><span>.</span><span class="identifier">red</span><span>
-</span><span class="type-name">AnsiCodes</span><span>.</span><span class="identifier">erase</span><span>.</span><span class="identifier">line</span></code></pre>
+</span><span class="comment">// res6: String = &quot;\u001b[31m&quot;
+</span><span class="type-name">AnsiCodes</span><span>.</span><span class="identifier">erase</span><span>.</span><span class="identifier">line</span><span>
+</span><span class="comment">// res7: String = &quot;\u001b[2K&quot;</span></code></pre>
             
             <h2 id="notes" class="section">Notes</h2>
             <p>You won&#39;t be able to run terminal programs from sbt if the JVM forks when running. That is, if you have the setting</p>
@@ -218,7 +145,7 @@
               </li>
             </ul>
             <div class="flex flex-row justify-between">
-                 
+                 <a class="pageNavigation" href="examples.html">Examples→</a>
             </div>
         </main>
         <footer>Creative Scala is copyright Noel Welsh</footer>

@@ -1,0 +1,148 @@
+<!doctype html>
+<html lang="">
+
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="generator" content="Laika 1.0.0" />
+    <title>Examples</title>
+    
+    
+    <meta name="description" content="docs" />
+    
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <link href="https://fonts.googleapis.com/css?family=Source+Code+Pro:400|Source+Sans+Pro:300,400,600"
+        rel="stylesheet" type="text/css">
+    <link href="https://fonts.googleapis.com/css?family=Crimson+Pro:400" rel="stylesheet" type="text/css">
+    <link rel="stylesheet" type="text/css" href="css/creative-scala.css" /><link rel="stylesheet" type="text/css" href="xterm.css" />
+    <script src="js/toc.js"></script><script src="js/solution.js"></script><script src="main.js"></script><script src="xterm.js"></script>
+    <script> /* for avoiding page load transitions */</script>
+</head>
+
+<body>
+    <nav id="topbar">
+      <details>
+        <summary>Terminus</summary>
+        <ul class="nav-list">
+          <li class="level1 active nav-leaf"><a href="#">Examples</a></li>
+          <li class="level1 nav-leaf"><a href="jvm.html">JVM Backend</a></li>
+          <li class="level1 nav-leaf"><a href="js.html">Javascript Backend</a></li>
+        </ul>
+      </details>
+    </nav>
+    <nav id="sidebar">
+        <ul class="nav-list">
+          <li class="level1 nav-leaf"><a href="index.html">Terminus</a></li>
+          <li class="level1 active nav-leaf"><a href="#">Examples</a></li>
+          <li class="level1 nav-leaf"><a href="jvm.html">JVM Backend</a></li>
+          <li class="level1 nav-leaf"><a href="js.html">Javascript Backend</a></li>
+        </ul>
+    </nav>
+
+    <div id="content">
+        <main class="content">
+            <h1 id="examples" class="title">Examples</h1>
+            
+            <h2 id="prompt" class="section">Prompt</h2>
+            <p>This example shows a simple UI you can easily build with Terminus. This is the kind of thing you might create for a command line tool. Make sure the emulated terminal has focus (i.e. click in the black rectangle) and then use up and down arrows to select an option. Reload the page to start again.</p>
+            <div class="doodle" id="terminus-prompt"></div>
+            <script>Prompt.go("terminus-prompt")</script>
+            <p>Here&#39;s the code for this example, running on the JVM backend. (The JS code is slightly different due to differences in how input is handled.)</p>
+            <pre><code class="nohighlight"><span class="keyword">import</span><span> </span><span class="identifier">terminus</span><span>.</span><span class="identifier">effect</span><span>.</span><span class="type-name">Eof</span><span>
+
+</span><span class="identifier">enum</span><span> </span><span class="type-name">KeyCode</span><span> {
+  </span><span class="keyword">case</span><span> </span><span class="type-name">Down</span><span>
+  </span><span class="keyword">case</span><span> </span><span class="type-name">Up</span><span>
+  </span><span class="keyword">case</span><span> </span><span class="type-name">Enter</span><span>
+}
+
+</span><span class="comment">// Clear the text we&#39;ve written
+</span><span class="keyword">def</span><span> </span><span class="declaration-name">clear</span><span>(): </span><span class="type-name">Program</span><span>[</span><span class="type-name">Unit</span><span>] = {
+  </span><span class="type-name">Terminal</span><span>.</span><span class="identifier">cursor</span><span>.</span><span class="identifier">move</span><span>(</span><span class="number-literal">1</span><span>, -</span><span class="number-literal">4</span><span>)
+  </span><span class="type-name">Terminal</span><span>.</span><span class="identifier">erase</span><span>.</span><span class="identifier">down</span><span>()
+  </span><span class="type-name">Terminal</span><span>.</span><span class="identifier">cursor</span><span>.</span><span class="identifier">column</span><span>(</span><span class="number-literal">1</span><span>)
+}
+
+</span><span class="comment">// Write an option the user can choose. The currently selected option is highlighted.
+</span><span class="keyword">def</span><span> </span><span class="declaration-name">writeChoice</span><span>(</span><span class="identifier">description</span><span>: </span><span class="type-name">String</span><span>, </span><span class="identifier">selected</span><span>: </span><span class="type-name">Boolean</span><span>): </span><span class="type-name">Program</span><span>[</span><span class="type-name">Unit</span><span>] =
+  </span><span class="keyword">if</span><span> </span><span class="identifier">selected</span><span> </span><span class="identifier">then</span><span>
+    </span><span class="type-name">Terminal</span><span>.</span><span class="identifier">display</span><span>.</span><span class="identifier">bold</span><span>(</span><span class="type-name">Terminal</span><span>.</span><span class="identifier">write</span><span>(</span><span class="string-literal">s&quot;&gt; </span><span class="substitution">${description}</span><span class="escape-sequence">\r\n</span><span class="string-literal">&quot;</span><span>))
+  </span><span class="keyword">else</span><span> </span><span class="type-name">Terminal</span><span>.</span><span class="identifier">write</span><span>(</span><span class="string-literal">s&quot;  </span><span class="substitution">${description}</span><span class="escape-sequence">\r\n</span><span class="string-literal">&quot;</span><span>)
+
+</span><span class="comment">// Write the UI
+</span><span class="keyword">def</span><span> </span><span class="declaration-name">write</span><span>(</span><span class="identifier">selected</span><span>: </span><span class="type-name">Int</span><span>): </span><span class="type-name">Program</span><span>[</span><span class="type-name">Unit</span><span>] = {
+  </span><span class="type-name">Terminal</span><span>.</span><span class="identifier">write</span><span>(</span><span class="string-literal">&quot;How cool is this?</span><span class="escape-sequence">\r\n</span><span class="string-literal">&quot;</span><span>)
+  </span><span class="identifier">writeChoice</span><span>(</span><span class="string-literal">&quot;Very cool&quot;</span><span>, </span><span class="identifier">selected</span><span> == </span><span class="number-literal">0</span><span>)
+  </span><span class="identifier">writeChoice</span><span>(</span><span class="string-literal">&quot;Way cool&quot;</span><span>, </span><span class="identifier">selected</span><span> == </span><span class="number-literal">1</span><span>)
+  </span><span class="identifier">writeChoice</span><span>(</span><span class="string-literal">&quot;So cool&quot;</span><span>, </span><span class="identifier">selected</span><span> == </span><span class="number-literal">2</span><span>)
+  </span><span class="type-name">Terminal</span><span>.</span><span class="identifier">flush</span><span>()
+}
+
+</span><span class="keyword">def</span><span> </span><span class="declaration-name">read</span><span>(): </span><span class="type-name">Program</span><span>[</span><span class="type-name">KeyCode</span><span>] = {
+  </span><span class="type-name">Terminal</span><span>.</span><span class="identifier">read</span><span>() </span><span class="keyword">match</span><span> {
+    </span><span class="keyword">case</span><span> </span><span class="type-name">Eof</span><span> =&gt;
+      </span><span class="keyword">throw</span><span> </span><span class="keyword">new</span><span> </span><span class="type-name">Exception</span><span>(</span><span class="string-literal">&quot;Received an EOF&quot;</span><span>)
+    </span><span class="keyword">case</span><span> </span><span class="identifier">char</span><span>: </span><span class="type-name">Char</span><span> =&gt;
+      </span><span class="identifier">char</span><span> </span><span class="keyword">match</span><span> {
+        </span><span class="keyword">case</span><span> </span><span class="number-literal">10</span><span> | </span><span class="number-literal">13</span><span> =&gt; </span><span class="type-name">KeyCode</span><span>.</span><span class="type-name">Enter</span><span>
+        </span><span class="keyword">case</span><span> </span><span class="char-literal">&#39;</span><span class="escape-sequence">\u001b</span><span class="char-literal">&#39;</span><span> =&gt;
+          </span><span class="type-name">Terminal</span><span>.</span><span class="identifier">read</span><span>() </span><span class="keyword">match</span><span> {
+            </span><span class="comment">// Normal mode
+</span><span>            </span><span class="keyword">case</span><span> </span><span class="char-literal">&#39;[&#39;</span><span> =&gt;
+              </span><span class="type-name">Terminal</span><span>.</span><span class="identifier">read</span><span>() </span><span class="keyword">match</span><span> {
+                </span><span class="keyword">case</span><span> </span><span class="char-literal">&#39;A&#39;</span><span>   =&gt; </span><span class="type-name">KeyCode</span><span>.</span><span class="type-name">Up</span><span>
+                </span><span class="keyword">case</span><span> </span><span class="char-literal">&#39;B&#39;</span><span>   =&gt; </span><span class="type-name">KeyCode</span><span>.</span><span class="type-name">Down</span><span>
+                </span><span class="keyword">case</span><span> </span><span class="identifier">other</span><span> =&gt; </span><span class="identifier">read</span><span>()
+              }
+
+            </span><span class="comment">// Application mode
+</span><span>            </span><span class="keyword">case</span><span> </span><span class="char-literal">&#39;O&#39;</span><span> =&gt;
+              </span><span class="type-name">Terminal</span><span>.</span><span class="identifier">read</span><span>() </span><span class="keyword">match</span><span> {
+                </span><span class="keyword">case</span><span> </span><span class="char-literal">&#39;A&#39;</span><span>   =&gt; </span><span class="type-name">KeyCode</span><span>.</span><span class="type-name">Up</span><span>
+                </span><span class="keyword">case</span><span> </span><span class="char-literal">&#39;B&#39;</span><span>   =&gt; </span><span class="type-name">KeyCode</span><span>.</span><span class="type-name">Down</span><span>
+                </span><span class="keyword">case</span><span> </span><span class="identifier">other</span><span> =&gt; </span><span class="identifier">read</span><span>()
+              }
+
+            </span><span class="keyword">case</span><span> </span><span class="identifier">other</span><span> =&gt; </span><span class="identifier">read</span><span>()
+          }
+        </span><span class="keyword">case</span><span> </span><span class="identifier">other</span><span> =&gt; </span><span class="identifier">read</span><span>()
+      }
+  }
+}
+
+</span><span class="keyword">def</span><span> </span><span class="declaration-name">loop</span><span>(</span><span class="identifier">idx</span><span>: </span><span class="type-name">Int</span><span>): </span><span class="type-name">Program</span><span>[</span><span class="type-name">Int</span><span>] = {
+  </span><span class="identifier">write</span><span>(</span><span class="identifier">idx</span><span>)
+  </span><span class="identifier">read</span><span>() </span><span class="keyword">match</span><span> {
+    </span><span class="keyword">case</span><span> </span><span class="type-name">KeyCode</span><span>.</span><span class="type-name">Up</span><span> =&gt;
+      </span><span class="identifier">clear</span><span>()
+      </span><span class="identifier">loop</span><span>(</span><span class="keyword">if</span><span> </span><span class="identifier">idx</span><span> == </span><span class="number-literal">0</span><span> </span><span class="identifier">then</span><span> </span><span class="number-literal">2</span><span> </span><span class="keyword">else</span><span> </span><span class="identifier">idx</span><span> - </span><span class="number-literal">1</span><span>)
+
+    </span><span class="keyword">case</span><span> </span><span class="type-name">KeyCode</span><span>.</span><span class="type-name">Down</span><span> =&gt;
+      </span><span class="identifier">clear</span><span>()
+      </span><span class="identifier">loop</span><span>(</span><span class="keyword">if</span><span> </span><span class="identifier">idx</span><span> == </span><span class="number-literal">2</span><span> </span><span class="identifier">then</span><span> </span><span class="number-literal">0</span><span> </span><span class="keyword">else</span><span> </span><span class="identifier">idx</span><span> + </span><span class="number-literal">1</span><span>)
+
+    </span><span class="keyword">case</span><span> </span><span class="type-name">KeyCode</span><span>.</span><span class="type-name">Enter</span><span> =&gt; </span><span class="identifier">idx</span><span>
+  }
+}
+
+</span><span class="annotation">@main</span><span> </span><span class="keyword">def</span><span> </span><span class="declaration-name">prompt</span><span>(): </span><span class="type-name">Unit</span><span> = {
+  </span><span class="keyword">val</span><span> </span><span class="identifier">idx</span><span> =
+    </span><span class="type-name">Terminal</span><span>.</span><span class="identifier">run</span><span>(
+      </span><span class="type-name">Terminal</span><span>.</span><span class="identifier">raw</span><span> { </span><span class="identifier">loop</span><span>(</span><span class="number-literal">0</span><span>) }
+    )
+
+  </span><span class="identifier">println</span><span>(</span><span class="string-literal">s&quot;Selected </span><span class="substitution">$idx</span><span class="string-literal">&quot;</span><span>)
+}</span></code></pre>
+            <div class="flex flex-row justify-between">
+                <a class="pageNavigation" href="index.html">←Terminus</a> <a class="pageNavigation" href="jvm.html">JVM Backend→</a>
+            </div>
+        </main>
+        <footer>Creative Scala is copyright Noel Welsh</footer>
+    </div>
+
+    </div>
+</body>
+
+</html>
