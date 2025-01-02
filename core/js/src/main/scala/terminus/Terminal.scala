@@ -16,8 +16,12 @@
 
 package terminus
 
+import org.scalajs.dom
 import org.scalajs.dom.HTMLElement
-import org.scalajs.dom.document
+
+import scala.collection.mutable
+import scala.concurrent.Future
+import scala.concurrent.Promise
 
 class Terminal(root: HTMLElement, options: XtermJsOptions)
     extends effect.Color[Terminal],
@@ -26,8 +30,23 @@ class Terminal(root: HTMLElement, options: XtermJsOptions)
       effect.Erase,
       effect.Writer {
 
+  private val keyBuffer: mutable.ArrayDeque[Promise[String]] =
+    new mutable.ArrayDeque[Promise[String]](8)
+
   private val terminal = new XtermJsTerminal(options)
   terminal.open(root)
+  terminal.onKey { (event: XtermKeyEvent) =>
+    keyBuffer.removeHead().success(event.domEvent.key)
+    ()
+  }
+
+  /** Block reading a Javascript keycode */
+  def readKey(): Future[String] = {
+    val promise = Promise[String]()
+    keyBuffer.append(promise)
+
+    promise.future
+  }
 
   def flush(): Unit = ()
 
@@ -40,9 +59,12 @@ class Terminal(root: HTMLElement, options: XtermJsOptions)
 type Program[A] = Terminal ?=> A
 
 object Terminal extends Color, Cursor, Display, Erase, Writer {
+  def readKey(): Program[Future[String]] =
+    terminal ?=> terminal.readKey()
+
   def run[A](id: String, rows: Int = 24, cols: Int = 80)(f: Program[A]): A = {
     val options = XtermJsOptions(rows, cols)
-    run(document.getElementById(id).asInstanceOf[HTMLElement], options)(f)
+    run(dom.document.getElementById(id).asInstanceOf[HTMLElement], options)(f)
   }
 
   def run[A](element: HTMLElement, options: XtermJsOptions)(
