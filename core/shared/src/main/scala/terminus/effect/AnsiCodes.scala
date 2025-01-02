@@ -32,7 +32,7 @@ object AnsiCodes {
   /** The Control Sequencer Introducer code, which starts many escape codes. It
     * is ESC[
     */
-  val csiCode: String = "$esc["
+  val csiCode: String = s"${esc}["
 
   /** Create a CSI escape code. The terminator must be specifed first, followed
     * by zero or more arguments. The arguments will printed semi-colon separated

@@ -18,13 +18,14 @@ package terminus
 
 import org.scalajs.dom
 
+import scala.annotation.unused
 import scala.scalajs.js
 import scala.scalajs.js.annotation.JSGlobal
 
 @js.native
 @JSGlobal("Terminal")
 /** Minimal definition of the Terminal type from xterm.js */
-class XtermJsTerminal() extends js.Object {
+class XtermJsTerminal(@unused options: XtermJsOptions) extends js.Object {
   def open(element: dom.HTMLElement): Unit = js.native
   def write(data: String): Unit = js.native
 }

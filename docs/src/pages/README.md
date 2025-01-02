@@ -1,8 +1,8 @@
 # Terminus
 
 Terminus is a Scala 3 library for working with the terminal.
-It currently supports the JVM, via [JLine][jline]. 
-We intend to add [Scala Native][scala-native] and [Scala.js][scala-js] support .
+It currently supports JVM and Javascript backends.
+We intend to add [Scala Native][scala-native] support .
 
 
 ## Setup
@@ -22,17 +22,23 @@ Import Terminus
 import terminus.*
 ```
 
-Now you can call methods on the `Terminal` object. The core methods are `read` and `write`, but there are also methods to change color, move the cursor, erase content, and so on. Don't forget to call `flush` or your output won't appear. Wrap a call to `run` around your entire program. Here's a small example that prints bright red text.
+Now you can call methods on the `Terminal` object. The core methods are `read` and `write`, but there are also methods to change color, move the cursor, erase content, and so on. On most terminals you will need to call `flush` or your output won't appear. Wrap a call to `run` around your entire program. Here's a small example that prints green text.
 
 
 ```scala mdoc:compile-only
 Terminal.run {
-  Terminal.foreground.brightRed{
-    Terminal.write("This is Terminus!")
-    Terminal.flush()
+  Terminal.display.bold {
+    Terminal.foreground.green {
+      Terminal.write("This is Terminus!")
+      Terminal.flush()
+    }
   }
 }
 ```
+
+This produces the following output.
+
+@:doodle("color-foreground-green", "ColorForegroundGreen.go")
 
 Here's a more involved example that demonstrates interactivity. It displays a prompt that asks the user to select one of three choices.
 

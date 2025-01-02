@@ -17,15 +17,16 @@
 package terminus
 
 import org.scalajs.dom.HTMLElement
+import org.scalajs.dom.document
 
-class Terminal(root: HTMLElement)
+class Terminal(root: HTMLElement, options: XtermJsOptions)
     extends effect.Color[Terminal],
       effect.Cursor,
       effect.Display[Terminal],
       effect.Erase,
       effect.Writer {
 
-  private val terminal = new XtermJsTerminal()
+  private val terminal = new XtermJsTerminal(options)
   terminal.open(root)
 
   def flush(): Unit = ()
@@ -38,4 +39,16 @@ class Terminal(root: HTMLElement)
 }
 type Program[A] = Terminal ?=> A
 
-object Terminal extends Color, Cursor, Display, Erase, Writer {}
+object Terminal extends Color, Cursor, Display, Erase, Writer {
+  def run[A](id: String, rows: Int = 24, cols: Int = 80)(f: Program[A]): A = {
+    val options = XtermJsOptions(rows, cols)
+    run(document.getElementById(id).asInstanceOf[HTMLElement], options)(f)
+  }
+
+  def run[A](element: HTMLElement, options: XtermJsOptions)(
+      f: Program[A]
+  ): A = {
+    val terminal = Terminal(element, options)
+    f(using terminal)
+  }
+}
