@@ -1,8 +1,8 @@
 # Terminus
 
 Terminus is a Scala 3 library for working with the terminal.
-It currently supports the JVM, via [JLine][jline]. 
-We intend to add [Scala Native][scala-native] and [Scala.js][scala-js] support .
+It currently supports JVM and Javascript backends.
+We intend to add [Scala Native][scala-native] support .
 
 
 ## Setup
@@ -22,108 +22,25 @@ Import Terminus
 import terminus.*
 ```
 
-Now you can call methods on the `Terminal` object. The core methods are `read` and `write`, but there are also methods to change color, move the cursor, erase content, and so on. Don't forget to call `flush` or your output won't appear. Wrap a call to `run` around your entire program. Here's a small example that prints bright red text.
+Now you can call methods on the `Terminal` object. The core methods are `read` and `write`, but there are also methods to change color, move the cursor, erase content, and so on. On most terminals you will need to call `flush` or your output won't appear. Wrap a call to `run` around your entire program. Here's a small example that prints green text.
 
 
 ```scala mdoc:compile-only
 Terminal.run {
-  Terminal.foreground.brightRed{
-    Terminal.write("This is Terminus!")
-    Terminal.flush()
+  Terminal.display.bold {
+    Terminal.foreground.green {
+      Terminal.write("This is Terminus!")
+      Terminal.flush()
+    }
   }
 }
 ```
 
-Here's a more involved example that demonstrates interactivity. It displays a prompt that asks the user to select one of three choices.
+This produces the following output.
 
-```scala
-import terminus.*
-import terminus.effect.Eof
+@:doodle("color-foreground-green", "ColorForegroundGreen.go")
 
-enum KeyCode {
-  case Down
-  case Up
-  case Enter
-}
-
-// Clear the text we've written
-def clear(): Program[Unit] = {
-  Terminal.cursor.move(1, -4)
-  Terminal.erase.down()
-  Terminal.cursor.column(1)
-}
-
-// Write an option the user can choose. The currently selected option is highlighted.
-def writeChoice(description: String, selected: Boolean): Program[Unit] =
-  if selected then
-    Terminal.display.bold(Terminal.write(s"> ${description}\r\n"))
-  else Terminal.write(s"  ${description}\r\n")
-
-// Write the UI
-def write(selected: Int): Program[Unit] = {
-  Terminal.write("How cool is this?\r\n")
-  writeChoice("Very cool", selected == 0)
-  writeChoice("Way cool", selected == 1)
-  writeChoice("So cool", selected == 2)
-  Terminal.flush()
-}
-
-def read(): Program[KeyCode] = {
-  Terminal.read() match {
-    case Eof =>
-      throw new Exception("Received an EOF")
-    case char: Char =>
-      char match {
-        case 10 | 13 => KeyCode.Enter
-        case '\u001b' =>
-          Terminal.read() match {
-            // Normal mode
-            case '[' =>
-              Terminal.read() match {
-                case 'A'   => KeyCode.Up
-                case 'B'   => KeyCode.Down
-                case other => read()
-              }
-
-            // Application mode
-            case 'O' =>
-              Terminal.read() match {
-                case 'A'   => KeyCode.Up
-                case 'B'   => KeyCode.Down
-                case other => read()
-              }
-
-            case other => read()
-          }
-        case other => read()
-      }
-  }
-}
-
-def loop(idx: Int): Program[Int] = {
-  write(idx)
-  read() match {
-    case KeyCode.Up =>
-      clear()
-      loop(if idx == 0 then 2 else idx - 1)
-
-    case KeyCode.Down =>
-      clear()
-      loop(if idx == 2 then 0 else idx + 1)
-
-    case KeyCode.Enter => idx
-  }
-}
-
-@main def prompt(): Unit = {
-  val idx =
-    Terminal.run(
-      Terminal.raw { loop(0) }
-    )
-
-  println(s"Selected $idx")
-}
-```
+See the [Examples](examples.md) for more involved use cases.
 
 
 ## Design
@@ -201,7 +118,7 @@ All the ANSI escape codes used by Terminus are defined in `terminus.effect.AnsiC
 This can be useful if you want to write [escape codes][ansi-escape-codes] directly to the terminal without the abstractions provided by the Terminus DSL.
 Here's a simple example.
 
-```scala mdoc:silent
+```scala mdoc
 import terminus.effect.AnsiCodes
 
 AnsiCodes.foreground.red

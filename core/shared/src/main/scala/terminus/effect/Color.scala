@@ -19,106 +19,106 @@ package terminus.effect
 trait Color[+F <: Writer] extends WithEffect[F] { self: F =>
   object foreground {
     def default[A](f: F ?=> A): A =
-      withEffect("39")(f)
+      withEffect(AnsiCodes.foreground.default)(f)
 
     def black[A](f: F ?=> A): A =
-      withEffect("30")(f)
+      withEffect(AnsiCodes.foreground.black)(f)
 
     def red[A](f: F ?=> A): A =
-      withEffect("31")(f)
+      withEffect(AnsiCodes.foreground.red)(f)
 
     def green[A](f: F ?=> A): A =
-      withEffect("32")(f)
+      withEffect(AnsiCodes.foreground.green)(f)
 
     def yellow[A](f: F ?=> A): A =
-      withEffect("33")(f)
+      withEffect(AnsiCodes.foreground.yellow)(f)
 
     def blue[A](f: F ?=> A): A =
-      withEffect("34")(f)
+      withEffect(AnsiCodes.foreground.blue)(f)
 
     def magenta[A](f: F ?=> A): A =
-      withEffect("35")(f)
+      withEffect(AnsiCodes.foreground.magenta)(f)
 
     def cyan[A](f: F ?=> A): A =
-      withEffect("36")(f)
+      withEffect(AnsiCodes.foreground.cyan)(f)
 
     def white[A](f: F ?=> A): A =
-      withEffect("37")(f)
+      withEffect(AnsiCodes.foreground.white)(f)
 
     def brightBlack[A](f: F ?=> A): A =
-      withEffect("90")(f)
+      withEffect(AnsiCodes.foreground.brightBlack)(f)
 
     def brightRed[A](f: F ?=> A): A =
-      withEffect("91")(f)
+      withEffect(AnsiCodes.foreground.brightRed)(f)
 
     def brightGreen[A](f: F ?=> A): A =
-      withEffect("92")(f)
+      withEffect(AnsiCodes.foreground.brightGreen)(f)
 
     def brightYellow[A](f: F ?=> A): A =
-      withEffect("93")(f)
+      withEffect(AnsiCodes.foreground.brightYellow)(f)
 
     def brightBlue[A](f: F ?=> A): A =
-      withEffect("94")(f)
+      withEffect(AnsiCodes.foreground.brightBlue)(f)
     def brightMagenta[A](f: F ?=> A): A =
-      withEffect("95")(f)
+      withEffect(AnsiCodes.foreground.brightMagenta)(f)
 
     def brightCyan[A](f: F ?=> A): A =
-      withEffect("96")(f)
+      withEffect(AnsiCodes.foreground.brightCyan)(f)
 
     def brightWhite[A](f: F ?=> A): A =
-      withEffect("97")(f)
+      withEffect(AnsiCodes.foreground.brightWhite)(f)
   }
 
   object background {
     def default[A](f: F ?=> A): A =
-      withEffect("49")(f)
+      withEffect(AnsiCodes.background.default)(f)
 
     def black[A](f: F ?=> A): A =
-      withEffect("40")(f)
+      withEffect(AnsiCodes.background.black)(f)
 
     def red[A](f: F ?=> A): A =
-      withEffect("41")(f)
+      withEffect(AnsiCodes.background.red)(f)
 
     def green[A](f: F ?=> A): A =
-      withEffect("42")(f)
+      withEffect(AnsiCodes.background.green)(f)
 
     def yellow[A](f: F ?=> A): A =
-      withEffect("43")(f)
+      withEffect(AnsiCodes.background.yellow)(f)
 
     def blue[A](f: F ?=> A): A =
-      withEffect("44")(f)
+      withEffect(AnsiCodes.background.blue)(f)
 
     def magenta[A](f: F ?=> A): A =
-      withEffect("45")(f)
+      withEffect(AnsiCodes.background.magenta)(f)
 
     def cyan[A](f: F ?=> A): A =
-      withEffect("46")(f)
+      withEffect(AnsiCodes.background.cyan)(f)
 
     def white[A](f: F ?=> A): A =
-      withEffect("47")(f)
+      withEffect(AnsiCodes.background.white)(f)
 
     def brightBlack[A](f: F ?=> A): A =
-      withEffect("100")(f)
+      withEffect(AnsiCodes.background.brightBlack)(f)
 
     def brightRed[A](f: F ?=> A): A =
-      withEffect("101")(f)
+      withEffect(AnsiCodes.background.brightRed)(f)
 
     def brightGreen[A](f: F ?=> A): A =
-      withEffect("102")(f)
+      withEffect(AnsiCodes.background.brightGreen)(f)
 
     def brightYellow[A](f: F ?=> A): A =
-      withEffect("103")(f)
+      withEffect(AnsiCodes.background.brightYellow)(f)
 
     def brightBlue[A](f: F ?=> A): A =
-      withEffect("104")(f)
+      withEffect(AnsiCodes.background.brightBlue)(f)
 
     def brightMagenta[A](f: F ?=> A): A =
-      withEffect("105")(f)
+      withEffect(AnsiCodes.background.brightMagenta)(f)
 
     def brightCyan[A](f: F ?=> A): A =
-      withEffect("106")(f)
+      withEffect(AnsiCodes.background.brightCyan)(f)
 
     def brightWhite[A](f: F ?=> A): A =
-      withEffect("107")(f)
+      withEffect(AnsiCodes.background.brightWhite)(f)
   }
 }

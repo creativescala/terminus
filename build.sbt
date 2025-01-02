@@ -81,6 +81,7 @@ lazy val core = crossProject(JSPlatform, JVMPlatform, NativePlatform)
     name := "terminus-core"
   )
   .jvmSettings(libraryDependencies += Dependencies.jline.value)
+  .jsSettings(libraryDependencies += Dependencies.scalajsDom.value)
 
 lazy val docs =
   project
@@ -95,9 +96,16 @@ lazy val docs =
           )
       ),
       mdocIn := file("docs/src/pages"),
-      Laika / sourceDirectories ++= Seq(),
+      Laika / sourceDirectories ++= Seq(
+        file("docs/src/css"),
+        file("docs/src/js"),
+        (examples.js / Compile / fastOptJS / artifactPath).value
+          .getParentFile() / s"${(examples.js / moduleName).value}-fastopt"
+      ),
       laikaTheme := CreativeScalaTheme.empty
+        .addJs(laika.ast.Path.Root / "xterm.js")
         .addJs(laika.ast.Path.Root / "main.js")
+        .addCss(laika.ast.Path.Root / "xterm.css")
         .build,
       laikaExtensions ++= Seq(
         laika.format.Markdown.GitHubFlavor,
@@ -105,6 +113,7 @@ lazy val docs =
       ),
       tlSite := Def
         .sequential(
+          (examples.js / Compile / fastLinkJS),
           mdoc.toTask(""),
           laikaSite
         )
@@ -121,6 +130,23 @@ lazy val unidocs = project
     ScalaUnidoc / unidoc / unidocProjectFilter :=
       inAnyProject -- inProjects(
         docs,
-        core.js
+        core.js,
+        examples.js
       )
   )
+
+lazy val examples = crossProject(JSPlatform, JVMPlatform)
+  .in(file("examples"))
+  .settings(
+    commonSettings,
+    moduleName := "terminus-examples"
+  )
+  .jvmConfigure(
+    _.settings(mimaPreviousArtifacts := Set.empty)
+      .dependsOn(core.jvm)
+  )
+  .jsConfigure(
+    _.settings(mimaPreviousArtifacts := Set.empty)
+      .dependsOn(core.js)
+  )
+  .dependsOn(core)
