@@ -1,3 +1,3 @@
 # Terminus
 
-Terminus provides terminal interaction for Scala 3. [Read more](http://www.creativescala.org/terminus).
+Terminus provides terminal interaction for Scala 3. [Read more](https://www.creativescala.org/terminus).
