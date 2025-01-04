@@ -16,7 +16,9 @@
 
 package terminus
 
+import terminus.effect.AnsiCodes
 import terminus.effect.Eof
+import terminus.effect.WithEffect
 
 import scala.scalanative.libc
 import scala.scalanative.posix.termios
@@ -24,7 +26,7 @@ import scala.scalanative.posix.termios
 import scalanative.unsafe.*
 
 /** A Terminal implementation for Scala Native. */
-object NativeTerminal extends Terminal {
+object NativeTerminal extends Terminal, WithEffect[Terminal] {
   // https://viewsourcecode.org/snaptoken/kilo/index.html is a good introduction
   // to using the C API to control the terminal.
 
@@ -61,20 +63,14 @@ object NativeTerminal extends Terminal {
   }
 
   def application[A](f: (terminus.Terminal) ?=> A): A = {
-    // See https://www.vt100.net/docs/vt510-rm/DECCKM
-    csi("?1h")
-    val result = f(using this)
-    csi("?1l")
-
-    result
+    withEffect(AnsiCodes.mode.application.on, AnsiCodes.mode.application.off)(f)
   }
 
   def alternateScreen[A](f: (terminus.Terminal) ?=> A): A = {
-    csi("?1049h")
-    val result = f(using this)
-    csi("?1049l")
-
-    result
+    withEffect(
+      AnsiCodes.mode.alternateScreen.on,
+      AnsiCodes.mode.alternateScreen.off
+    )(f)
   }
 
   def raw[A](f: Terminal ?=> A): A = {
