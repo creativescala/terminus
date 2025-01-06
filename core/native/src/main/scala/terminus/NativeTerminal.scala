@@ -34,11 +34,12 @@ object NativeTerminal extends Terminal, WithEffect[Terminal] {
       sys.error(
         s"""Your platform, {LinktimeInfo.target.os}, is not currently supported by Terminus on Scala Native.
            |
-           |You have two options:
+           |You can use a different backend, such as the JVM, which is likely to support your platform. You can
+           |also open an issue at
            |
-           |1. You can use a different backend, such as the JVM, which is likely to support your platform.
+           |   https://github.com/creativescala/terminus/issues
            |
-           |2. You can open an issue at https://github.com/creativescala/terminus/issues to get support added for your platform.""".stripMargin
+           |to get support added for your platform.""".stripMargin
       )
 
   def run[A](f: Program[A]): A = {
