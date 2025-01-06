@@ -17,11 +17,11 @@
 package terminus
 
 import org.scalajs.dom
+import org.scalajs.dom.KeyboardEvent
 
 import scala.annotation.unused
 import scala.scalajs.js
 import scala.scalajs.js.annotation.JSGlobal
-import org.scalajs.dom.KeyboardEvent
 
 @js.native
 trait XtermKeyEvent extends js.Object {

@@ -205,6 +205,16 @@ object AnsiCodes {
       val on: String = csi("?1h")
       val off: String = csi("?1l")
     }
+
+    /** Alternate screen mode, which means content will not be shown when the
+      * program exits and key presses will not be saved to the history buffer.
+      * See https://invisible-island.net/xterm/ctlseqs/ctlseqs.html and search
+      * for "alternate screen"
+      */
+    object alternateScreen {
+      val on: String = csi("?1049h")
+      val off: String = csi("?11049l")
+    }
   }
 
   object scroll {
