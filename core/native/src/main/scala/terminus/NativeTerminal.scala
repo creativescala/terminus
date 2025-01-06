@@ -21,16 +21,25 @@ import terminus.effect.Eof
 import terminus.effect.WithEffect
 
 import scala.scalanative.libc
-import scala.scalanative.posix.termios
+import scala.scalanative.meta.LinktimeInfo
 
 import scalanative.unsafe.*
 
 /** A Terminal implementation for Scala Native. */
 object NativeTerminal extends Terminal, WithEffect[Terminal] {
-  // https://viewsourcecode.org/snaptoken/kilo/index.html is a good introduction
-  // to using the C API to control the terminal.
-
-  private val STDIN = scala.scalanative.posix.unistd.STDIN_FILENO
+  val termios =
+    if LinktimeInfo.isMac then MacOsTermios
+    else if LinktimeInfo.isLinux then LinuxTermios
+    else
+      sys.error(
+        s"""Your platform, {LinktimeInfo.target.os}, is not currently supported by Terminus on Scala Native.
+           |
+           |You have two options:
+           |
+           |1. You can use a different backend, such as the JVM, which is likely to support your platform.
+           |
+           |2. You can open an issue at https://github.com/creativescala/terminus/issues to get support added for your platform.""".stripMargin
+      )
 
   def run[A](f: Program[A]): A = {
     val result = f(using this)
@@ -74,21 +83,14 @@ object NativeTerminal extends Terminal, WithEffect[Terminal] {
   }
 
   def raw[A](f: Terminal ?=> A): A = {
-    val origAttrs: Ptr[termios.termios] = stackalloc[termios.termios]()
-    val flags = termios.TCSAFLUSH
-
-    termios.tcgetattr(STDIN, origAttrs)
-
-    try {
-      val rawAttrs = stackalloc[termios.termios]()
-      termios.tcgetattr(STDIN, rawAttrs)
-      // _4 is c_lflag
-      rawAttrs._4 = rawAttrs._4 & ~(termios.ECHO | termios.ICANON)
-      termios.tcsetattr(STDIN, flags, rawAttrs)
-
-      f(using this)
-    } finally {
-      val _ = termios.tcsetattr(STDIN, flags, origAttrs)
+    Zone {
+      val origAttrs = termios.getAttributes()
+      try {
+        termios.setRawMode()
+        f(using this)
+      } finally {
+        termios.setAttributes(origAttrs)
+      }
     }
   }
 }

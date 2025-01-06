@@ -23,6 +23,8 @@ import scalanative.posix
   * implementation
   */
 object MacOsTermios extends Termios {
+  // https://viewsourcecode.org/snaptoken/kilo/index.html is a good introduction
+  // to using the C API to control the terminal.
   type Attributes = Ptr[posix.termios.termios]
 
   private val STDIN = scala.scalanative.posix.unistd.STDIN_FILENO
