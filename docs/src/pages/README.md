@@ -1,8 +1,7 @@
 # Terminus
 
 Terminus is a Scala 3 library for working with the terminal.
-It currently supports JVM and Javascript backends.
-We intend to add [Scala Native][scala-native] support .
+It currently supports JVM, Scala Native, and Javascript backends.
 
 
 ## Setup
