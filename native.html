@@ -6,7 +6,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="generator" content="Laika 1.0.0" />
-    <title>JVM Backend</title>
+    <title>Native Backend</title>
     
     
     <meta name="description" content="docs" />
@@ -27,9 +27,9 @@
         <summary>Terminus</summary>
         <ul class="nav-list">
           <li class="level1 nav-leaf"><a href="examples.html">Examples</a></li>
-          <li class="level1 active nav-leaf"><a href="#">JVM Backend</a></li>
+          <li class="level1 nav-leaf"><a href="jvm.html">JVM Backend</a></li>
           <li class="level1 nav-leaf"><a href="js.html">Javascript Backend</a></li>
-          <li class="level1 nav-leaf"><a href="native.html">Native Backend</a></li>
+          <li class="level1 active nav-leaf"><a href="#">Native Backend</a></li>
         </ul>
       </details>
     </nav>
@@ -37,19 +37,19 @@
         <ul class="nav-list">
           <li class="level1 nav-leaf"><a href="index.html">Terminus</a></li>
           <li class="level1 nav-leaf"><a href="examples.html">Examples</a></li>
-          <li class="level1 active nav-leaf"><a href="#">JVM Backend</a></li>
+          <li class="level1 nav-leaf"><a href="jvm.html">JVM Backend</a></li>
           <li class="level1 nav-leaf"><a href="js.html">Javascript Backend</a></li>
-          <li class="level1 nav-leaf"><a href="native.html">Native Backend</a></li>
+          <li class="level1 active nav-leaf"><a href="#">Native Backend</a></li>
         </ul>
     </nav>
 
     <div id="content">
         <main class="content">
-            <h1 id="jvm-backend" class="title">JVM Backend</h1>
-            <p>The JVM backend uses <a href="https://jline.org/">JLine</a> for terminal access. It works on every platform that JLine supports, which includes Linux, macOS, and Windows.</p>
-            <p>To use this implementation just import <code>terminus.Terminal</code> and call methods as normal.</p>
+            <h1 id="native-backend" class="title">Native Backend</h1>
+            <p>The <a href="https://scala-native.org/">Scala Native</a> backend is built against Scala Native <em>0.5.6</em>. It currently supports macOS and Linux.</p>
+            <p>With the native backend you can produce executable that are very small (typically a few megabytes) and start in milliseconds.</p>
             <div class="flex flex-row justify-between">
-                <a class="pageNavigation" href="examples.html">←Examples</a> <a class="pageNavigation" href="js.html">Javascript Backend→</a>
+                <a class="pageNavigation" href="js.html">←Javascript Backend</a> 
             </div>
         </main>
         <footer>Creative Scala is copyright Noel Welsh</footer>
