@@ -8,15 +8,15 @@ class ColorSuite extends FunSuite {
     val result =
       StringBuilderTerminal.run { t ?=>
         t.foreground.blue{
-          t.write("Blue 1")
-          t.foreground.red{ t.write("Red") }
-          t.write("Blue 2")
+          t.write("Blue ")
+          t.foreground.red{ t.write("Red ") }
+          t.write("Blue ")
         }
       }
 
     assertEquals(
       result,
-      s"${AnsiCodes.foreground.blue}Blue 1${AnsiCodes.foreground.red}Red${AnsiCodes.foreground.blue}Blue 2${AnsiCodes.foreground.default}"
+      s"${AnsiCodes.foreground.blue}Blue ${AnsiCodes.foreground.red}Red ${AnsiCodes.foreground.blue}Blue ${AnsiCodes.foreground.default}"
     )
   }
 }
