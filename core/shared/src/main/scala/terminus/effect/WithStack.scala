@@ -16,25 +16,18 @@
 
 package terminus.effect
 
-import munit.FunSuite
-import terminus.StringBuilderTerminal
+/** Utility trait for working with stacks. */
+trait WithStack[+F <: Writer] { self: F =>
 
-class ColorSuite extends FunSuite {
-  test(
-    "Foreground color code reverts to enclosing color after leaving inner colored block"
-  ) {
-    val result =
-      StringBuilderTerminal.run { t ?=>
-        t.foreground.blue {
-          t.write("Blue ")
-          t.foreground.red { t.write("Red ") }
-          t.write("Blue ")
-        }
-      }
-
-    assertEquals(
-      result,
-      s"${AnsiCodes.foreground.blue}Blue ${AnsiCodes.foreground.red}Red ${AnsiCodes.foreground.blue}Blue ${AnsiCodes.foreground.default}"
-    )
+  /** Use `withStack` to ensure a stack is pushed on before `f` is evaluated,
+    * and popped when `f` finishes.
+    */
+  protected def withStack[A](stack: Stack, code: String)(f: F ?=> A): A = {
+    stack.push(code, self)
+    try {
+      f(using this)
+    } finally {
+      stack.pop(self)
+    }
   }
 }

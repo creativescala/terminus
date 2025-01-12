@@ -16,25 +16,32 @@
 
 package terminus.effect
 
-import munit.FunSuite
-import terminus.StringBuilderTerminal
+import scala.collection.mutable
 
-class ColorSuite extends FunSuite {
-  test(
-    "Foreground color code reverts to enclosing color after leaving inner colored block"
-  ) {
-    val result =
-      StringBuilderTerminal.run { t ?=>
-        t.foreground.blue {
-          t.write("Blue ")
-          t.foreground.red { t.write("Red ") }
-          t.write("Blue ")
+final case class Stack(reset: String) {
+  private val stack: mutable.Stack[String] = mutable.Stack()
+
+  def push(code: String, writer: Writer): Unit =
+    stack.headOption match {
+      case None =>
+        stack.push(code)
+        writer.write(code)
+
+      case Some(value) =>
+        if value == code then {
+          stack.push(code)
+        } else {
+          stack.push(code)
+          writer.write(code)
         }
-      }
+    }
 
-    assertEquals(
-      result,
-      s"${AnsiCodes.foreground.blue}Blue ${AnsiCodes.foreground.red}Red ${AnsiCodes.foreground.blue}Blue ${AnsiCodes.foreground.default}"
-    )
+  def pop(writer: Writer): Unit = {
+    stack.pop()
+    stack.headOption match {
+      case None        => writer.write(reset)
+      case Some(value) => writer.write(value)
+    }
   }
+
 }

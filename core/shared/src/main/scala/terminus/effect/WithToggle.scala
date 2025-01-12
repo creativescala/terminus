@@ -16,25 +16,18 @@
 
 package terminus.effect
 
-import munit.FunSuite
-import terminus.StringBuilderTerminal
+/** Utility trait for working with toggles. */
+trait WithToggle[+F <: Writer] { self: F =>
 
-class ColorSuite extends FunSuite {
-  test(
-    "Foreground color code reverts to enclosing color after leaving inner colored block"
-  ) {
-    val result =
-      StringBuilderTerminal.run { t ?=>
-        t.foreground.blue {
-          t.write("Blue ")
-          t.foreground.red { t.write("Red ") }
-          t.write("Blue ")
-        }
-      }
-
-    assertEquals(
-      result,
-      s"${AnsiCodes.foreground.blue}Blue ${AnsiCodes.foreground.red}Red ${AnsiCodes.foreground.blue}Blue ${AnsiCodes.foreground.default}"
-    )
+  /** Use `withToggle` to ensure a toggle iis turned on before `f` is evaluated,
+    * and turned off when `f` finishes.
+    */
+  protected def withToggle[A](toggle: Toggle)(f: F ?=> A): A = {
+    toggle.on(self)
+    try {
+      f(using this)
+    } finally {
+      toggle.off(self)
+    }
   }
 }

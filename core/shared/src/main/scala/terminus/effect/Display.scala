@@ -17,15 +17,44 @@
 package terminus.effect
 
 /** Terminal effects that can change display properties. */
-trait Display[+F <: Writer] extends WithEffect[F] { self: F =>
+trait Display[+F <: Writer] extends WithToggle[F] { self: F =>
   object display {
+    private val boldToggle =
+      Toggle(AnsiCodes.display.bold.on, AnsiCodes.display.bold.off)
+
     def bold[A](f: F ?=> A): A =
-      withEffect(AnsiCodes.display.bold.on, AnsiCodes.display.bold.off)(f)
+      withToggle(boldToggle)(f)
+
+    private val lightToggle =
+      Toggle(AnsiCodes.display.light.on, AnsiCodes.display.light.off)
 
     def light[A](f: F ?=> A): A =
-      withEffect(AnsiCodes.display.light.on, AnsiCodes.display.light.off)(f)
+      withToggle(lightToggle)(f)
+
+    private val blinkToggle =
+      Toggle(AnsiCodes.display.blink.on, AnsiCodes.display.blink.off)
+
+    def blink[A](f: F ?=> A): A =
+      withToggle(blinkToggle)(f)
+
+    private val invertToggle =
+      Toggle(AnsiCodes.display.invert.on, AnsiCodes.display.invert.off)
 
     def invert[A](f: F ?=> A): A =
-      withEffect(AnsiCodes.display.invert.on, AnsiCodes.display.invert.off)(f)
+      withToggle(invertToggle)(f)
+
+    private val invisibleToggle =
+      Toggle(AnsiCodes.display.invisible.on, AnsiCodes.display.invisible.off)
+
+    def invisible[A](f: F ?=> A): A =
+      withToggle(invisibleToggle)(f)
+
+    private val strikethroughToggle = Toggle(
+      AnsiCodes.display.strikethrough.on,
+      AnsiCodes.display.strikethrough.off
+    )
+
+    def strikethrough[A](f: F ?=> A): A =
+      withToggle(strikethroughToggle)(f)
   }
 }
