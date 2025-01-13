@@ -23,14 +23,9 @@ final class StringBuilderTerminal()
       effect.Cursor,
       effect.Display[StringBuilderTerminal],
       effect.Erase,
-      effect.Mode[StringBuilderTerminal],
       effect.Writer {
 
   private val builder = mutable.StringBuilder()
-
-  def alternateScreen[A](f: (terminus.StringBuilderTerminal) ?=> A): A = ???
-  def application[A](f: (terminus.StringBuilderTerminal) ?=> A): A = ???
-  def raw[A](f: (terminus.StringBuilderTerminal) ?=> A): A = ???
 
   /** Flush is a no-op */
   def flush(): Unit = ()
