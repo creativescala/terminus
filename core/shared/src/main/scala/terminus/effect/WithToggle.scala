@@ -14,29 +14,20 @@
  * limitations under the License.
  */
 
-package terminus
+package terminus.effect
 
-trait Terminal
-    extends effect.Color[Terminal],
-      effect.Cursor,
-      effect.Display[Terminal],
-      effect.Erase,
-      effect.AlternateScreenMode[Terminal],
-      effect.ApplicationMode[Terminal],
-      effect.RawMode[Terminal],
-      effect.Reader,
-      effect.Writer
-type Program[A] = Terminal ?=> A
+/** Utility trait for working with `Toggle`. */
+trait WithToggle[+F <: Writer] { self: F =>
 
-object Terminal
-    extends Color,
-      Cursor,
-      Display,
-      Erase,
-      AlternateScreenMode,
-      ApplicationMode,
-      RawMode,
-      Reader,
-      Writer {
-  export JLineTerminal.*
+  /** Use `withToggle` to ensure a toggle is turned on before `f` is evaluated,
+    * and turned off when `f` finishes.
+    */
+  protected def withToggle[A](toggle: Toggle)(f: F ?=> A): A = {
+    toggle.on(self)
+    try {
+      f(using this)
+    } finally {
+      toggle.off(self)
+    }
+  }
 }

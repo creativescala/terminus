@@ -14,29 +14,14 @@
  * limitations under the License.
  */
 
-package terminus
+package terminus.effect
 
-trait Terminal
-    extends effect.Color[Terminal],
-      effect.Cursor,
-      effect.Display[Terminal],
-      effect.Erase,
-      effect.AlternateScreenMode[Terminal],
-      effect.ApplicationMode[Terminal],
-      effect.RawMode[Terminal],
-      effect.Reader,
-      effect.Writer
-type Program[A] = Terminal ?=> A
+trait ApplicationMode[+F <: Effect] { self: F =>
 
-object Terminal
-    extends Color,
-      Cursor,
-      Display,
-      Erase,
-      AlternateScreenMode,
-      ApplicationMode,
-      RawMode,
-      Reader,
-      Writer {
-  export JLineTerminal.*
+  /** Run the given terminal program `f` in application mode, which changes the
+    * input sent to the program when arrow keys are pressed. See
+    * https://invisible-island.net/xterm/xterm.faq.html#xterm_arrows
+    */
+  def application[A](f: F ?=> A): A
+
 }

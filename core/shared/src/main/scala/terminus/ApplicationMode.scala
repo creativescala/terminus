@@ -14,26 +14,16 @@
  * limitations under the License.
  */
 
-package terminus.effect
+package terminus
 
-/** Changes various modes that the terminal can be in. */
-trait Mode[+F <: Effect] { self: F =>
-
-  /** Run the given terminal program `f` in raw mode, which means that the
-    * program can read user input a character at a time. In canonical mode,
-    * which is the default, user input is only available a line at a time.
-    */
-  def raw[A](f: F ?=> A): A
+trait ApplicationMode {
 
   /** Run the given terminal program `f` in application mode, which changes the
     * input sent to the program when arrow keys are pressed. See
     * https://invisible-island.net/xterm/xterm.faq.html#xterm_arrows
     */
-  def application[A](f: F ?=> A): A
-
-  /** Run the given terminal program `f` in alternate screen mode, which means
-    * that whatever is displayed by `f` will not been shown when the program
-    * exits, and similarly key presses will not be saved in the history buffer.
-    */
-  def alternateScreen[A](f: F ?=> A): A
+  def application[F <: effect.Effect, A](
+      f: F ?=> A
+  ): (F & effect.ApplicationMode[F]) ?=> A =
+    effect ?=> effect.application(f)
 }

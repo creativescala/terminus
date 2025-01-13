@@ -21,7 +21,9 @@ trait Terminal
       effect.Cursor,
       effect.Display[Terminal],
       effect.Erase,
-      effect.Mode[Terminal],
+      effect.AlternateScreenMode[Terminal],
+      effect.ApplicationMode[Terminal],
+      effect.RawMode[Terminal],
       effect.Reader,
       effect.Writer
 type Program[A] = Terminal ?=> A

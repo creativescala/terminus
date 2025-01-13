@@ -26,9 +26,106 @@ trait Display {
     ): (F & effect.Display[F]) ?=> A =
       effect ?=> effect.display.light(f)
 
+    def normal[F <: effect.Writer, A](
+        f: F ?=> A
+    ): (F & effect.Display[F]) ?=> A =
+      effect ?=> effect.display.normal(f)
+
+    object underline {
+      def none[F <: effect.Writer, A](
+          f: F ?=> A
+      ): (F & effect.Display[F]) ?=> A =
+        effect ?=> effect.display.underline.none(f)
+
+      def straight[F <: effect.Writer, A](
+          f: F ?=> A
+      ): (F & effect.Display[F]) ?=> A =
+        effect ?=> effect.display.underline.straight(f)
+
+      def double[F <: effect.Writer, A](
+          f: F ?=> A
+      ): (F & effect.Display[F]) ?=> A =
+        effect ?=> effect.display.underline.double(f)
+
+      def curly[F <: effect.Writer, A](
+          f: F ?=> A
+      ): (F & effect.Display[F]) ?=> A =
+        effect ?=> effect.display.underline.curly(f)
+
+      def dotted[F <: effect.Writer, A](
+          f: F ?=> A
+      ): (F & effect.Display[F]) ?=> A =
+        effect ?=> effect.display.underline.dotted(f)
+
+      def dashed[F <: effect.Writer, A](
+          f: F ?=> A
+      ): (F & effect.Display[F]) ?=> A =
+        effect ?=> effect.display.underline.dashed(f)
+
+      def default[F <: effect.Writer, A](
+          f: F ?=> A
+      ): (F & effect.Display[F]) ?=> A =
+        effect ?=> effect.display.underline.default(f)
+
+      def black[F <: effect.Writer, A](
+          f: F ?=> A
+      ): (F & effect.Display[F]) ?=> A =
+        effect ?=> effect.display.underline.black(f)
+
+      def red[F <: effect.Writer, A](
+          f: F ?=> A
+      ): (F & effect.Display[F]) ?=> A =
+        effect ?=> effect.display.underline.red(f)
+
+      def green[F <: effect.Writer, A](
+          f: F ?=> A
+      ): (F & effect.Display[F]) ?=> A =
+        effect ?=> effect.display.underline.green(f)
+
+      def yellow[F <: effect.Writer, A](
+          f: F ?=> A
+      ): (F & effect.Display[F]) ?=> A =
+        effect ?=> effect.display.underline.yellow(f)
+
+      def blue[F <: effect.Writer, A](
+          f: F ?=> A
+      ): (F & effect.Display[F]) ?=> A =
+        effect ?=> effect.display.underline.blue(f)
+
+      def magenta[F <: effect.Writer, A](
+          f: F ?=> A
+      ): (F & effect.Display[F]) ?=> A =
+        effect ?=> effect.display.underline.magenta(f)
+
+      def cyan[F <: effect.Writer, A](
+          f: F ?=> A
+      ): (F & effect.Display[F]) ?=> A =
+        effect ?=> effect.display.underline.cyan(f)
+
+      def white[F <: effect.Writer, A](
+          f: F ?=> A
+      ): (F & effect.Display[F]) ?=> A =
+        effect ?=> effect.display.underline.white(f)
+    }
+
+    def blink[F <: effect.Writer, A](
+        f: F ?=> A
+    ): (F & effect.Display[F]) ?=> A =
+      effect ?=> effect.display.blink(f)
+
     def invert[F <: effect.Writer, A](
         f: F ?=> A
     ): (F & effect.Display[F]) ?=> A =
       effect ?=> effect.display.invert(f)
+
+    def invisible[F <: effect.Writer, A](
+        f: F ?=> A
+    ): (F & effect.Display[F]) ?=> A =
+      effect ?=> effect.display.invisible(f)
+
+    def strikethrough[F <: effect.Writer, A](
+        f: F ?=> A
+    ): (F & effect.Display[F]) ?=> A =
+      effect ?=> effect.display.strikethrough(f)
   }
 }

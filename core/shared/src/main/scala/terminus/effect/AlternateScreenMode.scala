@@ -14,29 +14,13 @@
  * limitations under the License.
  */
 
-package terminus
+package terminus.effect
 
-trait Terminal
-    extends effect.Color[Terminal],
-      effect.Cursor,
-      effect.Display[Terminal],
-      effect.Erase,
-      effect.AlternateScreenMode[Terminal],
-      effect.ApplicationMode[Terminal],
-      effect.RawMode[Terminal],
-      effect.Reader,
-      effect.Writer
-type Program[A] = Terminal ?=> A
+trait AlternateScreenMode[+F <: Effect] { self: F =>
 
-object Terminal
-    extends Color,
-      Cursor,
-      Display,
-      Erase,
-      AlternateScreenMode,
-      ApplicationMode,
-      RawMode,
-      Reader,
-      Writer {
-  export JLineTerminal.*
+  /** Run the given terminal program `f` in alternate screen mode, which means
+    * that whatever is displayed by `f` will not been shown when the program
+    * exits, and similarly key presses will not be saved in the history buffer.
+    */
+  def alternateScreen[A](f: F ?=> A): A
 }

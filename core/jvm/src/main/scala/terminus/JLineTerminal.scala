@@ -74,7 +74,9 @@ object JLineTerminal
       Cursor,
       Display,
       Erase,
-      Mode,
+      AlternateScreenMode,
+      ApplicationMode,
+      RawMode,
       Reader,
       Writer {
   def apply: JLineTerminal = new JLineTerminal(

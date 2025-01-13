@@ -16,27 +16,12 @@
 
 package terminus
 
-trait Terminal
-    extends effect.Color[Terminal],
-      effect.Cursor,
-      effect.Display[Terminal],
-      effect.Erase,
-      effect.AlternateScreenMode[Terminal],
-      effect.ApplicationMode[Terminal],
-      effect.RawMode[Terminal],
-      effect.Reader,
-      effect.Writer
-type Program[A] = Terminal ?=> A
+trait RawMode {
 
-object Terminal
-    extends Color,
-      Cursor,
-      Display,
-      Erase,
-      AlternateScreenMode,
-      ApplicationMode,
-      RawMode,
-      Reader,
-      Writer {
-  export JLineTerminal.*
+  /** Run the given terminal program `f` in raw mode, which means that the
+    * program can read user input a character at a time. In canonical mode,
+    * which is the default, user input is only available a line at a time.
+    */
+  def raw[F <: effect.Effect, A](f: F ?=> A): (F & effect.RawMode[F]) ?=> A =
+    effect ?=> effect.raw(f)
 }

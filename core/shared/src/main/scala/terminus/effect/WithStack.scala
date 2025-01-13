@@ -14,29 +14,20 @@
  * limitations under the License.
  */
 
-package terminus
+package terminus.effect
 
-trait Terminal
-    extends effect.Color[Terminal],
-      effect.Cursor,
-      effect.Display[Terminal],
-      effect.Erase,
-      effect.AlternateScreenMode[Terminal],
-      effect.ApplicationMode[Terminal],
-      effect.RawMode[Terminal],
-      effect.Reader,
-      effect.Writer
-type Program[A] = Terminal ?=> A
+/** Utility trait for working with `Stack`. */
+trait WithStack[+F <: Writer] { self: F =>
 
-object Terminal
-    extends Color,
-      Cursor,
-      Display,
-      Erase,
-      AlternateScreenMode,
-      ApplicationMode,
-      RawMode,
-      Reader,
-      Writer {
-  export JLineTerminal.*
+  /** Use `withStack` to ensure a stack is pushed on before `f` is evaluated,
+    * and popped when `f` finishes.
+    */
+  protected def withStack[A](stack: Stack, code: String)(f: F ?=> A): A = {
+    stack.push(code, self)
+    try {
+      f(using this)
+    } finally {
+      stack.pop(self)
+    }
+  }
 }
