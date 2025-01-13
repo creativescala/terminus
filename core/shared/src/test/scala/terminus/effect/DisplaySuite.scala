@@ -20,6 +20,22 @@ import munit.FunSuite
 import terminus.StringBuilderTerminal
 
 class DisplaySuite extends FunSuite {
+  test("Bold and light stack in nested scopes") {
+    val result =
+      StringBuilderTerminal.run { t ?=>
+        t.display.bold {
+          t.write("Bold ")
+          t.display.light { t.write("Light ") }
+          t.write("Bold ")
+        }
+      }
+
+    assertEquals(
+      result,
+      s"${AnsiCodes.display.bold.on}Bold ${AnsiCodes.display.light.on}Light ${AnsiCodes.display.bold.on}Bold ${AnsiCodes.display.bold.off}"
+    )
+  }
+
   test("Blink toggles off only when exiting outermost block") {
     val result =
       StringBuilderTerminal.run { t ?=>
