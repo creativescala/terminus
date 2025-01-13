@@ -32,4 +32,5 @@ Terminal.run("id", rows = 24, cols = 80){
 
 User input is asynchronous in the web browser, so the normal @:api(terminus.Reader) interface doesn't work. Instead, Terminus provides a `readKey` method, which returns a `Future[String]`, where the `String` is the [key from a DOM `KeyboardEvent`](https://developer.mozilla.org/en-US/docs/Web/API/KeyboardEvent/key).
 
+
 [xterm.js]: https://xtermjs.org

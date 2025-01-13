@@ -1,15 +1,19 @@
 # Terminus
 
 Terminus is a Scala 3 library for working with the terminal.
-It currently supports JVM, Scala Native, and Javascript backends.
+Using Terminus you can build:
+
+- terminal applications that use the full ecosystem of the JVM;
+- small and fast binaries using Scala Native; and
+- terminal application that run in the browser using Scala.js.
 
 
-## Setup
+## Installation
 
 To use Terminus, add the following to your `build.sbt`
 
 ```scala
-libraryDependencies += "org.creativescala" %% "terminus-core" % "@VERSION@"
+libraryDependencies += "org.creativescala" %%% "terminus-core" % "@VERSION@"
 ```
 
 
@@ -21,7 +25,7 @@ Import Terminus
 import terminus.*
 ```
 
-Now you can call methods on the `Terminal` object. The core methods are `read` and `write`, but there are also methods to change color, move the cursor, erase content, and so on. On most terminals you will need to call `flush` or your output won't appear. Wrap a call to `run` around your entire program. Here's a small example that prints green text.
+Now call methods on the `Terminal` object. The core methods are `read` and `write`, but there are also methods to change color, move the cursor, erase content, and so on. On most terminals you will need to call `flush` or your output won't appear. Wrap a call to `run` around your entire program. Here's a small example that prints green text.
 
 
 ```scala mdoc:compile-only
@@ -40,75 +44,6 @@ This produces the following output.
 @:doodle("color-foreground-green", "ColorForegroundGreen.go")
 
 See the [Examples](examples.md) for more involved use cases.
-
-
-## Design
-
-The API in the `terminus` package provides a functional API for working with the terminal.
-Methods consume and return context functions with type
-
-```scala
-type Program[A] = Terminal ?=> A
-```
-
-where `Terminal` is a backend specific implementation that handles interfacing with the terminal. A `Program` represents a function that, when run, will do something with the terminal.
-
-Context functions are new to Scala 3, so many developers may not be familiar with how they work. There are three rules for working with them, described below.
-
-The first rule is that if the compiler can tell that a context function is expected it will automatically create one. We can do this with a `Program` type annotation. Here are some examples
-
-```scala mdoc:compile-only
-// Most of the methods on Terminal return programs
-val aTerminalOperation: Program[Unit] = Terminal.write("Some text")
-
-// Any expression can be a Program with a type annotation
-val aProgram: Program[Int] = 1 + 1
-```
-
-The second rule is that context functions will be automatically applied if there is a `given` value of the appropriate type in scope. This is what allows us to write effectful code in so-called *direct-style*, which just means writing normal code without monads or other complications. Here's an example that mixes effectful code, using the terminal, with some normal code. Notice that the entire result is a `Program`. This type annotation means the compiler constructs a context function around the entire block.
-
-```scala mdoc:compile-only
-val writeSomeStuff: Program[Int] = {
-  Terminal.write("Some output")
-  // We can mix normal code in
-  val result = 1 + 1
-  Terminal.write("More output")
-  Terminal.flush()
-  result
-}
-```
-  
-We can do the same thing with a method, by specifying the return type is a `Program`. Here's an example.
-  
-```scala mdoc:silent
-def doSomeStuff(): Program[Int] = {
-  Terminal.write("Some output")
-  val result = 1 + 1
-  Terminal.write("More output")
-  Terminal.flush()
-  result
-}
-```
-
-The final rule is if we don't tell the compiler we're expecting a context function, we may get an error when the compiler attempts to apply a context function to a given value that does not exist.
-
-```scala mdoc:fail
-Terminal.write("Some output")
-```
-
-We can solve this by either adding a context function type annotation
-
-```scala mdoc:compile-only
-val ok: Program[Unit] = Terminal.write("Some output")
-```
-
-or by providing a `given` value of the required type, which is what `Terminal.run` does.
-
-```scala mdoc:compile-only
-Terminal.run(Terminal.write("Some output"))
-```
-
-If you want to work directly with the terminal, without working with context functions, you can work with the types in `terminus.effect`.
 
 
 ## Low-level Code

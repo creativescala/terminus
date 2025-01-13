@@ -69,7 +69,7 @@ lazy val commonSettings = Seq(
   )
 )
 
-lazy val root = tlCrossRootProject.aggregate(core)
+lazy val root = tlCrossRootProject.aggregate(core, unidocs)
 
 lazy val core = crossProject(JSPlatform, JVMPlatform, NativePlatform)
   .in(file("core"))
