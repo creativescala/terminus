@@ -139,14 +139,17 @@ object AnsiCodes {
 
     /** The support for underlines follows the Kitty extension defined at
       * https://sw.kovidgoyal.net/kitty/underlines/
+      *
+      * Off and straight are backwards compatible, but older terminals might not
+      * support the others.
       */
     object underline {
-      val off: String = csi("m", "4", "0")
-      val straight: String = csi("m", "4", "1")
-      val double: String = csi("m", "4", "2")
-      val curly: String = csi("m", "4", "3")
-      val dotted: String = csi("m", "4", "4")
-      val dashed: String = csi("m", "4", "5")
+      val off: String = sgr("24") // Backwards compatible variant
+      val straight: String = sgr("4") // Backwards compatible variant
+      val double: String = sgr("4:2")
+      val curly: String = sgr("4:3")
+      val dotted: String = sgr("4:4")
+      val dashed: String = sgr("4:5")
 
       // Not sure this will work.
       val default: String = sgr("59")
