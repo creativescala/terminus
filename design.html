@@ -6,7 +6,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="generator" content="Laika 1.0.0" />
-    <title>Native Backend</title>
+    <title>Design</title>
     
     
     <meta name="description" content="docs" />
@@ -29,10 +29,10 @@
           <li class="level1 nav-leaf"><a href="quick-start.html">Quick Start</a></li>
           <li class="level1 nav-leaf"><a href="guide.html">Guide</a></li>
           <li class="level1 nav-leaf"><a href="examples.html">Examples</a></li>
-          <li class="level1 nav-leaf"><a href="design.html">Design</a></li>
+          <li class="level1 active nav-leaf"><a href="#">Design</a></li>
           <li class="level1 nav-leaf"><a href="jvm.html">JVM Backend</a></li>
           <li class="level1 nav-leaf"><a href="js.html">Javascript Backend</a></li>
-          <li class="level1 active nav-leaf"><a href="#">Native Backend</a></li>
+          <li class="level1 nav-leaf"><a href="native.html">Native Backend</a></li>
         </ul>
       </details>
     </nav>
@@ -42,20 +42,30 @@
           <li class="level1 nav-leaf"><a href="quick-start.html">Quick Start</a></li>
           <li class="level1 nav-leaf"><a href="guide.html">Guide</a></li>
           <li class="level1 nav-leaf"><a href="examples.html">Examples</a></li>
-          <li class="level1 nav-leaf"><a href="design.html">Design</a></li>
+          <li class="level1 active nav-leaf"><a href="#">Design</a></li>
           <li class="level1 nav-leaf"><a href="jvm.html">JVM Backend</a></li>
           <li class="level1 nav-leaf"><a href="js.html">Javascript Backend</a></li>
-          <li class="level1 active nav-leaf"><a href="#">Native Backend</a></li>
+          <li class="level1 nav-leaf"><a href="native.html">Native Backend</a></li>
         </ul>
     </nav>
 
     <div id="content">
         <main class="content">
-            <h1 id="native-backend" class="title">Native Backend</h1>
-            <p>The <a href="https://scala-native.org/">Scala Native</a> backend is built against Scala Native <em>0.5.6</em>. It currently supports macOS and Linux.</p>
-            <p>With the native backend you can produce executables that are very small (typically a few megabytes) and start in milliseconds.</p>
+            <h1 id="design" class="title">Design</h1>
+            <p>Terminus is split into two parts: <code>terminus.effect</code> which defines all the effects that can be used in terminal, and <code>terminus</code>, which defines the user-facing functions for interacting with effects.</p>
+            
+            <h2 id="low-level-code" class="section">Low-level Code</h2>
+            <p>All the ANSI escape codes used by Terminus are defined in <code>terminus.effect.AnsiCodes</code>.
+            This can be useful if you want to write <a href="https://en.wikipedia.org/wiki/ANSI_escape_code">escape codes</a> directly to the terminal without the abstractions provided by the Terminus DSL.
+            Here&#39;s a simple example.</p>
+            <pre><code class="nohighlight"><span class="keyword">import</span><span> </span><span class="identifier">terminus</span><span>.</span><span class="identifier">effect</span><span>.</span><span class="type-name">AnsiCodes</span><span>
+
+</span><span class="type-name">AnsiCodes</span><span>.</span><span class="identifier">foreground</span><span>.</span><span class="identifier">red</span><span>
+</span><span class="comment">// res0: String = &quot;\u001b[31m&quot;
+</span><span class="type-name">AnsiCodes</span><span>.</span><span class="identifier">erase</span><span>.</span><span class="identifier">line</span><span>
+</span><span class="comment">// res1: String = &quot;\u001b[2K&quot;</span></code></pre>
             <div class="flex flex-row justify-between">
-                <a class="pageNavigation" href="js.html">←Javascript Backend</a> 
+                <a class="pageNavigation" href="examples.html">←Examples</a> <a class="pageNavigation" href="jvm.html">JVM Backend→</a>
             </div>
         </main>
         <footer>Creative Scala is copyright Noel Welsh</footer>
