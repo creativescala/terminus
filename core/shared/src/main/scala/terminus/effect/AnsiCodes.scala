@@ -141,7 +141,7 @@ object AnsiCodes {
       * https://sw.kovidgoyal.net/kitty/underlines/
       */
     object underline {
-      val reset: String = csi("m", "4", "0")
+      val off: String = csi("m", "4", "0")
       val straight: String = csi("m", "4", "1")
       val double: String = csi("m", "4", "2")
       val curly: String = csi("m", "4", "3")
