@@ -1,3 +1,10 @@
+# v0.3 13-Jan-2025
+
+- Styles nest correctly
+- Expose all display styling in the algebras
+- Much more documentation
+
+
 # v0.2 6-Jan-2025
 
 - Support Linux and macOS on Scala Native
