@@ -16,10 +16,10 @@
 
 package terminus.effect
 
-/** Utility trait for working with toggles. */
+/** Utility trait for working with `Toggle`. */
 trait WithToggle[+F <: Writer] { self: F =>
 
-  /** Use `withToggle` to ensure a toggle iis turned on before `f` is evaluated,
+  /** Use `withToggle` to ensure a toggle is turned on before `f` is evaluated,
     * and turned off when `f` finishes.
     */
   protected def withToggle[A](toggle: Toggle)(f: F ?=> A): A = {

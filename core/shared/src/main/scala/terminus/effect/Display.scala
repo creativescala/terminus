@@ -17,19 +17,17 @@
 package terminus.effect
 
 /** Terminal effects that can change display properties. */
-trait Display[+F <: Writer] extends WithToggle[F] { self: F =>
+trait Display[+F <: Writer] extends WithStack[F], WithToggle[F] { self: F =>
   object display {
-    private val boldToggle =
-      Toggle(AnsiCodes.display.bold.on, AnsiCodes.display.bold.off)
+    // Bold and light share this stack
+    private val fontWeightStack =
+      Stack(AnsiCodes.display.bold.off)
 
     def bold[A](f: F ?=> A): A =
-      withToggle(boldToggle)(f)
-
-    private val lightToggle =
-      Toggle(AnsiCodes.display.light.on, AnsiCodes.display.light.off)
+      withStack(fontWeightStack, AnsiCodes.display.bold.on)(f)
 
     def light[A](f: F ?=> A): A =
-      withToggle(lightToggle)(f)
+      withStack(fontWeightStack, AnsiCodes.display.light.on)(f)
 
     private val blinkToggle =
       Toggle(AnsiCodes.display.blink.on, AnsiCodes.display.blink.off)

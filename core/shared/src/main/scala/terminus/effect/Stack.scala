@@ -18,6 +18,16 @@ package terminus.effect
 
 import scala.collection.mutable
 
+/** A `Stack` handles stack for Terminal effects that overwrite each other
+  * within nested blocks. The canoncial example is color. There can only be one
+  * foreground or background color in use at any one time, but the color revert
+  * to that of the surrounding block when a given block exits. This is handles
+  * by storing a stack of color codes, and doing the appropriate actions on
+  * entering a block (a `push`) and exiting a block (a `pop`).
+  *
+  * @param `reset`:
+  *   The escape code to emit when there are no elements left on the stack.
+  */
 final case class Stack(reset: String) {
   private val stack: mutable.Stack[String] = mutable.Stack()
 

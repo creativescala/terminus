@@ -16,7 +16,7 @@
 
 package terminus.effect
 
-/** Utility trait for working with stacks. */
+/** Utility trait for working with `Stack`. */
 trait WithStack[+F <: Writer] { self: F =>
 
   /** Use `withStack` to ensure a stack is pushed on before `f` is evaluated,

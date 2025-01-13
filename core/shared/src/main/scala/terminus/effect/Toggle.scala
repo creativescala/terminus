@@ -18,12 +18,12 @@ package terminus.effect
 
 /** A `Toggle` stores state for Terminal effects that involve turning on some
   * state within a block of code and turning it off when that block exits. A
-  * typical example is bold styling: we have a block where we want bold styling
-  * enabled, and when the block finishes we want bold styling turned out. A
-  * complication arises when we can nest blocks. A bold block might be nested
-  * inside another bold block. It's only when the outer block exits that the
-  * styling should be turned off. A `Toggle` handles this with a counter. Only
-  * when the counter hits zero do we emit the reset escape code.
+  * typical example is text styling: we have a block where we want invert
+  * styling enabled, and when the block finishes we want inverted styling turned
+  * off. A complication arises when we can nest blocks. An inverted block might
+  * be nested inside another inverted block. It's only when the outer block
+  * exits that the styling should be turned off. A `Toggle` handles this with a
+  * counter. Only when the counter hits zero do we emit the reset escape code.
   *
   * @param `set`:
   *   The escape code to emit when entering a block.
