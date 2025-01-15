@@ -554,6 +554,31 @@ video {
   --tw-contain-style:  ;
 }
 
+.fixed {
+  position: fixed;
+}
+
+.absolute {
+  position: absolute;
+}
+
+.relative {
+  position: relative;
+}
+
+.right-4 {
+  right: 1rem;
+}
+
+.top-4 {
+  top: 1rem;
+}
+
+.mx-auto {
+  margin-left: auto;
+  margin-right: auto;
+}
+
 .flex {
   display: flex;
 }
@@ -566,12 +591,73 @@ video {
   display: contents;
 }
 
+.h-screen {
+  height: 100vh;
+}
+
+.max-w-prose {
+  max-width: 65ch;
+}
+
+.transform {
+  transform: translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y));
+}
+
 .flex-row {
   flex-direction: row;
 }
 
 .justify-between {
   justify-content: space-between;
+}
+
+.overflow-y-auto {
+  overflow-y: auto;
+}
+
+.rounded-md {
+  border-radius: 0.375rem;
+}
+
+.border {
+  border-width: 1px;
+}
+
+.border-slate-900 {
+  --tw-border-opacity: 1;
+  border-color: rgb(15 23 42 / var(--tw-border-opacity));
+}
+
+.bg-white {
+  --tw-bg-opacity: 1;
+  background-color: rgb(255 255 255 / var(--tw-bg-opacity));
+}
+
+.p-4 {
+  padding: 1rem;
+}
+
+.font-sans {
+  font-family: ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+}
+
+.text-sm {
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+}
+
+.font-semibold {
+  font-weight: 600;
+}
+
+.text-pink-800 {
+  --tw-text-opacity: 1;
+  color: rgb(157 23 77 / var(--tw-text-opacity));
+}
+
+.text-slate-900 {
+  --tw-text-opacity: 1;
+  color: rgb(15 23 42 / var(--tw-text-opacity));
 }
 
 body {
@@ -584,342 +670,536 @@ body {
   color: rgb(15 23 42 / var(--tw-text-opacity));
 }
 
-@media (min-width: 1280px) {
-  body {
-    display: flex;
-  }
-}
+/** HEADER **/
 
-/* Topbar (mobile) navigation */
-
-nav#topbar {
-  display: flex;
+header {
+  position: sticky;
+  top: 0px;
+  z-index: 50;
   width: 100%;
-  align-content: center;
-  justify-content: flex-start;
+  border-bottom-width: 1px;
+  border-color: rgb(131 24 67 / 0.1);
   --tw-bg-opacity: 1;
-  background-color: rgb(30 41 59 / var(--tw-bg-opacity));
-  padding-left: 3rem;
-  padding-right: 3rem;
-  padding-top: 0.5rem;
-  padding-bottom: 0.5rem;
-  font-size: 1.25rem;
-  line-height: 1.75rem;
-  --tw-text-opacity: 1;
-  color: rgb(255 255 255 / var(--tw-text-opacity));
+  background-color: rgb(255 255 255 / var(--tw-bg-opacity));
+  padding: 1rem;
 }
 
-@media (min-width: 1280px) {
+header div#topbar {
+  margin-left: auto;
+  margin-right: auto;
+  display: flex;
+  max-width: 90rem;
+  justify-content: space-between;
+}
+
+header nav#home {
+  display: inline-block;
+}
+
+header nav#home a {
+  padding-top: 1rem;
+  padding-bottom: 1rem;
+  font-family: ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  font-weight: 600;
+  --tw-text-opacity: 1;
+  color: rgb(157 23 77 / var(--tw-text-opacity));
+  text-decoration-line: none;
+}
+
+header nav#home a:hover {
+  --tw-text-opacity: 1;
+  color: rgb(219 39 119 / var(--tw-text-opacity));
+}
+
+header nav#external {
+  display: inline-block;
+}
+
+header nav#external a {
+  padding: 1rem;
+  font-family: ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  font-weight: 600;
+  --tw-text-opacity: 1;
+  color: rgb(15 23 42 / var(--tw-text-opacity));
+  text-decoration-line: none;
+}
+
+header nav#external a:hover {
+  --tw-text-opacity: 1;
+  color: rgb(157 23 77 / var(--tw-text-opacity));
+}
+
+/** TOPBAR **/
+
+@media (min-width: 1024px) {
   nav#topbar {
     display: none;
   }
 }
 
-nav#topbar details summary {
+div#topbar-nav {
+  z-index: 50;
+  height: 100svh;
+  height: 100vh;
+  width: 100svw;
+  width: 100vw;
+  background-color: transparent;
+  --tw-backdrop-blur: blur(4px);
+  -webkit-backdrop-filter: var(--tw-backdrop-blur) var(--tw-backdrop-brightness) var(--tw-backdrop-contrast) var(--tw-backdrop-grayscale) var(--tw-backdrop-hue-rotate) var(--tw-backdrop-invert) var(--tw-backdrop-opacity) var(--tw-backdrop-saturate) var(--tw-backdrop-sepia);
+  backdrop-filter: var(--tw-backdrop-blur) var(--tw-backdrop-brightness) var(--tw-backdrop-contrast) var(--tw-backdrop-grayscale) var(--tw-backdrop-hue-rotate) var(--tw-backdrop-invert) var(--tw-backdrop-opacity) var(--tw-backdrop-saturate) var(--tw-backdrop-sepia);
+}
+
+div#topbar-nav-container {
+  display: flex;
+  height: 100vh;
+  align-items: center;
+  justify-content: center;
+  overflow-x: auto;
+  overflow-y: auto;
+}
+
+nav#topbar ul {
+  padding: 1rem;
+  font-family: ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+  font-size: 1.125rem;
+  line-height: 1.75rem;
+}
+
+nav#topbar ul li a {
+  display: block;
+  width: 100%;
+  border-radius: 0.375rem;
+  padding: 1rem;
+}
+
+nav#topbar ul li a:hover {
   --tw-text-opacity: 1;
-  color: rgb(249 168 212 / var(--tw-text-opacity));
+  color: rgb(157 23 77 / var(--tw-text-opacity));
+  --tw-ring-offset-shadow: var(--tw-ring-inset) 0 0 0 var(--tw-ring-offset-width) var(--tw-ring-offset-color);
+  --tw-ring-shadow: var(--tw-ring-inset) 0 0 0 calc(1px + var(--tw-ring-offset-width)) var(--tw-ring-color);
+  box-shadow: var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow, 0 0 #0000);
+  --tw-ring-opacity: 1;
+  --tw-ring-color: rgb(157 23 77 / var(--tw-ring-opacity));
 }
 
-nav#topbar p {
-  margin: 0px;
-  padding: 0px;
-}
-
-/* Sidebar (desktop) navigation */
-
-nav#sidebar {
-  display: none;
-  max-width: 24rem;
-  --tw-bg-opacity: 1;
-  background-color: rgb(30 41 59 / var(--tw-bg-opacity));
-  padding: 3rem;
-}
-
-@media (min-width: 1280px) {
-  nav#sidebar {
-    display: block;
-    flex: none;
-  }
-}
-
-nav#sidebar ul.nav-list > li:first-child {
-  text-transform: uppercase;
-}
-
-/* General navigation styling */
-
-.nav-list details summary {
+nav#topbar ul li a:focus {
   --tw-text-opacity: 1;
-  color: rgb(249 168 212 / var(--tw-text-opacity));
+  color: rgb(157 23 77 / var(--tw-text-opacity));
+  text-decoration-line: none;
+  --tw-ring-offset-shadow: var(--tw-ring-inset) 0 0 0 var(--tw-ring-offset-width) var(--tw-ring-offset-color);
+  --tw-ring-shadow: var(--tw-ring-inset) 0 0 0 calc(1px + var(--tw-ring-offset-width)) var(--tw-ring-color);
+  box-shadow: var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow, 0 0 #0000);
+  --tw-ring-opacity: 1;
+  --tw-ring-color: rgb(157 23 77 / var(--tw-ring-opacity));
 }
 
-ul.nav-list:first-child {
-  margin-top: 0px;
+nav#topbar ul li.level1 a {
+  font-weight: 600;
 }
 
-.level1 {
-  margin-top: 1rem;
-  list-style-type: none;
+nav#topbar ul li.level2 a {
+  margin-top: 0.25rem;
+  font-weight: 600;
 }
 
-.level1.nav-node h5, .level1.nav-header h5 {
-  margin-top: 0.5rem;
-  margin-bottom: 0.5rem;
-  --tw-text-opacity: 1;
-  color: rgb(249 168 212 / var(--tw-text-opacity));
+nav#topbar ul li.level3 a {
+  margin-top: 0.25rem;
+  padding-left: 2rem;
 }
 
-.level1.nav-leaf > h5 {
-  margin-top: 0.5rem;
-  margin-bottom: 0.5rem;
-  --tw-text-opacity: 1;
-  color: rgb(249 168 212 / var(--tw-text-opacity));
-}
-
-.level2.nav-leaf {
-  list-style-type: none;
-  padding-left: 1rem;
-  --tw-text-opacity: 1;
-  color: rgb(203 213 225 / var(--tw-text-opacity));
-}
-
-#content {
-  flex: 1 1 auto;
-  padding: 3rem;
-}
-
-main {
-  display: grid;
-  grid-template-columns: [main-start] minmax(20ch, 70ch) [main-end] minmax(0ch,20ch) [overflow-end];
-}
-
-h1, h2, h3, h4, h5 {
+nav#topbar ul li.active a {
   --tw-text-opacity: 1;
   color: rgb(157 23 77 / var(--tw-text-opacity));
 }
 
-h1 {
-  margin-bottom: 4rem;
-  font-size: 3.75rem;
-  line-height: 1;
+nav#topbar ul li.active a:hover {
+  --tw-ring-offset-shadow: var(--tw-ring-inset) 0 0 0 var(--tw-ring-offset-width) var(--tw-ring-offset-color);
+  --tw-ring-shadow: var(--tw-ring-inset) 0 0 0 calc(0px + var(--tw-ring-offset-width)) var(--tw-ring-color);
+  box-shadow: var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow, 0 0 #0000);
 }
 
-h2 {
-  margin-top: 2rem;
-  margin-bottom: 1rem;
+nav#topbar ul li.active a:focus {
+  --tw-ring-offset-shadow: var(--tw-ring-inset) 0 0 0 var(--tw-ring-offset-width) var(--tw-ring-offset-color);
+  --tw-ring-shadow: var(--tw-ring-inset) 0 0 0 calc(0px + var(--tw-ring-offset-width)) var(--tw-ring-color);
+  box-shadow: var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow, 0 0 #0000);
+}
+
+/** MAIN **/
+
+main {
+  margin-left: auto;
+  margin-right: auto;
+  display: flex;
+  min-height: 100vh;
+  max-width: 90rem;
+  padding-top: 2rem;
+  padding-bottom: 2rem;
+}
+
+/** SITEBAR **/
+
+nav#sitebar {
+  margin-right: 2rem;
+  display: none;
+  min-width: 15rem;
+  max-width: 28rem;
+}
+
+@media (min-width: 1024px) {
+  nav#sitebar {
+    display: block;
+  }
+}
+
+nav#sitebar .nav-list li a {
+  display: block;
+  width: 100%;
+  padding-left: 1rem;
+  padding-right: 1rem;
+  padding-top: 0.25rem;
+  padding-bottom: 0.25rem;
+  font-family: ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+}
+
+nav#sitebar .nav-list li a:hover {
+  --tw-text-opacity: 1;
+  color: rgb(157 23 77 / var(--tw-text-opacity));
+  text-decoration-line: none;
+}
+
+nav#sitebar .nav-list li.level1 a {
+  font-weight: 600;
+}
+
+nav#sitebar .nav-list li.level2 a {
+  margin-top: 0.25rem;
+  font-weight: 600;
+}
+
+nav#sitebar .nav-list li.level3 a {
+  margin-top: 0.25rem;
+  padding-left: 2rem;
+}
+
+nav#sitebar .nav-list li.active a {
+  border-start-end-radius: 9999px;
+  border-end-end-radius: 9999px;
+  --tw-bg-opacity: 1;
+  background-color: rgb(249 168 212 / var(--tw-bg-opacity));
+  --tw-text-opacity: 1;
+  color: rgb(157 23 77 / var(--tw-text-opacity));
+}
+
+nav#sitebar .nav-list li.active a:hover {
+  --tw-bg-opacity: 1;
+  background-color: rgb(249 168 212 / var(--tw-bg-opacity));
+}
+
+/** PAGEBAR **/
+
+nav#pagebar {
+  margin-left: 2rem;
+  display: none;
+  min-width: 15rem;
+}
+
+@media (min-width: 1024px) {
+  nav#pagebar {
+    display: block;
+  }
+}
+
+nav#pagebar p {
+  font-family: ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  font-weight: 600;
+  --tw-text-opacity: 1;
+  color: rgb(157 23 77 / var(--tw-text-opacity));
+}
+
+nav#pagebar li a {
+  font-family: ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  text-decoration-line: none;
+}
+
+nav#pagebar li a:hover {
+  --tw-text-opacity: 1;
+  color: rgb(157 23 77 / var(--tw-text-opacity));
+}
+
+/** CONTENTBAR **/
+
+div#contentbar {
+  margin-left: 2rem;
+  margin-right: 2rem;
+  width: 100%;
+  overflow-y: auto;
+}
+
+/** PAGENAV **/
+
+a.pagenav {
+  font-family: ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  text-decoration-line: none;
+}
+
+a.pagenav:hover {
+  --tw-text-opacity: 1;
+  color: rgb(157 23 77 / var(--tw-text-opacity));
+  text-decoration-line: none;
+}
+
+/** CONTENT **/
+
+div#content h1,
+h2,
+h3,
+h4,
+h5 {
+  font-family: ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+  font-weight: 600;
+  letter-spacing: -0.025em;
+}
+
+div#content h1 {
+  margin-bottom: 2.25rem;
   font-size: 2.25rem;
   line-height: 2.5rem;
 }
 
-h3 {
-  margin-top: 2rem;
+div#content h2 {
+  margin-top: 1.5rem;
   margin-bottom: 1rem;
   font-size: 1.5rem;
   line-height: 2rem;
 }
 
-h4 {
-  margin-top: 2rem;
-  margin-bottom: 1rem;
+div#content h3 {
+  margin-top: 1rem;
+  margin-bottom: 0.5rem;
   font-size: 1.25rem;
   line-height: 1.75rem;
 }
 
-h5 {
-  margin-top: 2rem;
-  margin-bottom: 1rem;
+div#content h4 {
+  margin-top: 1rem;
+  margin-bottom: 0.5rem;
   font-size: 1.125rem;
   line-height: 1.75rem;
 }
 
-p {
+div#content h5 {
+  margin-top: 1rem;
+  margin-bottom: 0.5rem;
+  font-size: 1.125rem;
+  line-height: 1.75rem;
+}
+
+div#content p {
   margin-bottom: 1rem;
 }
 
-a:hover {
-  text-decoration-line: underline;
-  text-decoration-style: solid;
-}
-
-.content a {
+div#content a {
   text-decoration-line: underline;
   text-decoration-style: dotted;
   text-decoration-thickness: 1px;
 }
 
-.content a:hover {
+div#content a:hover {
   text-decoration-style: solid;
 }
 
-.content * {
-  grid-column-start: main-start;
-  grid-column-end: main-end;
-}
-
-.content ol.arabic {
+div#content ol.arabic {
   margin-bottom: 1rem;
   list-style-position: outside;
   list-style-type: decimal;
   padding-left: 1rem;
 }
 
-.content ul {
+div#content ul {
   margin-bottom: 1rem;
   list-style-position: outside;
   list-style-type: disc;
   padding-left: 1rem;
 }
 
-.content pre {
-  grid-column-start: main-start;
-  grid-column-end: overflow-end;
-}
-
-.content table.footnote tbody tr td {
+div#content table.footnote tbody tr td {
   padding-right: 1rem;
   font-size: 0.875rem;
   line-height: 1.25rem;
 }
 
-pre {
-  margin-bottom: 1rem;
-  --tw-bg-opacity: 1;
-  background-color: rgb(241 245 249 / var(--tw-bg-opacity));
-  padding: 0.5rem;
-}
-
-.content div.doodle {
+div#content div.doodle {
   margin-top: 1rem;
   margin-bottom: 1rem;
   margin-left: auto;
   margin-right: auto;
 }
 
-.content p img {
+div#content p img {
   margin-top: 1rem;
   margin-bottom: 1rem;
   margin-left: auto;
   margin-right: auto;
 }
 
-.content div.callout {
+div#content div.callout {
   margin-top: 1rem;
   margin-bottom: 1rem;
   padding: 1rem;
 }
 
-.content div.info {
+div#content div.info {
   --tw-bg-opacity: 1;
   background-color: rgb(191 219 254 / var(--tw-bg-opacity));
 }
 
-.content div.warn {
+div#content div.warn {
   --tw-bg-opacity: 1;
   background-color: rgb(253 230 138 / var(--tw-bg-opacity));
 }
 
-details summary {
+div#content details summary {
   cursor: pointer;
   --tw-text-opacity: 1;
   color: rgb(133 77 14 / var(--tw-text-opacity));
 }
 
-details summary > * {
+div#content details summary > * {
   display: inline;
 }
 
-.exercise {
+div#content .exercise {
   padding-bottom: 1rem;
-  grid-column-start: main-start;
-  grid-column-end: overflow-end;
-  display: grid;
-  grid-template-columns: [main-start] minmax(20ch, 70ch) [main-end] minmax(0ch,20ch) [overflow-end];
 }
 
-.exercise * {
+div#content .exercise * {
   grid-column-start: main-start;
   grid-column-end: main-end;
 }
 
-.exercise pre {
+div#content .exercise pre {
   grid-column-start: main-start;
   grid-column-end: overflow-end;
 }
 
-.solution {
+div#content .solution {
   padding-bottom: 1rem;
   grid-column-start: main-start;
   grid-column-end: overflow-end;
 }
 
-.solution details .solution-body {
+div#content .solution details .solution-body {
   display: grid;
-  grid-template-columns: [main-start] minmax(20ch, 70ch) [main-end] minmax(0ch,20ch) [overflow-end];
+  grid-template-columns:
+    [main-start] minmax(20ch, 70ch) [main-end] minmax(0ch, 20ch)
+    [overflow-end];
 }
 
-.solution details .solution-body * {
+div#content .solution details .solution-body * {
   grid-column-start: main-start;
   grid-column-end: main-end;
 }
 
-.solution details .solution-body pre {
+div#content .solution details .solution-body pre {
   grid-column-start: main-start;
   grid-column-end: overflow-end;
 }
 
-code {
+/** SYNTAX HIGHLIGHTING **/
+
+div#content pre {
+  margin-bottom: 1rem;
+  overflow-x: auto;
+  border-radius: 0.375rem;
+  --tw-bg-opacity: 1;
+  background-color: rgb(30 41 59 / var(--tw-bg-opacity));
+  padding-left: 1rem;
+  padding-right: 1rem;
+  padding-top: 0.5rem;
+  padding-bottom: 0.5rem;
+  --tw-text-opacity: 1;
+  color: rgb(203 213 225 / var(--tw-text-opacity));
+}
+
+div#content code {
   font-size: 0.875rem;
   line-height: 1.25rem;
   font-family: "Source Code Pro", ui-monospace, monospace;
 }
 
-pre code .number-literal, .char-literal, .boolean-literal, .string-literal {
+div#content pre code .number-literal,
+.char-literal,
+.boolean-literal,
+.string-literal {
   --tw-text-opacity: 1;
-  color: rgb(2 132 199 / var(--tw-text-opacity));
+  color: rgb(125 211 252 / var(--tw-text-opacity));
 }
 
-pre code .keyword {
+div#content pre code .keyword {
   --tw-text-opacity: 1;
   color: rgb(225 29 72 / var(--tw-text-opacity));
 }
 
-pre code .identifier {
+div#content pre code .identifier {
   --tw-text-opacity: 1;
-  color: rgb(71 85 105 / var(--tw-text-opacity));
+  color: rgb(249 168 212 / var(--tw-text-opacity));
 }
 
-pre code .type-name {
+div#content pre code .type-name {
   --tw-text-opacity: 1;
-  color: rgb(22 163 74 / var(--tw-text-opacity));
+  color: rgb(134 239 172 / var(--tw-text-opacity));
 }
 
-pre code .declaration-name {
+div#content pre code .declaration-name {
   --tw-text-opacity: 1;
-  color: rgb(37 99 235 / var(--tw-text-opacity));
+  color: rgb(147 197 253 / var(--tw-text-opacity));
 }
 
-pre code .comment {
+div#content pre code .comment {
   font-style: italic;
-}
-
-.pageNavigation {
-  margin-top: 1rem;
-  font-size: 1.25rem;
-  line-height: 1.75rem;
-  --tw-text-opacity: 1;
-  color: rgb(157 23 77 / var(--tw-text-opacity));
 }
 
 footer {
   margin-top: 1rem;
-  border-top-width: 2px;
-  --tw-border-opacity: 1;
-  border-color: rgb(203 213 225 / var(--tw-border-opacity));
+  border-top-width: 1px;
+  border-color: rgb(131 24 67 / 0.1);
   padding-top: 1rem;
+  padding-bottom: 1rem;
   text-align: center;
   font-family: ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
   font-size: 0.875rem;
   line-height: 1.25rem;
+  color: rgb(131 24 67 / 0.6);
+}
+
+.hover\:text-pink-600:hover {
   --tw-text-opacity: 1;
-  color: rgb(203 213 225 / var(--tw-text-opacity));
+  color: rgb(219 39 119 / var(--tw-text-opacity));
+}
+
+.hover\:text-pink-800:hover {
+  --tw-text-opacity: 1;
+  color: rgb(157 23 77 / var(--tw-text-opacity));
+}
+
+.focus\:text-pink-600:focus {
+  --tw-text-opacity: 1;
+  color: rgb(219 39 119 / var(--tw-text-opacity));
+}
+
+.focus\:text-pink-800:focus {
+  --tw-text-opacity: 1;
+  color: rgb(157 23 77 / var(--tw-text-opacity));
 }
