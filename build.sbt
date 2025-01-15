@@ -37,6 +37,7 @@ ThisBuild / sonatypeCredentialHost := xerial.sbt.Sonatype.sonatypeLegacy
 lazy val scala3 = "3.3.4"
 
 ThisBuild / crossScalaVersions := List(scala3)
+ThisBuild / githubWorkflowJavaVersions := List(JavaSpec.temurin("11"))
 ThisBuild / scalaVersion := scala3
 ThisBuild / useSuperShell := false
 ThisBuild / semanticdbEnabled := true
