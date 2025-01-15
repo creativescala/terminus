@@ -17,6 +17,7 @@ import scala.sys.process.*
 import laika.config.LinkConfig
 import laika.config.ApiLinks
 import laika.theme.Theme
+import laika.helium.config.TextLink
 
 ThisBuild / tlBaseVersion := "0.3" // your current series x.y
 
@@ -87,6 +88,11 @@ lazy val docs =
   project
     .in(file("docs"))
     .settings(
+      tlSiteApiUrl := Some(
+        sbt.url(
+          "https://javadoc.io/doc/org.creativescala/terminus-docs_3/latest/"
+        )
+      ),
       laikaConfig := laikaConfig.value.withConfigValue(
         LinkConfig.empty
           .addApiLinks(
@@ -103,6 +109,24 @@ lazy val docs =
           .getParentFile() / s"${(examples.js / moduleName).value}-fastopt"
       ),
       laikaTheme := CreativeScalaTheme.empty
+        .withHome(
+          TextLink.internal(laika.ast.Path.Root / "README.md", "Terminus")
+        )
+        .withCommunity(
+          TextLink.external("https://discord.gg/rRhcFbJxVG", "Community")
+        )
+        .withApi(
+          TextLink.external(
+            "https://javadoc.io/doc/org.creativescala/terminus-docs_3/latest",
+            "API"
+          )
+        )
+        .withSource(
+          TextLink.external(
+            "https://github.com/creativescala/terminus",
+            "Source"
+          )
+        )
         .addJs(laika.ast.Path.Root / "xterm.js")
         .addJs(laika.ast.Path.Root / "main.js")
         .addCss(laika.ast.Path.Root / "xterm.css")
