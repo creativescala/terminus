@@ -131,6 +131,7 @@ lazy val docs =
         .addJs(laika.ast.Path.Root / "xterm.js")
         .addJs(laika.ast.Path.Root / "main.js")
         .addCss(laika.ast.Path.Root / "xterm.css")
+        .addCss(laika.ast.Path.Root / "main.css")
         .build,
       laikaExtensions ++= Seq(
         laika.format.Markdown.GitHubFlavor,
