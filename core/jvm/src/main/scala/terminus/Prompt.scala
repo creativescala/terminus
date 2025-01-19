@@ -16,7 +16,7 @@
 
 package terminus
 
-import terminus.effect.Eof
+import terminus.effect.{Ascii, Eof}
 
 enum KeyCode {
   case Down
@@ -52,8 +52,8 @@ def read(): Program[KeyCode] = {
       throw new Exception("Received an EOF")
     case char: Char =>
       char match {
-        case 10 | 13 => KeyCode.Enter
-        case '\u001b' =>
+        case Ascii.LF | Ascii.CR => KeyCode.Enter
+        case Ascii.ESC =>
           Terminal.read() match {
             // Normal mode
             case '[' =>
