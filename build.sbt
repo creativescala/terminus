@@ -19,7 +19,7 @@ import laika.config.ApiLinks
 import laika.theme.Theme
 import laika.helium.config.TextLink
 
-ThisBuild / tlBaseVersion := "0.3" // your current series x.y
+ThisBuild / tlBaseVersion := "0.4" // your current series x.y
 
 Global / onChangedBuildSource := ReloadOnSourceChanges
 
