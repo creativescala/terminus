@@ -25,14 +25,12 @@ package terminus.effect
   *   - https://ghostty.org/docs/vt
   */
 object AnsiCodes {
-
-  /** The escape character, which all codes begin with. */
-  val esc: Char = '\u001b'
+  import Ascii.*
 
   /** The Control Sequencer Introducer code, which starts many escape codes. It
     * is ESC[
     */
-  val csiCode: String = s"${esc}["
+  val csiCode: String = s"${ESC}["
 
   /** Create a CSI escape code. The terminator must be specifed first, followed
     * by zero or more arguments. The arguments will printed semi-colon separated
@@ -55,30 +53,30 @@ object AnsiCodes {
       * if no state has been saved.
       */
     val restore: String =
-      s"${esc}8"
+      s"${ESC}8"
 
     /** Save the cursor location, character set, pending wrap state, SGR
       * attributes, and origin mode.
       */
     val save: String =
-      s"${esc}7"
+      s"${ESC}7"
 
     object style {
-      val default = s"${esc}0 q"
+      val default = s"${ESC}0 q"
 
       object block {
-        val blink = s"${esc}1 q"
-        val steady = s"${esc}2 q"
+        val blink = s"${ESC}1 q"
+        val steady = s"${ESC}2 q"
       }
 
       object underline {
-        val blink = s"${esc}3 q"
-        val steady = s"${esc}4 q"
+        val blink = s"${ESC}3 q"
+        val steady = s"${ESC}4 q"
       }
 
       object bar {
-        val blink = s"${esc}5 q"
-        val steady = s"${esc}6 q"
+        val blink = s"${ESC}5 q"
+        val steady = s"${ESC}6 q"
       }
     }
 

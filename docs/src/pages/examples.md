@@ -8,8 +8,8 @@ This example shows a simple UI you can easily build with Terminus. This is the k
 
 Here's the code for this example, running on the JVM backend. (The JS code is slightly different due to differences in how input is handled.)
 
-```scala
-import terminus.effect.Eof
+```scala 3
+import terminus.effect.{ Ascii, Eof }
 
 enum KeyCode {
   case Down
@@ -39,14 +39,15 @@ def write(selected: Int): Program[Unit] = {
   Terminal.flush()
 }
 
+@tailrec
 def read(): Program[KeyCode] = {
   Terminal.read() match {
     case Eof =>
       throw new Exception("Received an EOF")
     case char: Char =>
       char match {
-        case 10 | 13 => KeyCode.Enter
-        case '\u001b' =>
+        case Ascii.LF | Ascii.CR => KeyCode.Enter
+        case Ascii.ESC =>
           Terminal.read() match {
             // Normal mode
             case '[' =>
@@ -71,6 +72,7 @@ def read(): Program[KeyCode] = {
   }
 }
 
+@tailrec
 def loop(idx: Int): Program[Int] = {
   write(idx)
   read() match {

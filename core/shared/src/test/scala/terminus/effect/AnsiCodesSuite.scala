@@ -19,10 +19,6 @@ package terminus.effect
 import munit.FunSuite
 
 class AnsiCodesSuite extends FunSuite {
-  test("esc is the correct character") {
-    assertEquals(AnsiCodes.esc, '\u001b')
-  }
-
   test("csi is the correct code") {
     assertEquals(AnsiCodes.csiCode, "[")
   }
