@@ -126,16 +126,16 @@ object Ascii {
       */
     def isControlChar: Boolean = char >= 0x00 && char < 0x20
 
-    /** Evaluates as true if the character is not an Ascii control character
-     * or DEL otherwise false.
-     *
-     * While DEL can be considered an ascii-printable character, an end user
-     * is likely to want to treat a DEL input separate from other keystrokes,
-     * as the character can be displayed like this:
-     * {{{
-     * scala> println(s"Foo${Ascii.DEL}bar")
-     * Foo bar
-     * }}}
-     */
+    /** Evaluates as true if the character is not an Ascii control character or
+      * DEL otherwise false.
+      *
+      * While DEL can be considered an ascii-printable character, an end user is
+      * likely to want to treat a DEL input separate from other keystrokes, as
+      * the character can be displayed like this:
+      * {{{
+      * scala> println(s"Foo${Ascii.DEL}bar")
+      * Foo bar
+      * }}}
+      */
     def isPrintableChar: Boolean = char >= 0x20 && char != DEL
 }

@@ -16,7 +16,8 @@
 
 package terminus
 
-import terminus.effect.{Ascii, Eof}
+import terminus.effect.Ascii
+import terminus.effect.Eof
 
 enum KeyCode {
   case Down
