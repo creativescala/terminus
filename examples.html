@@ -96,7 +96,7 @@
 <div class="doodle" id="terminus-prompt"></div>
 <script>Prompt.go("terminus-prompt")</script>
 <p>Here&#39;s the code for this example, running on the JVM backend. (The JS code is slightly different due to differences in how input is handled.)</p>
-<pre><code class="nohighlight"><span class="keyword">import</span><span> </span><span class="identifier">terminus</span><span>.</span><span class="identifier">effect</span><span>.</span><span class="type-name">Eof</span><span>
+<pre><code class="nohighlight"><span class="keyword">import</span><span> </span><span class="identifier">terminus</span><span>.</span><span class="identifier">effect</span><span>.{ </span><span class="type-name">Ascii</span><span>, </span><span class="type-name">Eof</span><span> }
 
 </span><span class="identifier">enum</span><span> </span><span class="type-name">KeyCode</span><span> {
   </span><span class="keyword">case</span><span> </span><span class="type-name">Down</span><span>
@@ -126,14 +126,15 @@
   </span><span class="type-name">Terminal</span><span>.</span><span class="identifier">flush</span><span>()
 }
 
+</span><span class="annotation">@tailrec</span><span>
 </span><span class="keyword">def</span><span> </span><span class="declaration-name">read</span><span>(): </span><span class="type-name">Program</span><span>[</span><span class="type-name">KeyCode</span><span>] = {
   </span><span class="type-name">Terminal</span><span>.</span><span class="identifier">read</span><span>() </span><span class="keyword">match</span><span> {
     </span><span class="keyword">case</span><span> </span><span class="type-name">Eof</span><span> =&gt;
       </span><span class="keyword">throw</span><span> </span><span class="keyword">new</span><span> </span><span class="type-name">Exception</span><span>(</span><span class="string-literal">&quot;Received an EOF&quot;</span><span>)
     </span><span class="keyword">case</span><span> </span><span class="identifier">char</span><span>: </span><span class="type-name">Char</span><span> =&gt;
       </span><span class="identifier">char</span><span> </span><span class="keyword">match</span><span> {
-        </span><span class="keyword">case</span><span> </span><span class="number-literal">10</span><span> | </span><span class="number-literal">13</span><span> =&gt; </span><span class="type-name">KeyCode</span><span>.</span><span class="type-name">Enter</span><span>
-        </span><span class="keyword">case</span><span> </span><span class="char-literal">&#39;</span><span class="escape-sequence">\u001b</span><span class="char-literal">&#39;</span><span> =&gt;
+        </span><span class="keyword">case</span><span> </span><span class="type-name">Ascii</span><span>.</span><span class="type-name">LF</span><span> | </span><span class="type-name">Ascii</span><span>.</span><span class="type-name">CR</span><span> =&gt; </span><span class="type-name">KeyCode</span><span>.</span><span class="type-name">Enter</span><span>
+        </span><span class="keyword">case</span><span> </span><span class="type-name">Ascii</span><span>.</span><span class="type-name">ESC</span><span> =&gt;
           </span><span class="type-name">Terminal</span><span>.</span><span class="identifier">read</span><span>() </span><span class="keyword">match</span><span> {
             </span><span class="comment">// Normal mode
 </span><span>            </span><span class="keyword">case</span><span> </span><span class="char-literal">&#39;[&#39;</span><span> =&gt;
@@ -158,6 +159,7 @@
   }
 }
 
+</span><span class="annotation">@tailrec</span><span>
 </span><span class="keyword">def</span><span> </span><span class="declaration-name">loop</span><span>(</span><span class="identifier">idx</span><span>: </span><span class="type-name">Int</span><span>): </span><span class="type-name">Program</span><span>[</span><span class="type-name">Int</span><span>] = {
   </span><span class="identifier">write</span><span>(</span><span class="identifier">idx</span><span>)
   </span><span class="identifier">read</span><span>() </span><span class="keyword">match</span><span> {

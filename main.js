@@ -4119,11 +4119,8 @@ function $m_Lterminus_XtermJsOptions$() {
 }
 /** @constructor */
 function $c_Lterminus_effect_AnsiCodes$() {
-  this.Lterminus_effect_AnsiCodes$__f_esc = 0;
   this.Lterminus_effect_AnsiCodes$__f_csiCode = null;
-  $n_Lterminus_effect_AnsiCodes$ = this;
-  this.Lterminus_effect_AnsiCodes$__f_esc = 27;
-  this.Lterminus_effect_AnsiCodes$__f_csiCode = ($cToS(this.Lterminus_effect_AnsiCodes$__f_esc) + "[");
+  this.Lterminus_effect_AnsiCodes$__f_csiCode = "\u001b[";
 }
 $c_Lterminus_effect_AnsiCodes$.prototype = new $h_O();
 $c_Lterminus_effect_AnsiCodes$.prototype.constructor = $c_Lterminus_effect_AnsiCodes$;
@@ -4190,9 +4187,6 @@ function $m_Lterminus_effect_AnsiCodes$background$() {
 }
 /** @constructor */
 function $c_Lterminus_effect_AnsiCodes$cursor$() {
-  $n_Lterminus_effect_AnsiCodes$cursor$ = this;
-  $m_Lterminus_effect_AnsiCodes$();
-  $m_Lterminus_effect_AnsiCodes$();
 }
 $c_Lterminus_effect_AnsiCodes$cursor$.prototype = new $h_O();
 $c_Lterminus_effect_AnsiCodes$cursor$.prototype.constructor = $c_Lterminus_effect_AnsiCodes$cursor$;
