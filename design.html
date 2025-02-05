@@ -92,9 +92,12 @@
           <div id="content"><h1 id="design" class="title">Design</h1>
 <p>A Terminus program consists of two parts: the <code>Program</code> that describes what we want to do, and the interpreter that carries out those actions. Terminus user spend their time creating <code>Programs</code>, but don&#39;t think much about how the interpreter works. In this section we describe the implementation of the interpreters and the <code>Programs</code> that use them.</p>
 
-<h2 id="effects-and-their-implementation" class="section">Effects and Their Implementation</h2>
+<h2 id="programs-and-effects" class="section">Programs and Effects</h2>
 <p>A <code>Program</code> is a <a href="https://docs.scala-lang.org/scala3/reference/contextual/context-functions.html">context function</a> with type <code>Terminal ?=&gt; A</code>, where <code>Terminal</code> is some backend specific type. The <code>Terminal</code> type is backend specific because different terminals support different features. For example, the Javascript xterm.js doesn&#39;t have a concept of raw mode because it doesn&#39;t intercept key presses in the first place; this is something that is managed by the browser.</p>
-<p>We want to support differences across terminals, but where common functionality exists we want to provide it through a common interface. The solution is to describe individual pieces of functionality as separate interfaces. For example, we have a <a class="api" href="https://javadoc.io/doc/org.creativescala/terminus-docs_3/latest/terminus/effect/Writer.html">Writer</a> interface that allows us to write characters to the Terminal, <a class="api" href="https://javadoc.io/doc/org.creativescala/terminus-docs_3/latest/terminus/effect/Color.html">Color</a> for changing foreground and background colors, and so on. These are called <em>effects</em> because they actually do things to the terminal, like causing output to appear.</p>
+<p>When we call <code>Terminal.run</code> we carry out the description in the <code>Program</code>. This is the interpreter. It is split into two parts: function application, which is just passing a concrete <code>Terminal</code> instance to the <code>Program</code>, and the effects that are defined in that <code>Terminal</code> instance.</p>
+
+<h2 id="effects-and-their-implementation" class="section">Effects and Their Implementation</h2>
+<p>We want to support differences across terminals, but where common functionality exists we want to provide it through a common interface. The solution is to describe individual pieces of functionality as separate interfaces. For example, we have a <a class="api" href="https://javadoc.io/doc/org.creativescala/terminus-docs_3/latest/terminus/effect/Writer.html">Writer</a> interface that allows us to write characters to the Terminal, <a class="api" href="https://javadoc.io/doc/org.creativescala/terminus-docs_3/latest/terminus/effect/Color.html">Color</a> for changing foreground and background colors, and so on. These interfaces, and their implementations, are called <em>effects</em> because they actually do things to the terminal.</p>
 <p>A backend specific <code>Terminal</code> type is the union of the interfaces, or effects, that describe the functionality it supports. For example, here is the JVM <code>Terminal</code> type at the time of writing:</p>
 <pre><code class="nohighlight"><span class="keyword">trait</span><span> </span><span class="type-name">Terminal</span><span>
     </span><span class="keyword">extends</span><span> </span><span class="identifier">effect</span><span>.</span><span class="type-name">Color</span><span>[</span><span class="type-name">Terminal</span><span>],
@@ -226,6 +229,7 @@ Here&#39;s a simple example.</p>
         <div class="fixed h-screen overflow-y-auto">
           <p>On This Page</p>
           <ul class="nav-list">
+            <li class="level1 nav-leaf"><a href="#programs-and-effects">Programs and Effects</a></li>
             <li class="level1 nav-leaf"><a href="#effects-and-their-implementation">Effects and Their Implementation</a></li>
             <li class="level1 nav-leaf"><a href="#programs-and-their-implementation">Programs and Their Implementation</a></li>
             <li class="level1 nav-leaf"><a href="#low-level-code">Low-level Code</a></li>
