@@ -17,12 +17,13 @@
 package terminus
 
 trait Terminal
-    extends effect.AlternateScreenMode[Terminal],
+    extends effect.Alert,
+      effect.AlternateScreenMode[Terminal],
       effect.ApplicationMode[Terminal],
       effect.Color[Terminal],
       effect.Cursor,
-      effect.Format[Terminal],
       effect.Erase,
+      effect.Format[Terminal],
       effect.KeyReader,
       effect.NonBlockingReader,
       effect.RawMode[Terminal],
