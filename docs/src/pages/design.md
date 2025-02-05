@@ -9,7 +9,7 @@ A `Program` is a [context function][context-function] with type `Terminal ?=> A`
 When we call `Terminal.run` we carry out the description in the `Program`. This is the interpreter. It is split into two parts: function application, which is just passing a concrete `Terminal` instance to the `Program`, and the effects that are defined in that `Terminal` instance.
 
 
-## Effects and Their Implementation
+## Implementing Effects
 
 We want to support differences across terminals, but where common functionality exists we want to provide it through a common interface. The solution is to describe individual pieces of functionality as separate interfaces. For example, we have a @:api(terminus.effect.Writer) interface that allows us to write characters to the Terminal, @:api(terminus.effect.Color) for changing foreground and background colors, and so on. These interfaces, and their implementations, are called *effects* because they actually do things to the terminal.
 
@@ -115,7 +115,7 @@ How do we make sure that `Terminal` is actually of the same type as `this`? Firs
 so `F` *is* `Terminal`. The [self type](https://docs.scala-lang.org/tour/self-types.html) ensures that instances of `Display` are mixed into the correct type, and hence `this` is `F`.
 
 
-## Programs and Their Implementation
+## Implementing Programs
 
 Now let's look at how the `Program` types are implemented. We'll start with @:api(terminus.Writer), as it is very simple.
 
