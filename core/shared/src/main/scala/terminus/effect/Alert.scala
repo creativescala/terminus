@@ -14,31 +14,13 @@
  * limitations under the License.
  */
 
-package terminus
+package terminus.effect
 
-trait Terminal
-    extends effect.Alert,
-      effect.Color[Terminal],
-      effect.Cursor,
-      effect.Display[Terminal],
-      effect.Erase,
-      effect.AlternateScreenMode[Terminal],
-      effect.ApplicationMode[Terminal],
-      effect.RawMode[Terminal],
-      effect.Reader,
-      effect.Writer
-type Program[A] = Terminal ?=> A
-
-object Terminal
-    extends Alert,
-      Color,
-      Cursor,
-      Display,
-      Erase,
-      AlternateScreenMode,
-      ApplicationMode,
-      RawMode,
-      Reader,
-      Writer {
-  export JLineTerminal.*
+trait Alert extends Writer {
+  object alert {
+    def trigger(n: Int = 1): Unit = {
+      val a = List.fill(n)(Ascii.BEL).mkString
+      write(a)
+    }
+  }
 }
