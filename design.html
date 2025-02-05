@@ -96,7 +96,7 @@
 <p>A <code>Program</code> is a <a href="https://docs.scala-lang.org/scala3/reference/contextual/context-functions.html">context function</a> with type <code>Terminal ?=&gt; A</code>, where <code>Terminal</code> is some backend specific type. The <code>Terminal</code> type is backend specific because different terminals support different features. For example, the Javascript xterm.js doesn&#39;t have a concept of raw mode because it doesn&#39;t intercept key presses in the first place; this is something that is managed by the browser.</p>
 <p>When we call <code>Terminal.run</code> we carry out the description in the <code>Program</code>. This is the interpreter. It is split into two parts: function application, which is just passing a concrete <code>Terminal</code> instance to the <code>Program</code>, and the effects that are defined in that <code>Terminal</code> instance.</p>
 
-<h2 id="effects-and-their-implementation" class="section">Effects and Their Implementation</h2>
+<h2 id="implementing-effects" class="section">Implementing Effects</h2>
 <p>We want to support differences across terminals, but where common functionality exists we want to provide it through a common interface. The solution is to describe individual pieces of functionality as separate interfaces. For example, we have a <a class="api" href="https://javadoc.io/doc/org.creativescala/terminus-docs_3/latest/terminus/effect/Writer.html">Writer</a> interface that allows us to write characters to the Terminal, <a class="api" href="https://javadoc.io/doc/org.creativescala/terminus-docs_3/latest/terminus/effect/Color.html">Color</a> for changing foreground and background colors, and so on. These interfaces, and their implementations, are called <em>effects</em> because they actually do things to the terminal.</p>
 <p>A backend specific <code>Terminal</code> type is the union of the interfaces, or effects, that describe the functionality it supports. For example, here is the JVM <code>Terminal</code> type at the time of writing:</p>
 <pre><code class="nohighlight"><span class="keyword">trait</span><span> </span><span class="type-name">Terminal</span><span>
@@ -172,7 +172,7 @@
 <pre><code class="nohighlight"><span>      </span><span class="identifier">effect</span><span>.</span><span class="type-name">Display</span><span>[</span><span class="type-name">Terminal</span><span>],</span></code></pre>
 <p>so <code>F</code> <em>is</em> <code>Terminal</code>. The <a href="https://docs.scala-lang.org/tour/self-types.html">self type</a> ensures that instances of <code>Display</code> are mixed into the correct type, and hence <code>this</code> is <code>F</code>.</p>
 
-<h2 id="programs-and-their-implementation" class="section">Programs and Their Implementation</h2>
+<h2 id="implementing-programs" class="section">Implementing Programs</h2>
 <p>Now let&#39;s look at how the <code>Program</code> types are implemented. We&#39;ll start with <a class="api" href="https://javadoc.io/doc/org.creativescala/terminus-docs_3/latest/terminus/Writer.html">Writer</a>, as it is very simple.</p>
 <pre><code class="nohighlight"><span class="comment">/** Interface for writing to a console. */</span><span>
 </span><span class="keyword">trait</span><span> </span><span class="type-name">Writer</span><span> {
@@ -230,8 +230,8 @@ Here&#39;s a simple example.</p>
           <p>On This Page</p>
           <ul class="nav-list">
             <li class="level1 nav-leaf"><a href="#programs-and-effects">Programs and Effects</a></li>
-            <li class="level1 nav-leaf"><a href="#effects-and-their-implementation">Effects and Their Implementation</a></li>
-            <li class="level1 nav-leaf"><a href="#programs-and-their-implementation">Programs and Their Implementation</a></li>
+            <li class="level1 nav-leaf"><a href="#implementing-effects">Implementing Effects</a></li>
+            <li class="level1 nav-leaf"><a href="#implementing-programs">Implementing Programs</a></li>
             <li class="level1 nav-leaf"><a href="#low-level-code">Low-level Code</a></li>
           </ul>
         </div>
