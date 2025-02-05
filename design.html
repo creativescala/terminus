@@ -90,7 +90,118 @@
       <div id="contentbar">
         <div class="max-w-prose mx-auto">
           <div id="content"><h1 id="design" class="title">Design</h1>
-<p>Terminus is split into two parts: <code>terminus.effect</code> which defines all the effects that can be used in terminal, and <code>terminus</code>, which defines the user-facing functions for interacting with effects.</p>
+<p>A Terminus program consists of two parts: the <code>Program</code> that describes what we want to do, and the interpreter that carries out those actions. Terminus user spend their time creating <code>Programs</code>, but don&#39;t think much about how the interpreter works. In this section we describe the implementation of the interpreters and the <code>Programs</code> that use them.</p>
+
+<h2 id="effects-and-their-implementation" class="section">Effects and Their Implementation</h2>
+<p>A <code>Program</code> is a <a href="https://docs.scala-lang.org/scala3/reference/contextual/context-functions.html">context function</a> with type <code>Terminal ?=&gt; A</code>, where <code>Terminal</code> is some backend specific type. The <code>Terminal</code> type is backend specific because different terminals support different features. For example, the Javascript xterm.js doesn&#39;t have a concept of raw mode because it doesn&#39;t intercept key presses in the first place; this is something that is managed by the browser.</p>
+<p>We want to support differences across terminals, but where common functionality exists we want to provide it through a common interface. The solution is to describe individual pieces of functionality as separate interfaces. For example, we have a <a class="api" href="https://javadoc.io/doc/org.creativescala/terminus-docs_3/latest/terminus/effect/Writer.html">Writer</a> interface that allows us to write characters to the Terminal, <a class="api" href="https://javadoc.io/doc/org.creativescala/terminus-docs_3/latest/terminus/effect/Color.html">Color</a> for changing foreground and background colors, and so on. These are called <em>effects</em> because they actually do things to the terminal, like causing output to appear.</p>
+<p>A backend specific <code>Terminal</code> type is the union of the interfaces, or effects, that describe the functionality it supports. For example, here is the JVM <code>Terminal</code> type at the time of writing:</p>
+<pre><code class="nohighlight"><span class="keyword">trait</span><span> </span><span class="type-name">Terminal</span><span>
+    </span><span class="keyword">extends</span><span> </span><span class="identifier">effect</span><span>.</span><span class="type-name">Color</span><span>[</span><span class="type-name">Terminal</span><span>],
+      </span><span class="identifier">effect</span><span>.</span><span class="type-name">Cursor</span><span>,
+      </span><span class="identifier">effect</span><span>.</span><span class="type-name">Display</span><span>[</span><span class="type-name">Terminal</span><span>],
+      </span><span class="identifier">effect</span><span>.</span><span class="type-name">Erase</span><span>,
+      </span><span class="identifier">effect</span><span>.</span><span class="type-name">AlternateScreenMode</span><span>[</span><span class="type-name">Terminal</span><span>],
+      </span><span class="identifier">effect</span><span>.</span><span class="type-name">ApplicationMode</span><span>[</span><span class="type-name">Terminal</span><span>],
+      </span><span class="identifier">effect</span><span>.</span><span class="type-name">RawMode</span><span>[</span><span class="type-name">Terminal</span><span>],
+      </span><span class="identifier">effect</span><span>.</span><span class="type-name">Reader</span><span>,
+      </span><span class="identifier">effect</span><span>.</span><span class="type-name">Writer</span></code></pre>
+<p>As the above suggests, the interfaces defining the functionality live in the package <code>terminus.effect</code>.</p>
+<p>Let&#39;s now see an example of an effect type. Here&#39;s <a class="api" href="https://javadoc.io/doc/org.creativescala/terminus-docs_3/latest/terminus/effect/Writer.html">Writer</a>, one of the most basic types:</p>
+<pre><code class="nohighlight"><span class="comment">/** Interface for writing to a console. */</span><span>
+</span><span class="keyword">trait</span><span> </span><span class="type-name">Writer</span><span> </span><span class="keyword">extends</span><span> </span><span class="type-name">Effect</span><span> {
+
+  </span><span class="comment">/** Write a character to the console. */</span><span>
+  </span><span class="keyword">def</span><span> </span><span class="declaration-name">write</span><span>(</span><span class="identifier">char</span><span>: </span><span class="type-name">Char</span><span>): </span><span class="type-name">Unit</span><span>
+
+  </span><span class="comment">/** Write a string to the console. */</span><span>
+  </span><span class="keyword">def</span><span> </span><span class="declaration-name">write</span><span>(</span><span class="identifier">string</span><span>: </span><span class="type-name">String</span><span>): </span><span class="type-name">Unit</span><span>
+
+  </span><span class="comment">/** Flush the current output, causing it to be shown on the console. */</span><span>
+  </span><span class="keyword">def</span><span> </span><span class="declaration-name">flush</span><span>(): </span><span class="type-name">Unit</span><span>
+}</span></code></pre>
+<p>As we can see, it just defines some abstract methods that will be implemented in a backend specific way. The effect type can provide a default implementation where there is a reasonable cross-backend way to do so. Here&#39;s <a class="api" href="https://javadoc.io/doc/org.creativescala/terminus-docs_3/latest/terminus/effect/Erase.html">Erase</a>, which sends standard escape codes. A backend specific implementation could override this if there was some advantage to doing so.</p>
+<pre><code class="nohighlight"><span class="comment">/** Functionality for clearing contents on the terminal. */</span><span>
+</span><span class="keyword">trait</span><span> </span><span class="type-name">Erase</span><span> </span><span class="keyword">extends</span><span> </span><span class="type-name">Writer</span><span> {
+  </span><span class="keyword">object</span><span> </span><span class="identifier">erase</span><span> {
+
+    </span><span class="comment">/** Erase the entire screen and move the cursor to the top-left. */</span><span>
+    </span><span class="keyword">def</span><span> </span><span class="declaration-name">screen</span><span>(): </span><span class="type-name">Unit</span><span> =
+      </span><span class="identifier">write</span><span>(</span><span class="type-name">AnsiCodes</span><span>.</span><span class="identifier">erase</span><span>.</span><span class="identifier">screen</span><span>)
+
+    </span><span class="comment">/** Erase from current cursor position to the end of the screen. */</span><span>
+    </span><span class="keyword">def</span><span> </span><span class="declaration-name">down</span><span>(): </span><span class="type-name">Unit</span><span> =
+      </span><span class="identifier">write</span><span>(</span><span class="type-name">AnsiCodes</span><span>.</span><span class="identifier">erase</span><span>.</span><span class="identifier">down</span><span>)
+
+    </span><span class="comment">/** Erase from current cursor position to the start of the screen. */</span><span>
+    </span><span class="keyword">def</span><span> </span><span class="declaration-name">up</span><span>(): </span><span class="type-name">Unit</span><span> =
+      </span><span class="identifier">write</span><span>(</span><span class="type-name">AnsiCodes</span><span>.</span><span class="identifier">erase</span><span>.</span><span class="identifier">up</span><span>)
+
+    </span><span class="comment">/** Erase the current line. */</span><span>
+    </span><span class="keyword">def</span><span> </span><span class="declaration-name">line</span><span>(): </span><span class="type-name">Unit</span><span> =
+      </span><span class="identifier">write</span><span>(</span><span class="type-name">AnsiCodes</span><span>.</span><span class="identifier">erase</span><span>.</span><span class="identifier">line</span><span>)
+  }
+}</span></code></pre>
+<p>There are a few things to note:</p>
+<ol class="arabic">
+  <li><code>Erase</code> extends <code>Writer</code>, and uses the <code>write</code> method from <code>Writer</code>.</li>
+  <li>The methods are name-spaced by putting them inside an object named <code>erase</code>. This is aesthetic choice, leading to method calls like <code>erase.up()</code> and <code>cursor.up()</code> instead of <code>eraseUp()</code> and <code>cursorUp()</code>.</li>
+</ol>
+<p>There is one final kind of effect that is more involved, which is an effect that only applies to some scope. <a class="api" href="https://javadoc.io/doc/org.creativescala/terminus-docs_3/latest/terminus/effect/Display.html">Display</a> is an example, as is <a class="api" href="https://javadoc.io/doc/org.creativescala/terminus-docs_3/latest/terminues/effect/Color.html">Color</a>. These all change the way output is displayed, but only for the <code>Program</code> they take as a parameter. Here&#39;s part of the implementation of <code>Display</code>, which is a bit simpler than <code>Color</code>.</p>
+<pre><code class="nohighlight"><span class="keyword">trait</span><span> </span><span class="type-name">Display</span><span>[+</span><span class="type-name">F</span><span> &lt;: </span><span class="type-name">Writer</span><span>] </span><span class="keyword">extends</span><span> </span><span class="type-name">WithStack</span><span>[</span><span class="type-name">F</span><span>], </span><span class="type-name">WithToggle</span><span>[</span><span class="type-name">F</span><span>] { </span><span class="identifier">self</span><span>: </span><span class="type-name">F</span><span> =&gt;
+  </span><span class="keyword">object</span><span> </span><span class="identifier">display</span><span> {
+    </span><span class="comment">// ...
+</span><span>
+    </span><span class="keyword">private</span><span> </span><span class="keyword">val</span><span> </span><span class="identifier">invertToggle</span><span> =
+      </span><span class="type-name">Toggle</span><span>(</span><span class="type-name">AnsiCodes</span><span>.</span><span class="identifier">display</span><span>.</span><span class="identifier">invert</span><span>.</span><span class="identifier">on</span><span>, </span><span class="type-name">AnsiCodes</span><span>.</span><span class="identifier">display</span><span>.</span><span class="identifier">invert</span><span>.</span><span class="identifier">off</span><span>)
+
+    </span><span class="keyword">def</span><span> </span><span class="declaration-name">invert</span><span>[</span><span class="type-name">A</span><span>](</span><span class="identifier">f</span><span>: </span><span class="type-name">F</span><span> ?=&gt; </span><span class="type-name">A</span><span>): </span><span class="type-name">A</span><span> =
+      </span><span class="identifier">withToggle</span><span>(</span><span class="identifier">invertToggle</span><span>)(</span><span class="identifier">f</span><span>)
+    
+    </span><span class="comment">// ...
+</span><span>  }
+}</span></code></pre>
+<p>When we create a program like </p>
+<pre><code class="nohighlight"><span class="type-name">Terminal</span><span>.</span><span class="identifier">invert</span><span>(</span><span class="type-name">Terminal</span><span>.</span><span class="identifier">write</span><span>(</span><span class="string-literal">&quot;Inverted&quot;</span><span>))</span></code></pre>
+<p>we want only the <code>Program</code> inside the call to <code>Terminal.invert</code> (that <code>Program</code> is <code>Terminal.write(&quot;Inverted&quot;)</code>) to be displayed with inverted text. Inversion is relatively simply, as it is either on or off. This is what the call to <code>withToggle</code> does: it sends the code to turn on inverted text when we enter the block and turns it off when we exit. It also handles nested calls correctly. For more complicated cases, like color, there is also a stack abstraction which reverts to the previous setting when a block exits.</p>
+<p>The types deserve some explanation. We call <code>invert</code> with some <code>Program</code> type. Remember that <code>Program</code> is <code>Terminal ?=&gt; A</code> and <code>Terminal</code> is backend specific. In the <code>Display</code> effect we need to actually carry out the effects within the <code>Program</code>, so we need to pass an instance of <code>Terminal</code> to the <code>Program</code>. Where do we get this instance from? It is <code>this</code>. </p>
+<p>How do we make sure that <code>Terminal</code> is actually of the same type as <code>this</code>? Firstly, in <code>invert</code> the type of a program is <code>F ?=&gt; A</code>, where <code>F</code> is a type parameter of <code>Display</code>. The meaning of <code>F</code> is all the effect types that make up a particular <code>Terminal</code> type. If you look at the definition of the JVM terminal above you will see</p>
+<pre><code class="nohighlight"><span>      </span><span class="identifier">effect</span><span>.</span><span class="type-name">Display</span><span>[</span><span class="type-name">Terminal</span><span>],</span></code></pre>
+<p>so <code>F</code> <em>is</em> <code>Terminal</code>. The <a href="https://docs.scala-lang.org/tour/self-types.html">self type</a> ensures that instances of <code>Display</code> are mixed into the correct type, and hence <code>this</code> is <code>F</code>.</p>
+
+<h2 id="programs-and-their-implementation" class="section">Programs and Their Implementation</h2>
+<p>Now let&#39;s look at how the <code>Program</code> types are implemented. We&#39;ll start with <a class="api" href="https://javadoc.io/doc/org.creativescala/terminus-docs_3/latest/terminus/Writer.html">Writer</a>, as it is very simple.</p>
+<pre><code class="nohighlight"><span class="comment">/** Interface for writing to a console. */</span><span>
+</span><span class="keyword">trait</span><span> </span><span class="type-name">Writer</span><span> {
+
+  </span><span class="comment">/** Write a character to the console. */</span><span>
+  </span><span class="keyword">def</span><span> </span><span class="declaration-name">write</span><span>(</span><span class="identifier">char</span><span>: </span><span class="type-name">Char</span><span>): </span><span class="identifier">effect</span><span>.</span><span class="type-name">Writer</span><span> ?=&gt; </span><span class="type-name">Unit</span><span> =
+    </span><span class="identifier">effect</span><span> ?=&gt; </span><span class="identifier">effect</span><span>.</span><span class="identifier">write</span><span>(</span><span class="identifier">char</span><span>)
+
+  </span><span class="comment">/** Write a string to the console. */</span><span>
+  </span><span class="keyword">def</span><span> </span><span class="declaration-name">write</span><span>(</span><span class="identifier">string</span><span>: </span><span class="type-name">String</span><span>): </span><span class="identifier">effect</span><span>.</span><span class="type-name">Writer</span><span> ?=&gt; </span><span class="type-name">Unit</span><span> =
+    </span><span class="identifier">effect</span><span> ?=&gt; </span><span class="identifier">effect</span><span>.</span><span class="identifier">write</span><span>(</span><span class="identifier">string</span><span>)
+
+  </span><span class="comment">/** Flush the current output, causing it to be shown on the console. */</span><span>
+  </span><span class="keyword">def</span><span> </span><span class="declaration-name">flush</span><span>(): </span><span class="identifier">effect</span><span>.</span><span class="type-name">Writer</span><span> ?=&gt; </span><span class="type-name">Unit</span><span> =
+    </span><span class="identifier">effect</span><span> ?=&gt; </span><span class="identifier">effect</span><span>.</span><span class="identifier">flush</span><span>()
+}</span></code></pre>
+<p>Firstly, notice this is the <code>Writer</code> <em>program</em> <strong>not</strong> the <code>Writer</code> effect. They are separate concepts. A <code>Program</code> is just <code>Terminal ?=&gt; A</code>. In the specific case of <code>Writer</code> these programs simply require a <code>Writer</code> effect and then call the appropriate method on that effect.</p>
+<p><code>Display</code> is a bit more complex. Here&#39;s the definition, with most of the methods removed.</p>
+<pre><code class="nohighlight"><span class="keyword">trait</span><span> </span><span class="type-name">Display</span><span> {
+  </span><span class="keyword">object</span><span> </span><span class="identifier">display</span><span> {
+  
+    </span><span class="comment">// ...
+</span><span>
+    </span><span class="keyword">def</span><span> </span><span class="declaration-name">invert</span><span>[</span><span class="type-name">F</span><span> &lt;: </span><span class="identifier">effect</span><span>.</span><span class="type-name">Writer</span><span>, </span><span class="type-name">A</span><span>](
+        </span><span class="identifier">f</span><span>: </span><span class="type-name">F</span><span> ?=&gt; </span><span class="type-name">A</span><span>
+    ): (</span><span class="type-name">F</span><span> &amp; </span><span class="identifier">effect</span><span>.</span><span class="type-name">Display</span><span>[</span><span class="type-name">F</span><span>]) ?=&gt; </span><span class="type-name">A</span><span> =
+      </span><span class="identifier">effect</span><span> ?=&gt; </span><span class="identifier">effect</span><span>.</span><span class="identifier">display</span><span>.</span><span class="identifier">invert</span><span>(</span><span class="identifier">f</span><span>)
+
+    </span><span class="comment">// ...
+</span><span>  }
+}</span></code></pre>
+<p><code>invert</code> wraps a <code>Program</code> with another <code>Program</code>. What is the type of the inner program, the method argument <code>f</code>? It is whatever effects it requires to run, with the constraint that these effects much include the <code>Writer</code> effect. This is represented by the type parameter <code>F</code>. The result of calling <code>invert</code> is another program that requires all the effects of the argument <code>f</code> <em>and</em> the <code>Display</code> effect. In this way programs are constructed to require only the effects they need to run. So long as we apply them to a concrete <code>Terminal</code> type that is a super-type of these effects they can be run.</p>
 
 <h2 id="low-level-code" class="section">Low-level Code</h2>
 <p>All the ANSI escape codes used by Terminus are defined in <code>terminus.effect.AnsiCodes</code>.
@@ -115,6 +226,8 @@ Here&#39;s a simple example.</p>
         <div class="fixed h-screen overflow-y-auto">
           <p>On This Page</p>
           <ul class="nav-list">
+            <li class="level1 nav-leaf"><a href="#effects-and-their-implementation">Effects and Their Implementation</a></li>
+            <li class="level1 nav-leaf"><a href="#programs-and-their-implementation">Programs and Their Implementation</a></li>
             <li class="level1 nav-leaf"><a href="#low-level-code">Low-level Code</a></li>
           </ul>
         </div>
