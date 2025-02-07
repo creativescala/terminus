@@ -89,7 +89,7 @@ object JLineTerminal
       Reader,
       Writer {
   def apply: JLineTerminal = new JLineTerminal(
-    TerminalBuilder.builder().build()
+    TerminalBuilder.builder().dumb(false).build() // For debugging test
   )
 
   def run[A](f: Program[A]): A = {

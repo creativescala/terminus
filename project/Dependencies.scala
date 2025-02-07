@@ -12,6 +12,7 @@ object Dependencies {
   val scalatagsVersion = "0.13.1"
   val scalajsDomVersion = "2.8.0"
 
+  // Changing the version of this might be the key to unlocking testing
   val jlineVersion = "3.28.0"
 
   val scalaCheckVersion = "1.15.4"
