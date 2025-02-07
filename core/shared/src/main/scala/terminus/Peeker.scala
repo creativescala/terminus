@@ -16,28 +16,12 @@
 
 package terminus
 
-trait Terminal
-    extends effect.AlternateScreenMode[Terminal],
-      effect.ApplicationMode[Terminal],
-      effect.Color[Terminal],
-      effect.Cursor,
-      effect.Display[Terminal],
-      effect.Erase,
-      effect.Peeker,
-      effect.RawMode[Terminal],
-      effect.Reader,
-      effect.Writer
-type Program[A] = Terminal ?=> A
+import terminus.effect.Eof
+import terminus.effect.Timeout
 
-object Terminal
-    extends Color,
-      Cursor,
-      Display,
-      Erase,
-      AlternateScreenMode,
-      ApplicationMode,
-      RawMode,
-      Reader,
-      Writer {
-  export JLineTerminal.*
+import scala.concurrent.duration.Duration
+
+trait Peeker {
+  def peek(duration: Duration): effect.Peeker ?=> Timeout | Eof | Char =
+    effect ?=> effect.peek(duration)
 }

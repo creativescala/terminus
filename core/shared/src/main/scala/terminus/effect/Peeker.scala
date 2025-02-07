@@ -21,6 +21,6 @@ import scala.concurrent.duration.Duration
 sealed trait Timeout
 object Timeout extends Timeout
 
-trait Peaker extends Effect {
+trait Peeker extends Effect {
   def peek(duration: Duration): Timeout | Eof | Char
 }
