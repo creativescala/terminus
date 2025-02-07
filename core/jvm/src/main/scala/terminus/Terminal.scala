@@ -16,14 +16,15 @@
 
 package terminus
 
-trait Terminal extends effect.AlternateScreenMode[Terminal],
+trait Terminal
+    extends effect.AlternateScreenMode[Terminal],
       effect.ApplicationMode[Terminal],
       effect.Color[Terminal],
       effect.Cursor,
       effect.Format[Terminal],
       effect.Dimensions,
       effect.Erase,
-      effect.Peaker,
+      effect.Peeker,
       effect.RawMode[Terminal],
       effect.Reader,
       effect.Writer

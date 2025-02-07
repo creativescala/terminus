@@ -14,13 +14,14 @@
  * limitations under the License.
  */
 
-package terminus.effect
+package terminus
+
+import terminus.effect.Eof
+import terminus.effect.Timeout
 
 import scala.concurrent.duration.Duration
 
-sealed trait Timeout
-object Timeout extends Timeout
-
-trait Peeker extends Effect {
-  def peek(duration: Duration): Timeout | Eof | Char
+trait Peeker {
+  def peek(duration: Duration): effect.Peeker ?=> Timeout | Eof | Char =
+    effect ?=> effect.peek(duration)
 }
