@@ -20,11 +20,12 @@ import org.jline.terminal.Terminal as JTerminal
 import org.jline.terminal.TerminalBuilder
 import org.jline.utils.InfoCmp.Capability
 import terminus.effect.Eof
+import terminus.effect.TerminalKeyReader
 import terminus.effect.Timeout
 
 import scala.concurrent.duration.Duration
 
-class JLineTerminal(terminal: JTerminal) extends Terminal {
+class JLineTerminal(terminal: JTerminal) extends Terminal, TerminalKeyReader {
   private val reader = terminal.reader()
   private val writer = terminal.writer()
 
