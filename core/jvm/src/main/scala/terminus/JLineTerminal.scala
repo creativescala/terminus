@@ -16,8 +16,7 @@
 
 package terminus
 
-import org.jline.terminal.Terminal as JTerminal
-import org.jline.terminal.TerminalBuilder
+import org.jline.terminal.{Size, TerminalBuilder, Terminal as JTerminal}
 import org.jline.utils.InfoCmp.Capability
 import terminus.effect.Eof
 
@@ -47,6 +46,15 @@ class JLineTerminal(terminal: JTerminal) extends Terminal {
     }
   }
 
+// Do we need to consider getBufferSize?
+// Use getSize if in full screen mode?
+// Error handling? Do we want to just return a message detailing the issue?
+//
+  def getDimensions: Unit = {
+    val terminalSize: Size = terminal.getSize
+    writer.write(terminalSize.toString)
+  }
+
   def application[A](f: Terminal ?=> A): A = {
     try {
       terminal.puts(Capability.keypad_xmit)
@@ -73,6 +81,7 @@ object JLineTerminal
     extends Color,
       Cursor,
       Display,
+      Dimensions,
       Erase,
       AlternateScreenMode,
       ApplicationMode,
