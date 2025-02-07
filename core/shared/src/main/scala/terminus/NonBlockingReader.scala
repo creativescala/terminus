@@ -14,8 +14,15 @@
  * limitations under the License.
  */
 
-package terminus.effect
+package terminus
 
-trait Reader extends Effect {
-  def read(): Eof | Char
+import terminus.effect.Eof
+import terminus.effect.Timeout
+
+import scala.concurrent.duration.Duration
+
+trait NonBlockingReader {
+  def read(duration: Duration): effect.NonBlockingReader ?=> Timeout | Eof |
+    Char =
+    effect ?=> effect.read(duration)
 }

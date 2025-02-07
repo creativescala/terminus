@@ -16,6 +16,8 @@
 
 package terminus.effect
 
-trait Reader extends Effect {
-  def read(): Eof | Char
-}
+sealed trait Eof
+object Eof extends Eof
+
+sealed trait Timeout
+object Timeout extends Timeout

@@ -23,6 +23,7 @@ trait Terminal
       effect.Cursor,
       effect.Display[Terminal],
       effect.Erase,
+      effect.NonBlockingReader,
       effect.Peeker,
       effect.RawMode[Terminal],
       effect.Reader,
@@ -30,12 +31,14 @@ trait Terminal
 type Program[A] = Terminal ?=> A
 
 object Terminal
-    extends Color,
+    extends AlternateScreenMode,
+      ApplicationMode,
+      Color,
       Cursor,
       Display,
       Erase,
-      AlternateScreenMode,
-      ApplicationMode,
+      NonBlockingReader,
+      Peeker,
       RawMode,
       Reader,
       Writer {
