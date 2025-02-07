@@ -16,6 +16,9 @@
 
 package terminus.effect
 
+import terminus.Eof
+import terminus.Timeout
+
 import scala.concurrent.duration.Duration
 
 trait Peeker extends Effect {

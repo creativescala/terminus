@@ -19,9 +19,7 @@ package terminus
 import org.jline.terminal.Terminal as JTerminal
 import org.jline.terminal.TerminalBuilder
 import org.jline.utils.InfoCmp.Capability
-import terminus.effect.Eof
 import terminus.effect.TerminalKeyReader
-import terminus.effect.Timeout
 
 import scala.concurrent.duration.Duration
 

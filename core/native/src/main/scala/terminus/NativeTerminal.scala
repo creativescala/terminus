@@ -17,7 +17,6 @@
 package terminus
 
 import terminus.effect.AnsiCodes
-import terminus.effect.Eof
 import terminus.effect.WithEffect
 
 import scala.scalanative.libc
