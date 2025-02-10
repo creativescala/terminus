@@ -16,15 +16,20 @@
 
 package terminus
 
-import terminus.example.Prompt
+import munit.FunSuite
 
-@main def prompt(): Unit = {
-  val idx =
-    Terminal.run(
-      Terminal.raw {
-        Prompt[Terminal](Terminal).loop(0)
-      }
-    )
+class KeyModifierSuite extends FunSuite {
+  test("predicates return true when modifier is present") {
+    assert(KeyModifier.Shift.hasShift)
+    assert(KeyModifier.Control.hasControl)
+    assert(KeyModifier.Alt.hasAlt)
+    assert(KeyModifier.Super.hasSuper)
+    assert(KeyModifier.Hyper.hasHyper)
+    assert(KeyModifier.Meta.hasMeta)
+  }
 
-  println(s"Selected $idx")
+  test("or is the union of modifiers") {
+    assert(KeyModifier.Shift.or(KeyModifier.Control).hasShift)
+    assert(KeyModifier.Shift.or(KeyModifier.Control).hasControl)
+  }
 }

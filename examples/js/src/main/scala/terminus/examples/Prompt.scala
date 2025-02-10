@@ -9,8 +9,8 @@ import scala.concurrent.ExecutionContext.Implicits.global
 object Prompt {
   enum KeyCode {
     case Down
-        case Up
-        case Enter
+    case Up
+    case Enter
   }
 
   // Clear the text we've written
@@ -38,37 +38,37 @@ object Prompt {
   // Convert Javascript key to KeyCode
   // See https://developer.mozilla.org/en-US/docs/Web/API/KeyboardEvent/key
   def read(): Program[Future[KeyCode]] = {
-    Terminal.readKey().flatMap( keyCode =>
-      keyCode match {
-        case "Enter" => Future.successful(KeyCode.Enter)
-        case "ArrowDown" => Future.successful(KeyCode.Down)
-        case "ArrowUp" => Future.successful(KeyCode.Up)
-        case other => read()
-      }
-    )
+    Terminal
+      .readKeyF()
+      .flatMap(keyCode =>
+        keyCode match {
+          case "Enter"     => Future.successful(KeyCode.Enter)
+          case "ArrowDown" => Future.successful(KeyCode.Down)
+          case "ArrowUp"   => Future.successful(KeyCode.Up)
+          case other       => read()
+        }
+      )
   }
 
   def loop(idx: Int): Program[Future[Int]] = {
     write(idx)
-      read().flatMap(keyCode =>
-        keyCode match {
-          case KeyCode.Up =>
-            clear()
-            loop(if idx == 0 then 2 else idx - 1)
+    read().flatMap(keyCode =>
+      keyCode match {
+        case KeyCode.Up =>
+          clear()
+          loop(if idx == 0 then 2 else idx - 1)
 
-          case KeyCode.Down =>
-            clear()
-            loop(if idx == 2 then 0 else idx + 1)
+        case KeyCode.Down =>
+          clear()
+          loop(if idx == 2 then 0 else idx + 1)
 
-          case KeyCode.Enter => Future.successful(idx)
-        }
-      )
-    }
+        case KeyCode.Enter => Future.successful(idx)
+      }
+    )
+  }
   @JSExport
   def go(id: String) =
     Terminal.run(id, rows = 16) {
-      loop(0).map(idx =>
-        Terminal.write(s"You selected $idx")
-      )
+      loop(0).map(idx => Terminal.write(s"You selected $idx"))
     }
 }

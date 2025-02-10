@@ -17,15 +17,22 @@
 package terminus
 
 import terminus.effect.AnsiCodes
+import terminus.effect.TerminalKeyReader
 import terminus.effect.WithEffect
 
+import scala.concurrent.duration.Duration
 import scala.scalanative.libc
 import scala.scalanative.meta.LinktimeInfo
+import scala.scalanative.posix
+import scala.scalanative.unsigned.UInt
 
 import scalanative.unsafe.*
 
 /** A Terminal implementation for Scala Native. */
-object NativeTerminal extends Terminal, WithEffect[Terminal] {
+object NativeTerminal
+    extends Terminal,
+      WithEffect[Terminal],
+      TerminalKeyReader {
   private val termios =
     if LinktimeInfo.isMac then Termios[TermiosStruct.clong_flags]
     else if LinktimeInfo.isLinux then Termios[TermiosStruct.cint_flags]
@@ -48,9 +55,36 @@ object NativeTerminal extends Terminal, WithEffect[Terminal] {
   }
 
   def read(): Eof | Char = {
-    val char = libc.stdio.fgetc(libc.stdio.stdin)
-    if char == libc.stdio.EOF then Eof
-    else char.toChar
+    val buf: Ptr[Byte] = stackalloc[Byte]()
+    val count =
+      posix.unistd.read(posix.unistd.STDIN_FILENO, buf, UInt.valueOf(1))
+    if count == 0 then Eof
+    else (!buf).toChar
+  }
+
+  def read(duration: Duration): Timeout | Eof | Char = {
+    Zone {
+      val origAttrs = termios.getAttributes()
+      val attrs = termios.getAttributes()
+      try {
+        termios.setVMin(attrs, 0)
+        termios.setVTime(attrs, (duration.toMillis / 100).toByte)
+        termios.setAttributes(attrs)
+
+        val buf: Ptr[Byte] = stackalloc[Byte]()
+        val count =
+          posix.unistd.read(posix.unistd.STDIN_FILENO, buf, UInt.valueOf(1))
+
+        if count == 0 then Timeout
+        else if count == -1 then Eof
+        else {
+          (!buf).toChar
+        }
+
+      } finally {
+        termios.setAttributes(origAttrs)
+      }
+    }
   }
 
   def flush(): Unit = {
