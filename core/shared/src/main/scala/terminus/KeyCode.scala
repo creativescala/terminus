@@ -16,20 +16,30 @@
 
 package terminus
 
-import scala.scalanative.unsafe.Zone
-
-/** An abstraction of the termios library that only exposes the functionality we
-  * need
-  */
-trait Termios {
-
-  /** The terminal attributes data structure. (Called termios in the POSIX API.)
-    */
-  type Attributes
-
-  def getAttributes()(using Zone): Attributes
-  def setAttributes(attributes: Attributes): Unit
-  def setVMin(attributes: Attributes, vmin: Byte): Unit
-  def setVTime(attributes: Attributes, vtime: Byte): Unit
-  def setRawMode(): Unit
+enum KeyCode {
+  case Backspace
+  case BackTab
+  case Delete
+  case Enter
+  case Escape
+  case Insert
+  case Left
+  case Right
+  case Up
+  case Down
+  case Home
+  case End
+  case PageUp
+  case PageDown
+  case Tab
+  case F(value: Byte)
+  case Character(char: Char)
+  case Null
+  case CapsLock
+  case ScrollLock
+  case NumLock
+  case PrintScreen
+  case Pause
+  case Menu
+  case KeypadBegin
 }

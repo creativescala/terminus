@@ -25,6 +25,10 @@ import scalanative.posix
 object MacOsTermios extends Termios {
   // https://viewsourcecode.org/snaptoken/kilo/index.html is a good introduction
   // to using the C API to control the terminal.
+  //
+  // Also see http://www.unixwiz.net/techtips/termios-vmin-vtime.html
+  //
+  // For the Darwin header files see https://github.com/apple-oss-distributions/xnu/blob/main/bsd/sys/termios.h
   type Attributes = Ptr[posix.termios.termios]
 
   private val STDIN = scala.scalanative.posix.unistd.STDIN_FILENO
@@ -35,16 +39,23 @@ object MacOsTermios extends Termios {
     attrs
   }
 
+  def setVMin(attributes: Attributes, vmin: CChar): Unit =
+    attributes._5(posix.termios.VMIN) = vmin
+
+  def setVTime(attributes: Attributes, vtime: CChar): Unit =
+    attributes._5(posix.termios.VTIME) = vtime
+
   def setRawMode(): Unit = {
     Zone {
       val attrs = getAttributes()
+      attrs._1 = attrs._1 & ~(posix.termios.ICRNL)
       attrs._4 = attrs._4 & ~(posix.termios.ECHO | posix.termios.ICANON)
       setAttributes(attrs)
     }
   }
 
   def setAttributes(attributes: Attributes): Unit = {
-    val _ = posix.termios.tcsetattr(STDIN, posix.termios.TCSAFLUSH, attributes)
+    val _ = posix.termios.tcsetattr(STDIN, posix.termios.TCSANOW, attributes)
     ()
   }
 }

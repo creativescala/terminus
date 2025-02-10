@@ -33,6 +33,9 @@ object LinuxTermios extends Termios {
   //
   // Original is at
   // https://github.com/scala-native/scala-native/blob/main/posixlib/src/main/scala/scala/scalanative/posix/termios.scala
+  //
+  // See
+  // https://github.com/lattera/glibc/blob/master/bits/termios.h
 
   // types
 
@@ -54,6 +57,12 @@ object LinuxTermios extends Termios {
 
   // functions
 
+  def setVMin(attr: Attributes, byte: CChar): Unit =
+    attr._5(posix.termios.VMIN) = byte
+
+  def setVTime(attr: Attributes, byte: CChar): Unit =
+    attr._5(posix.termios.VTIME) = byte
+
   @extern
   def tcgetattr(fd: CInt, termios_p: Ptr[termios]): CInt = extern
   @extern
@@ -70,13 +79,14 @@ object LinuxTermios extends Termios {
   }
 
   def setAttributes(attributes: Attributes): Unit = {
-    val _ = tcsetattr(STDIN, posix.termios.TCSAFLUSH, attributes)
+    val _ = tcsetattr(STDIN, posix.termios.TCSANOW, attributes)
     ()
   }
 
   def setRawMode(): Unit = {
     Zone {
       val attrs = getAttributes()
+      attrs._1 = attrs._1 & ~(posix.termios.ICRNL)
       attrs._4 = attrs._4 & ~(posix.termios.ECHO | posix.termios.ICANON)
       setAttributes(attrs)
     }
