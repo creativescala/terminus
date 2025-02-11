@@ -10,7 +10,7 @@ class DimensionsSuite extends FunSuite {
 // readLine() never finishes executing
     JLineTerminal.run {
       readLine()
-      JLineTerminal.dimensions.getDimensions
+      JLineTerminal.dimensions.get
       JLineTerminal.flush()
     }
 

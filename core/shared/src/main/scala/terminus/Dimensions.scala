@@ -1,9 +1,11 @@
 package terminus
 
-/** Functionality for getting the dimensions of the terminal */
+import terminus.effect.TerminalDimensions
+
+/** Functionalities related to the dimensions of the terminal */
 trait Dimensions {
   object dimensions {
-    def getDimensions: effect.Dimensions ?=> Unit = effect ?=> 
+    def get: effect.Dimensions ?=> TerminalDimensions = effect ?=>
       effect.getDimensions
   }
 }

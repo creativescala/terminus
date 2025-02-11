@@ -18,7 +18,8 @@ package terminus
 
 import org.jline.terminal.{Size, TerminalBuilder, Terminal as JTerminal}
 import org.jline.utils.InfoCmp.Capability
-import terminus.effect.Eof
+import terminus.effect.{Eof, TerminalDimensions}
+import TerminalDimensions.*
 
 class JLineTerminal(terminal: JTerminal) extends Terminal {
   private val reader = terminal.reader()
@@ -49,10 +50,9 @@ class JLineTerminal(terminal: JTerminal) extends Terminal {
 // Do we need to consider getBufferSize?
 // Use getSize if in full screen mode?
 // Error handling? Do we want to just return a message detailing the issue?
-//
-  def getDimensions: Unit = {
+  def getDimensions: effect.TerminalDimensions = {
     val terminalSize: Size = terminal.getSize
-    writer.write(terminalSize.toString)
+    terminalSize.fromJLineSize
   }
 
   def application[A](f: Terminal ?=> A): A = {
