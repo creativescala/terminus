@@ -59,7 +59,7 @@ class Terminal(root: HTMLElement, options: XtermJsOptions)
 type Program[A] = Terminal ?=> A
 
 object Terminal extends Color, Cursor, Display, Erase, Writer {
-  def readKey(): Program[Future[String]] =
+  def readKeyF(): Program[Future[String]] =
     terminal ?=> terminal.readKey()
 
   def run[A](id: String, rows: Int = 24, cols: Int = 80)(f: Program[A]): A = {

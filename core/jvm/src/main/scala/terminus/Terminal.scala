@@ -17,24 +17,30 @@
 package terminus
 
 trait Terminal
-    extends effect.Color[Terminal],
+    extends effect.AlternateScreenMode[Terminal],
+      effect.ApplicationMode[Terminal],
+      effect.Color[Terminal],
       effect.Cursor,
       effect.Display[Terminal],
       effect.Erase,
-      effect.AlternateScreenMode[Terminal],
-      effect.ApplicationMode[Terminal],
+      effect.KeyReader,
+      effect.NonBlockingReader,
+      effect.Peeker,
       effect.RawMode[Terminal],
       effect.Reader,
       effect.Writer
 type Program[A] = Terminal ?=> A
 
 object Terminal
-    extends Color,
+    extends AlternateScreenMode,
+      ApplicationMode,
+      Color,
       Cursor,
       Display,
       Erase,
-      AlternateScreenMode,
-      ApplicationMode,
+      KeyReader,
+      NonBlockingReader,
+      Peeker,
       RawMode,
       Reader,
       Writer {

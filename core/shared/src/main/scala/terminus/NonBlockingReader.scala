@@ -16,20 +16,10 @@
 
 package terminus
 
-import scala.scalanative.unsafe.Zone
+import scala.concurrent.duration.Duration
 
-/** An abstraction of the termios library that only exposes the functionality we
-  * need
-  */
-trait Termios {
-
-  /** The terminal attributes data structure. (Called termios in the POSIX API.)
-    */
-  type Attributes
-
-  def getAttributes()(using Zone): Attributes
-  def setAttributes(attributes: Attributes): Unit
-  def setVMin(attributes: Attributes, vmin: Byte): Unit
-  def setVTime(attributes: Attributes, vtime: Byte): Unit
-  def setRawMode(): Unit
+trait NonBlockingReader {
+  def read(duration: Duration): effect.NonBlockingReader ?=> Timeout | Eof |
+    Char =
+    effect ?=> effect.read(duration)
 }

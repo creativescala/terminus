@@ -14,22 +14,13 @@
  * limitations under the License.
  */
 
-package terminus
+package terminus.effect
 
-import scala.scalanative.unsafe.Zone
+import terminus.Eof
+import terminus.Timeout
 
-/** An abstraction of the termios library that only exposes the functionality we
-  * need
-  */
-trait Termios {
+import scala.concurrent.duration.Duration
 
-  /** The terminal attributes data structure. (Called termios in the POSIX API.)
-    */
-  type Attributes
-
-  def getAttributes()(using Zone): Attributes
-  def setAttributes(attributes: Attributes): Unit
-  def setVMin(attributes: Attributes, vmin: Byte): Unit
-  def setVTime(attributes: Attributes, vtime: Byte): Unit
-  def setRawMode(): Unit
+trait Peeker extends Effect {
+  def peek(duration: Duration): Timeout | Eof | Char
 }

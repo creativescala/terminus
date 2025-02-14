@@ -16,20 +16,9 @@
 
 package terminus
 
-import scala.scalanative.unsafe.Zone
+trait KeyReader {
 
-/** An abstraction of the termios library that only exposes the functionality we
-  * need
-  */
-trait Termios {
-
-  /** The terminal attributes data structure. (Called termios in the POSIX API.)
-    */
-  type Attributes
-
-  def getAttributes()(using Zone): Attributes
-  def setAttributes(attributes: Attributes): Unit
-  def setVMin(attributes: Attributes, vmin: Byte): Unit
-  def setVTime(attributes: Attributes, vtime: Byte): Unit
-  def setRawMode(): Unit
+  /** Block waiting for a key. */
+  def readKey(): effect.KeyReader ?=> Eof | Key =
+    effect ?=> effect.readKey()
 }

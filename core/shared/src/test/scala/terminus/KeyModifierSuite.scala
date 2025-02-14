@@ -16,20 +16,20 @@
 
 package terminus
 
-import scala.scalanative.unsafe.Zone
+import munit.FunSuite
 
-/** An abstraction of the termios library that only exposes the functionality we
-  * need
-  */
-trait Termios {
+class KeyModifierSuite extends FunSuite {
+  test("predicates return true when modifier is present") {
+    assert(KeyModifier.Shift.hasShift)
+    assert(KeyModifier.Control.hasControl)
+    assert(KeyModifier.Alt.hasAlt)
+    assert(KeyModifier.Super.hasSuper)
+    assert(KeyModifier.Hyper.hasHyper)
+    assert(KeyModifier.Meta.hasMeta)
+  }
 
-  /** The terminal attributes data structure. (Called termios in the POSIX API.)
-    */
-  type Attributes
-
-  def getAttributes()(using Zone): Attributes
-  def setAttributes(attributes: Attributes): Unit
-  def setVMin(attributes: Attributes, vmin: Byte): Unit
-  def setVTime(attributes: Attributes, vtime: Byte): Unit
-  def setRawMode(): Unit
+  test("or is the union of modifiers") {
+    assert(KeyModifier.Shift.or(KeyModifier.Control).hasShift)
+    assert(KeyModifier.Shift.or(KeyModifier.Control).hasControl)
+  }
 }

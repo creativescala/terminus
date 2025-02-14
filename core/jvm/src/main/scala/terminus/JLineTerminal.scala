@@ -19,11 +19,27 @@ package terminus
 import org.jline.terminal.Terminal as JTerminal
 import org.jline.terminal.TerminalBuilder
 import org.jline.utils.InfoCmp.Capability
-import terminus.effect.Eof
+import terminus.effect.TerminalKeyReader
 
-class JLineTerminal(terminal: JTerminal) extends Terminal {
+import scala.concurrent.duration.Duration
+
+class JLineTerminal(terminal: JTerminal) extends Terminal, TerminalKeyReader {
   private val reader = terminal.reader()
   private val writer = terminal.writer()
+
+  def peek(duration: Duration): Timeout | Eof | Char =
+    reader.peek(duration.toMillis) match {
+      case -2   => Timeout
+      case -1   => Eof
+      case char => char.toChar
+    }
+
+  def read(duration: Duration): Timeout | Eof | Char =
+    reader.read(duration.toMillis) match {
+      case -2   => Timeout
+      case -1   => Eof
+      case char => char.toChar
+    }
 
   def read(): Eof | Char =
     reader.read() match {
