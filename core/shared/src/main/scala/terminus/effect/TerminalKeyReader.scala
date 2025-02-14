@@ -36,75 +36,89 @@ trait TerminalKeyReader(timeout: Duration = 100.millis) extends KeyReader {
   //   https://github.com/Textualize/textual/blob/main/src/textual/_ansi_sequences.py
   def readKey(): Eof | Key =
     read() match {
-      case ' '       => Key(' ')
-      case Ascii.NUL => Key.control('@') // Control-At (Also for Ctrl-Space)
-      case Ascii.SOH => Key.control('a') // Control-A (home)
-      case Ascii.STX => Key.control('b') // Control-B (emacs cursor left)
-      case Ascii.ETX => Key.control('c') // Control-C (interrupt)
-      case Ascii.EOT => Key.control('d') // Control-D (exit)
-      case Ascii.ENQ => Key.control('e') // Control-E (end)
-      case Ascii.ACK => Key.control('f') // Control-F (cursor forward)
-      case Ascii.BEL => Key.control('g') // Control-G
-      case Ascii.BS =>
-        Key(KeyCode.Backspace) // Control-H (8) (Identical to '\b')
-      case Ascii.HT => Key('\t') // Control-I (9) (Identical to '\t')
-      case Ascii.LF => Key('\n') // Control-J (10) (Identical to '\n')
+      case ' '       => Key.space
+      case Ascii.NUL => Key.controlAt // Control-At (Also for Ctrl-Space)
+      case Ascii.SOH => Key.controlA // Control-A (home)
+      case Ascii.STX => Key.controlB // Control-B (emacs cursor left)
+      case Ascii.ETX => Key.controlC // Control-C (interrupt)
+      case Ascii.EOT => Key.controlD // Control-D (exit)
+      case Ascii.ENQ => Key.controlE // Control-E (end)
+      case Ascii.ACK => Key.controlF // Control-F (cursor forward)
+      case Ascii.BEL => Key.controlG // Control-G
+      case Ascii.BS  => Key.backspace // Control-H (8) (Identical to '\b')
+      case Ascii.HT  => Key.tab // Control-I (9) (Identical to '\t')
+      case Ascii.LF  => Key.newLine // Control-J (10) (Identical to '\n')
       case Ascii.VT =>
-        Key.control('k') // Control-K (delete until end of line; vertical tab)
-      case Ascii.FF  => Key.control('l') // Control-L (clear; form feed)
-      case Ascii.CR  => Key(KeyCode.Enter)
-      case Ascii.SO  => Key.control('n') // Control-N (14) (history forward)
-      case Ascii.SI  => Key.control('o') // Control-O (15)
-      case Ascii.DLE => Key.control('p') // Control-P (16) (history back)
-      case Ascii.DC1 => Key.control('q') // Control-Q
-      case Ascii.DC2 => Key.control('r') // Control-R (18) (reverse search)
-      case Ascii.DC3 => Key.control('s') // Control-S (19) (forward search)
-      case Ascii.DC4 => Key.control('t') // Control-T
-      case Ascii.NAK => Key.control('u') // Control-U
-      case Ascii.SYN => Key.control('v') // Control-V
-      case Ascii.ETB => Key.control('w') // Control-W
-      case Ascii.CAN => Key.control('x') // Control-X
-      case Ascii.EM  => Key.control('y') // Control-Y (25)
-      case Ascii.SUB => Key.control('z') // Control-Z
+        Key.controlK // Control-K (delete until end of line; vertical tab)
+      case Ascii.FF  => Key.controlL // Control-L (clear; form feed)
+      case Ascii.CR  => Key.enter
+      case Ascii.SO  => Key.controlN // Control-N (14) (history forward)
+      case Ascii.SI  => Key.controlO // Control-O (15)
+      case Ascii.DLE => Key.controlP // Control-P (16) (history back)
+      case Ascii.DC1 => Key.controlQ // Control-Q
+      case Ascii.DC2 => Key.controlR // Control-R (18) (reverse search)
+      case Ascii.DC3 => Key.controlS // Control-S (19) (forward search)
+      case Ascii.DC4 => Key.controlT // Control-T
+      case Ascii.NAK => Key.controlU // Control-U
+      case Ascii.SYN => Key.controlV // Control-V
+      case Ascii.ETB => Key.controlW // Control-W
+      case Ascii.CAN => Key.controlX // Control-X
+      case Ascii.EM  => Key.controlY // Control-Y (25)
+      case Ascii.SUB => Key.controlZ // Control-Z
 
-      case '\u009b' => Key.shift(KeyCode.Escape)
-      case '\u001c' => Key.control('\\')
-      case '\u001d' => Key.control(']')
-      case '\u001e' => Key.control('^')
-      case '\u001f' => Key.control('_')
-
+      case '\u009b' => Key.shiftEscape
+      case '\u001c' => Key.controlBackslash
+      case '\u001d' => Key.controlSquareClose
+      case '\u001e' => Key.controlCircumflex
+      case '\u001f' => Key.controlUnderscore
+      case '\u007f' => Key.backspace
       case Ascii.ESC =>
         read(timeout) match {
-          case Eof     => Key(KeyCode.Escape)
-          case Timeout => Key(KeyCode.Escape)
+          case Eof     => Key.escape
+          case Timeout => Key.escape
           // Normal mode
           case '[' =>
             read() match {
               case Eof => Eof
-              case 'A' => Key(KeyCode.Up)
-              case 'B' => Key(KeyCode.Down)
-              case 'C' => Key(KeyCode.Right)
-              case 'D' => Key(KeyCode.Left)
-              case 'F' => Key(KeyCode.End)
-              case 'H' => Key(KeyCode.Home)
-              case other: Char =>
-                Key(other)
+              case 'A' => Key.up
+              case 'B' => Key.down
+              case 'C' => Key.right
+              case 'D' => Key.left
+              case 'F' => Key.`end`
+              case 'H' => Key.home
+              case digit: Char if digit.isDigit =>
+                read() match {
+                  case Eof => Eof
+                  case '~' =>
+                    digit match {
+                      case '1'         => Key.home // tmux
+                      case '2'         => Key.insert
+                      case '3'         => Key.delete
+                      case '4'         => Key.`end` // tmux
+                      case '5'         => Key.pageUp
+                      case '6'         => Key.pageDown
+                      case '7'         => Key.home // xrvt
+                      case '8'         => Key.`end` // xrvt
+                      case other: Char => Key.unknown(s"${Ascii.ESC}[~${other}")
+                    }
+                  case other: Char => Key.unknown(s"${Ascii.ESC}[${other}")
+                }
+              case 'Z'         => Key.backTab
+              case other: Char => Key.unknown(s"${Ascii.ESC}[${other}")
             }
           // Application mode
           case 'O' =>
             read() match {
-              case Eof => Eof
-              case 'A' => Key(KeyCode.Up)
-              case 'B' => Key(KeyCode.Down)
-              case 'C' => Key(KeyCode.Right)
-              case 'D' => Key(KeyCode.Left)
-              case 'F' => Key(KeyCode.End)
-              case 'H' => Key(KeyCode.Home)
-              case other: Char =>
-                Key(other)
+              case Eof         => Eof
+              case 'A'         => Key.up
+              case 'B'         => Key.down
+              case 'C'         => Key.right
+              case 'D'         => Key.left
+              case 'F'         => Key.`end`
+              case 'H'         => Key.home
+              case other: Char => Key.unknown(s"${Ascii.ESC}O${other}")
             }
-          case other: Char =>
-            Key(other)
+          case other: Char => Key.unknown(s"${Ascii.ESC}${other}")
         }
 
       case Eof         => Eof
