@@ -17,29 +17,34 @@
 package terminus
 
 enum KeyCode {
-  case Backspace
   case BackTab
+  case Backspace
+  case CapsLock
+  case Character(char: Char)
   case Delete
+  case Down
+  case End
   case Enter
   case Escape
-  case Insert
-  case Left
-  case Right
-  case Up
-  case Down
-  case Home
-  case End
-  case PageUp
-  case PageDown
-  case Tab
   case F(value: Byte)
-  case Character(char: Char)
-  case Null
-  case CapsLock
-  case ScrollLock
-  case NumLock
-  case PrintScreen
-  case Pause
-  case Menu
+  case Home
+  case Insert
   case KeypadBegin
+  case Left
+  case Menu
+  case Null
+  case NumLock
+  case PageDown
+  case PageUp
+  case Pause
+  case PrintScreen
+  case Right
+  case ScrollLock
+  case Tab
+  case Up
+
+  /** This case represents a sequence of codes that we don't know how to
+    * interpret. The entire sequence is contained here for debugging purposes.
+    */
+  case Unknown(code: String)
 }

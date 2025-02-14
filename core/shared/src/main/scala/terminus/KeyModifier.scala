@@ -25,6 +25,8 @@ object KeyModifier {
   val Hyper: KeyModifier = 0x0010
   val Meta: KeyModifier = 0x0020
   val None: KeyModifier = 0x0000
+
+  val ControlShift = Control.or(Shift)
 }
 extension (modifier: KeyModifier) {
   def and(other: KeyModifier): KeyModifier =
