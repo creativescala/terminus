@@ -18,7 +18,7 @@ package terminus.effect
 
 trait Alert extends Writer {
   object alert {
-    def trigger(n: Int = 1): Unit = {
+    def apply(n: Int = 1): Unit = {
       val a = List.fill(n)(Ascii.BEL).mkString
       write(a)
     }

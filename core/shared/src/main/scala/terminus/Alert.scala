@@ -18,7 +18,7 @@ package terminus
 
 trait Alert {
   object alert {
-    def trigger(n: Int = 1): effect.Alert ?=> Unit =
-      effect ?=> effect.alert.trigger(n)
+    def apply(n: Int = 1): effect.Alert ?=> Unit =
+      effect ?=> effect.alert.apply(n)
   }
 }
