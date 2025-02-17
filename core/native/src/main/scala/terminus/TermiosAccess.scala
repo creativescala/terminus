@@ -1,7 +1,23 @@
+/*
+ * Copyright 2024 Creative Scala
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package terminus
 
 import scala.scalanative.posix
-import scala.scalanative.unsafe._
+import scala.scalanative.unsafe.*
 
 trait TermiosAccess[T] {
   val STDIN = scala.scalanative.posix.unistd.STDIN_FILENO
@@ -75,22 +91,22 @@ given linuxTermiosAccess: TermiosAccess[TermiosTypes.linux] =
     }
 
     override def addLocalFlags(
-                                attrs: Ptr[TermiosTypes.linux],
-                                flags: CInt
-                              ): Unit = attrs._4 = attrs._4 | flags
+        attrs: Ptr[TermiosTypes.linux],
+        flags: CInt
+    ): Unit = attrs._4 = attrs._4 | flags
 
     override def removeLocalFlags(
-                                   attrs: Ptr[TermiosTypes.linux],
-                                   flags: CInt
-                                 ): Unit = attrs._4 = attrs._4 & ~flags
+        attrs: Ptr[TermiosTypes.linux],
+        flags: CInt
+    ): Unit = attrs._4 = attrs._4 & ~flags
 
     @extern
     def tcgetattr(fd: CInt, termios_p: Ptr[TermiosTypes.linux]): CInt = extern
 
     @extern
     def tcsetattr(
-                   fd: CInt,
-                   optionalActions: CInt,
-                   termios_p: Ptr[TermiosTypes.linux]
-                 ): CInt = extern
+        fd: CInt,
+        optionalActions: CInt,
+        termios_p: Ptr[TermiosTypes.linux]
+    ): CInt = extern
   }
