@@ -16,29 +16,9 @@
 
 package terminus
 
-trait Terminal
-    extends effect.Alert,
-      effect.Color[Terminal],
-      effect.Cursor,
-      effect.Display[Terminal],
-      effect.Erase,
-      effect.AlternateScreenMode[Terminal],
-      effect.ApplicationMode[Terminal],
-      effect.RawMode[Terminal],
-      effect.Reader,
-      effect.Writer
-type Program[A] = Terminal ?=> A
-
-object Terminal
-    extends Alert,
-      Color,
-      Cursor,
-      Display,
-      Erase,
-      AlternateScreenMode,
-      ApplicationMode,
-      RawMode,
-      Reader,
-      Writer {
-  export JLineTerminal.*
+trait Alert {
+  object alert {
+    def apply(n: Int = 1): effect.Alert ?=> Unit =
+      effect ?=> effect.alert.apply(n)
+  }
 }

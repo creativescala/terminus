@@ -17,7 +17,8 @@
 package terminus
 
 trait Terminal
-    extends effect.Color[Terminal],
+    extends effect.Alert,
+      effect.Color[Terminal],
       effect.Cursor,
       effect.Display[Terminal],
       effect.Erase,
