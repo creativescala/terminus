@@ -28,8 +28,8 @@ import scalanative.unsafe.*
 /** A Terminal implementation for Scala Native. */
 object NativeTerminal extends Terminal, WithEffect[Terminal] {
   val termios =
-    if LinktimeInfo.isMac then Termios[TermiosTypes.mac]
-    else if LinktimeInfo.isLinux then Termios[TermiosTypes.linux]
+    if LinktimeInfo.isMac then Termios[TermiosStruct.clong_flags]
+    else if LinktimeInfo.isLinux then Termios[TermiosStruct.cint_flags]
     else
       sys.error(
         s"""Your platform, {LinktimeInfo.target.os}, is not currently supported by Terminus on Scala Native.
