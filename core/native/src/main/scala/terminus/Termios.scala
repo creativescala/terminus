@@ -16,18 +16,18 @@
 
 package terminus
 
-import scala.scalanative.unsafe.Zone
+import scala.scalanative.posix
+import scala.scalanative.unsafe.{Ptr, Zone}
 
-/** An abstraction of the termios library that only exposes the functionality we
-  * need
-  */
-trait Termios {
+class Termios[T](using accessor: TermiosAccess[T]) {
+  def getAttributes()(using Zone): Ptr[T] = accessor.get
 
-  /** The terminal attributes data structure. (Called termios in the POSIX API.)
-    */
-  type Attributes
+  def setAttributes(attributes: Ptr[T]): Unit = accessor.set(attributes)
 
-  def getAttributes()(using Zone): Attributes
-  def setRawMode(): Unit
-  def setAttributes(attributes: Attributes): Unit
+  def setRawMode(): Unit =
+    Zone {
+      val attrs = accessor.get
+      attrs.removeLocalFlags(posix.termios.ECHO | posix.termios.ICANON)
+      accessor.set(attrs)
+    }
 }
