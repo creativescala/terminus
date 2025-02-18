@@ -27,7 +27,7 @@ import scalanative.unsafe.*
 
 /** A Terminal implementation for Scala Native. */
 object NativeTerminal extends Terminal, WithEffect[Terminal] {
-  val termios =
+  private val termios =
     if LinktimeInfo.isMac then Termios[TermiosStruct.clong_flags]
     else if LinktimeInfo.isLinux then Termios[TermiosStruct.cint_flags]
     else
