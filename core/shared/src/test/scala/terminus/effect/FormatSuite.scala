@@ -19,36 +19,36 @@ package terminus.effect
 import munit.FunSuite
 import terminus.StringBuilderTerminal
 
-class DisplaySuite extends FunSuite {
+class FormatSuite extends FunSuite {
   test("Bold and light stack in nested scopes") {
     val result =
       StringBuilderTerminal.run { t ?=>
-        t.display.bold {
+        t.format.bold {
           t.write("Bold ")
-          t.display.light { t.write("Light ") }
+          t.format.light { t.write("Light ") }
           t.write("Bold ")
         }
       }
 
     assertEquals(
       result,
-      s"${AnsiCodes.display.bold.on}Bold ${AnsiCodes.display.light.on}Light ${AnsiCodes.display.bold.on}Bold ${AnsiCodes.display.bold.off}"
+      s"${AnsiCodes.format.bold.on}Bold ${AnsiCodes.format.light.on}Light ${AnsiCodes.format.bold.on}Bold ${AnsiCodes.format.bold.off}"
     )
   }
 
   test("Blink toggles off only when exiting outermost block") {
     val result =
       StringBuilderTerminal.run { t ?=>
-        t.display.blink {
+        t.format.blink {
           t.write("Blink ")
-          t.display.blink { t.write("Blink ") }
+          t.format.blink { t.write("Blink ") }
           t.write("Blink ")
         }
       }
 
     assertEquals(
       result,
-      s"${AnsiCodes.display.blink.on}Blink Blink Blink ${AnsiCodes.display.blink.off}"
+      s"${AnsiCodes.format.blink.on}Blink Blink Blink ${AnsiCodes.format.blink.off}"
     )
   }
 }
