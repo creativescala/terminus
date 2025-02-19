@@ -32,7 +32,7 @@ As the above suggests, the interfaces defining the functionality live in the pac
 
 Let's now see an example of an effect type. Here's @:api(terminus.effect.Writer), one of the most basic types:
 
-```scala
+```scala 3
 /** Interface for writing to a console. */
 trait Writer extends Effect {
 
@@ -49,7 +49,7 @@ trait Writer extends Effect {
 
 As we can see, it just defines some abstract methods that will be implemented in a backend specific way. The effect type can provide a default implementation where there is a reasonable cross-backend way to do so. Here's @:api(terminus.effect.Erase), which sends standard escape codes. A backend specific implementation could override this if there was some advantage to doing so.
 
-```scala
+```scala 3
 /** Functionality for clearing contents on the terminal. */
 trait Erase extends Writer {
   object erase {
@@ -98,7 +98,7 @@ trait Format[+F <: Writer] extends WithStack[F], WithToggle[F] { self: F =>
 
 When we create a program like 
 
-```scala
+```scala 3
 Terminal.invert(Terminal.write("Inverted"))
 ```
 
@@ -166,7 +166,7 @@ All the ANSI escape codes used by Terminus are defined in `terminus.effect.AnsiC
 This can be useful if you want to write [escape codes][ansi-escape-codes] directly to the terminal without the abstractions provided by the Terminus DSL.
 Here's a simple example.
 
-```scala mdoc
+```scala 3 mdoc
 import terminus.effect.AnsiCodes
 
 AnsiCodes.foreground.red

@@ -21,7 +21,7 @@ to create a new project. It doesn't matter what name you give this project. Some
 Open `build.sbt` in the project you just created. Above the line that starts with `libraryDependencies` add
 
 ```scala
-libraryDependencies += "org.creativescala" %%% "terminus-core" % "@VERSION@",
+libraryDependencies += "org.creativescala" %%% "terminus-core" % "@VERSION@"
 ```
 
 Note the trailing comma on this line. sbt will be upset if you don't add this.

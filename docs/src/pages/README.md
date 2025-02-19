@@ -21,7 +21,7 @@ libraryDependencies += "org.creativescala" %%% "terminus-core" % "@VERSION@"
 
 Import Terminus
 
-```scala mdoc:silent
+```scala 3 mdoc:silent
 import terminus.*
 ```
 
@@ -52,7 +52,7 @@ All the ANSI escape codes used by Terminus are defined in `terminus.effect.AnsiC
 This can be useful if you want to write [escape codes][ansi-escape-codes] directly to the terminal without the abstractions provided by the Terminus DSL.
 Here's a simple example.
 
-```scala mdoc
+```scala 3 mdoc
 import terminus.effect.AnsiCodes
 
 AnsiCodes.foreground.red
