@@ -16,18 +16,48 @@
 
 package terminus
 
-import scala.scalanative.unsafe.Zone
+import scala.scalanative.posix
+import scala.scalanative.unsafe.{Ptr, Zone}
 
-/** An abstraction of the termios library that only exposes the functionality we
-  * need
+/** An abstraction over the c termios library that contains only the
+  * functionality that we need, hiding the details of reading, updating, and
+  * writing terminal settings from the caller. The details are handled by a
+  * [[TermiosAccess]] typeclass instance.
+  *
+  * @see
+  *   [[TermiosAccess]]
+  * @see
+  *   [[TermiosStruct]]
+  *
+  * @param accessor
+  *   An instance of [[TermiosAccess]] used to handle the actual reading,
+  *   updating, and writing of terminal settings.
+  * @tparam T
+  *   The termios structure type a Termios instance uses. See [[TermiosStruct]]
+  *   for more details
   */
-trait Termios {
+class Termios[T](using accessor: TermiosAccess[T]) {
 
-  /** The terminal attributes data structure. (Called termios in the POSIX API.)
+  /** Allocates a new termios structure defined by [[this.T]], in the given
+    * [[Zone]] and copies the current terminal settings into it, returning a
+    * pointer in memory to this structure.
     */
-  type Attributes
+  def getAttributes()(using Zone): Ptr[T] = accessor.get
 
-  def getAttributes()(using Zone): Attributes
-  def setRawMode(): Unit
-  def setAttributes(attributes: Attributes): Unit
+  /** Sets the terminal settings to the attributes defined by the termios
+    * structure stored at the pointer specified by the [[attributes]] argument.
+    */
+  def setAttributes(attributes: Ptr[T]): Unit = accessor.set(attributes)
+
+  /** Places the terminal in raw mode.
+    *
+    * @see
+    *   [[https://en.wikipedia.org/wiki/Terminal_mode Terminal Modes]]
+    */
+  def setRawMode(): Unit =
+    Zone {
+      val attrs = accessor.get
+      attrs.removeLocalFlags(posix.termios.ECHO | posix.termios.ICANON)
+      accessor.set(attrs)
+    }
 }
