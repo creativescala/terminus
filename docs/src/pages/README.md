@@ -28,9 +28,9 @@ import terminus.*
 Now call methods on the `Terminal` object. The core methods are `read` and `write`, but there are also methods to change color, move the cursor, erase content, and so on. On most terminals you will need to call `flush` or your output won't appear. Wrap a call to `run` around your entire program. Here's a small example that prints green text.
 
 
-```scala mdoc:compile-only
+```scala 3 mdoc:compile-only
 Terminal.run {
-  Terminal.display.bold {
+  Terminal.format.bold {
     Terminal.foreground.green {
       Terminal.write("This is Terminus!")
       Terminal.flush()

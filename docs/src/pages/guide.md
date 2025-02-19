@@ -113,11 +113,11 @@ Call `read` to wait for a character from the terminal. This returns character co
 
 ### Formatting Output
 
-Terminus provides many methods to control the formatting of text in the terminal. You can set the foreground or background, make text bold, make text blink, and a lot more. See the @:api(terminus.effect.Display) and @:api(terminus.effect.Color) API documentation to see everything that is available.
+Terminus provides many methods to control the formatting of text in the terminal. You can set the foreground or background, make text bold, make text blink, and a lot more. See the @:api(terminus.effect.Format) and @:api(terminus.effect.Color) API documentation to see everything that is available.
 
 These methods all take a `Program` as a parameter. The effect is applied to any output from that `Program` program, but it not persist outside the scope of the method. These methods can be arbitrarily nested, and will work correctly. For example, we can nest green text inside yellow text and get the correct mix of yellow and green.
 
-```scala mdoc:compile-only
+```scala 3 mdoc:compile-only
 Terminal.run {
   Terminal.foreground.yellow {
     Terminal.write("Yellow ")
@@ -133,10 +133,10 @@ Terminal.run {
 
 This example shows some more of the formatting options available.
 
-```scala mdoc:compile-only
+```scala 3 mdoc:compile-only
 Terminal.run {
-  Terminal.display.bold(
-    Terminal.display.strikethrough(
+  Terminal.format.bold(
+    Terminal.format.strikethrough(
       Terminal.write("Bold and strikethrough\r\n")
     )
   )
@@ -145,8 +145,8 @@ Terminal.run {
       Terminal.write("Foreground and background color\r\n")
     )
   )
-  Terminal.display.invert(
-    Terminal.display.underline.curly(
+  Terminal.format.invert(
+    Terminal.format.underline.curly(
       Terminal.write("Inverted with curly underline")
     )
   )
