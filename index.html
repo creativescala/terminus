@@ -107,7 +107,7 @@ Using Terminus you can build:</p>
 <pre><code class="nohighlight"><span class="keyword">import</span><span> </span><span class="identifier">terminus</span><span>.*</span></code></pre>
 <p>Now call methods on the <code>Terminal</code> object. The core methods are <code>read</code> and <code>write</code>, but there are also methods to change color, move the cursor, erase content, and so on. On most terminals you will need to call <code>flush</code> or your output won&#39;t appear. Wrap a call to <code>run</code> around your entire program. Here&#39;s a small example that prints green text.</p>
 <pre><code class="nohighlight"><span class="type-name">Terminal</span><span>.</span><span class="identifier">run</span><span> {
-  </span><span class="type-name">Terminal</span><span>.</span><span class="identifier">display</span><span>.</span><span class="identifier">bold</span><span> {
+  </span><span class="type-name">Terminal</span><span>.</span><span class="identifier">format</span><span>.</span><span class="identifier">bold</span><span> {
     </span><span class="type-name">Terminal</span><span>.</span><span class="identifier">foreground</span><span>.</span><span class="identifier">green</span><span> {
       </span><span class="type-name">Terminal</span><span>.</span><span class="identifier">write</span><span>(</span><span class="string-literal">&quot;This is Terminus!&quot;</span><span>)
       </span><span class="type-name">Terminal</span><span>.</span><span class="identifier">flush</span><span>()
@@ -126,9 +126,7 @@ Here&#39;s a simple example.</p>
 <pre><code class="nohighlight"><span class="keyword">import</span><span> </span><span class="identifier">terminus</span><span>.</span><span class="identifier">effect</span><span>.</span><span class="type-name">AnsiCodes</span><span>
 
 </span><span class="type-name">AnsiCodes</span><span>.</span><span class="identifier">foreground</span><span>.</span><span class="identifier">red</span><span>
-</span><span class="comment">// res1: String = &quot;\u001b[31m&quot;
-</span><span class="type-name">AnsiCodes</span><span>.</span><span class="identifier">erase</span><span>.</span><span class="identifier">line</span><span>
-</span><span class="comment">// res2: String = &quot;\u001b[2K&quot;</span></code></pre>
+</span><span class="type-name">AnsiCodes</span><span>.</span><span class="identifier">erase</span><span>.</span><span class="identifier">line</span></code></pre>
 
 <h2 id="notes" class="section">Notes</h2>
 <p>You won&#39;t be able to run terminal programs from sbt if the JVM forks when running. That is, if you have the setting</p>

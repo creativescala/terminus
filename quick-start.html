@@ -100,14 +100,14 @@
 <pre><code class="nohighlight"><span>sbt new scala/scala</span><span class="number-literal">3</span><span>.g</span><span class="number-literal">8</span></code></pre>
 <p>to create a new project. It doesn&#39;t matter what name you give this project. Something simple, like <code>terminal</code>, will do.</p>
 <p>Open <code>build.sbt</code> in the project you just created. Above the line that starts with <code>libraryDependencies</code> add</p>
-<pre><code class="nohighlight"><span class="identifier">libraryDependencies</span><span> += </span><span class="string-literal">&quot;org.creativescala&quot;</span><span> %%% </span><span class="string-literal">&quot;terminus-core&quot;</span><span> % </span><span class="string-literal">&quot;0.3&quot;</span><span>,</span></code></pre>
+<pre><code class="nohighlight"><span class="identifier">libraryDependencies</span><span> += </span><span class="string-literal">&quot;org.creativescala&quot;</span><span> %%% </span><span class="string-literal">&quot;terminus-core&quot;</span><span> % </span><span class="string-literal">&quot;0.3&quot;</span></code></pre>
 <p>Note the trailing comma on this line. sbt will be upset if you don&#39;t add this.</p>
 <p>Now open <code>src/main/scala/Main.scala</code> and replace the code with</p>
 <pre><code class="nohighlight"><span class="keyword">import</span><span> </span><span class="identifier">terminus</span><span>.*
 
 </span><span class="annotation">@main</span><span> </span><span class="keyword">def</span><span> </span><span class="declaration-name">hello</span><span>(): </span><span class="type-name">Unit</span><span> =
   </span><span class="type-name">Terminal</span><span>.</span><span class="identifier">run</span><span> {
-    </span><span class="type-name">Terminal</span><span>.</span><span class="identifier">display</span><span>.</span><span class="identifier">bold</span><span> {
+    </span><span class="type-name">Terminal</span><span>.</span><span class="identifier">format</span><span>.</span><span class="identifier">bold</span><span> {
       </span><span class="type-name">Terminal</span><span>.</span><span class="identifier">foreground</span><span>.</span><span class="identifier">green</span><span> {
         </span><span class="type-name">Terminal</span><span>.</span><span class="identifier">write</span><span>(</span><span class="string-literal">&quot;This is Terminus!&quot;</span><span>)
         </span><span class="type-name">Terminal</span><span>.</span><span class="identifier">flush</span><span>()

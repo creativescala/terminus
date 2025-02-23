@@ -133,9 +133,7 @@
   </span><span class="identifier">result</span><span>
 }</span></code></pre>
 <p>The final rule is if we don&#39;t tell the compiler we&#39;re expecting a context function, we may get an error when the compiler attempts to apply a context function to a given value that does not exist.</p>
-<pre><code class="nohighlight"><span class="type-name">Terminal</span><span>.</span><span class="identifier">write</span><span>(</span><span class="string-literal">&quot;Some output&quot;</span><span>)
-</span><span class="comment">// error: 
-// No given instance of type terminus.effect.Writer was found for parameter of (terminus.effect.Writer) ?=&gt; Unit</span></code></pre>
+<pre><code class="nohighlight"><span class="type-name">Terminal</span><span>.</span><span class="identifier">write</span><span>(</span><span class="string-literal">&quot;Some output&quot;</span><span>)</span></code></pre>
 <p>We can solve this by either adding a context function type annotation</p>
 <pre><code class="nohighlight"><span class="keyword">val</span><span> </span><span class="identifier">ok</span><span>: </span><span class="type-name">Program</span><span>[</span><span class="type-name">Unit</span><span>] = </span><span class="type-name">Terminal</span><span>.</span><span class="identifier">write</span><span>(</span><span class="string-literal">&quot;Some output&quot;</span><span>)</span></code></pre>
 <p>or by providing a <code>given</code> value of the required type, which is what <code>Terminal.run</code> does.</p>
@@ -158,7 +156,7 @@
 <p>Call <code>read</code> to wait for a character from the terminal. This returns character codes directly as sent by the terminal, which uses escape codes to encode various keys. For example, the up arrow is represented as the sequence of characters <code>ESC</code>, <code>[</code>, and <code>A</code>. You&#39;ll have to, for now, parse these yourself.</p>
 
 <h3 id="formatting-output" class="section">Formatting Output</h3>
-<p>Terminus provides many methods to control the formatting of text in the terminal. You can set the foreground or background, make text bold, make text blink, and a lot more. See the <a class="api" href="https://javadoc.io/doc/org.creativescala/terminus-docs_3/latest/terminus/effect/Display.html">Display</a> and <a class="api" href="https://javadoc.io/doc/org.creativescala/terminus-docs_3/latest/terminus/effect/Color.html">Color</a> API documentation to see everything that is available.</p>
+<p>Terminus provides many methods to control the formatting of text in the terminal. You can set the foreground or background, make text bold, make text blink, and a lot more. See the <a class="api" href="https://javadoc.io/doc/org.creativescala/terminus-docs_3/latest/terminus/effect/Format.html">Format</a> and <a class="api" href="https://javadoc.io/doc/org.creativescala/terminus-docs_3/latest/terminus/effect/Color.html">Color</a> API documentation to see everything that is available.</p>
 <p>These methods all take a <code>Program</code> as a parameter. The effect is applied to any output from that <code>Program</code> program, but it not persist outside the scope of the method. These methods can be arbitrarily nested, and will work correctly. For example, we can nest green text inside yellow text and get the correct mix of yellow and green.</p>
 <pre><code class="nohighlight"><span class="type-name">Terminal</span><span>.</span><span class="identifier">run</span><span> {
   </span><span class="type-name">Terminal</span><span>.</span><span class="identifier">foreground</span><span>.</span><span class="identifier">yellow</span><span> {
@@ -173,8 +171,8 @@
 <script>NestedFormat.go("nested-format")</script>
 <p>This example shows some more of the formatting options available.</p>
 <pre><code class="nohighlight"><span class="type-name">Terminal</span><span>.</span><span class="identifier">run</span><span> {
-  </span><span class="type-name">Terminal</span><span>.</span><span class="identifier">display</span><span>.</span><span class="identifier">bold</span><span>(
-    </span><span class="type-name">Terminal</span><span>.</span><span class="identifier">display</span><span>.</span><span class="identifier">strikethrough</span><span>(
+  </span><span class="type-name">Terminal</span><span>.</span><span class="identifier">format</span><span>.</span><span class="identifier">bold</span><span>(
+    </span><span class="type-name">Terminal</span><span>.</span><span class="identifier">format</span><span>.</span><span class="identifier">strikethrough</span><span>(
       </span><span class="type-name">Terminal</span><span>.</span><span class="identifier">write</span><span>(</span><span class="string-literal">&quot;Bold and strikethrough</span><span class="escape-sequence">\r\n</span><span class="string-literal">&quot;</span><span>)
     )
   )
@@ -183,8 +181,8 @@
       </span><span class="type-name">Terminal</span><span>.</span><span class="identifier">write</span><span>(</span><span class="string-literal">&quot;Foreground and background color</span><span class="escape-sequence">\r\n</span><span class="string-literal">&quot;</span><span>)
     )
   )
-  </span><span class="type-name">Terminal</span><span>.</span><span class="identifier">display</span><span>.</span><span class="identifier">invert</span><span>(
-    </span><span class="type-name">Terminal</span><span>.</span><span class="identifier">display</span><span>.</span><span class="identifier">underline</span><span>.</span><span class="identifier">curly</span><span>(
+  </span><span class="type-name">Terminal</span><span>.</span><span class="identifier">format</span><span>.</span><span class="identifier">invert</span><span>(
+    </span><span class="type-name">Terminal</span><span>.</span><span class="identifier">format</span><span>.</span><span class="identifier">underline</span><span>.</span><span class="identifier">curly</span><span>(
       </span><span class="type-name">Terminal</span><span>.</span><span class="identifier">write</span><span>(</span><span class="string-literal">&quot;Inverted with curly underline&quot;</span><span>)
     )
   )

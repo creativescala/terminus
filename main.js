@@ -4085,42 +4085,6 @@ var $d_Lterminus_Cursor$cursor$ = new $TypeData().initClass($c_Lterminus_Cursor$
   Lterminus_Cursor$cursor$: 1
 }));
 /** @constructor */
-function $c_Lterminus_Display$display$(outer) {
-  this.Lterminus_Display$display$__f_underline$lzy1 = null;
-  this.Lterminus_Display$display$__f_underlinebitmap$1 = false;
-  if ((outer === null)) {
-    throw $ct_jl_NullPointerException__(new $c_jl_NullPointerException());
-  }
-}
-$c_Lterminus_Display$display$.prototype = new $h_O();
-$c_Lterminus_Display$display$.prototype.constructor = $c_Lterminus_Display$display$;
-/** @constructor */
-function $h_Lterminus_Display$display$() {
-}
-$h_Lterminus_Display$display$.prototype = $c_Lterminus_Display$display$.prototype;
-$c_Lterminus_Display$display$.prototype.underline__Lterminus_Display$display$underline$ = (function() {
-  if ((!this.Lterminus_Display$display$__f_underlinebitmap$1)) {
-    this.Lterminus_Display$display$__f_underline$lzy1 = new $c_Lterminus_Display$display$underline$();
-    this.Lterminus_Display$display$__f_underlinebitmap$1 = true;
-  }
-  return this.Lterminus_Display$display$__f_underline$lzy1;
-});
-var $d_Lterminus_Display$display$ = new $TypeData().initClass($c_Lterminus_Display$display$, "terminus.Display$display$", ({
-  Lterminus_Display$display$: 1
-}));
-/** @constructor */
-function $c_Lterminus_Display$display$underline$() {
-}
-$c_Lterminus_Display$display$underline$.prototype = new $h_O();
-$c_Lterminus_Display$display$underline$.prototype.constructor = $c_Lterminus_Display$display$underline$;
-/** @constructor */
-function $h_Lterminus_Display$display$underline$() {
-}
-$h_Lterminus_Display$display$underline$.prototype = $c_Lterminus_Display$display$underline$.prototype;
-var $d_Lterminus_Display$display$underline$ = new $TypeData().initClass($c_Lterminus_Display$display$underline$, "terminus.Display$display$underline$", ({
-  Lterminus_Display$display$underline$: 1
-}));
-/** @constructor */
 function $c_Lterminus_Erase$erase$(outer) {
   if ((outer === null)) {
     throw $ct_jl_NullPointerException__(new $c_jl_NullPointerException());
@@ -4134,6 +4098,42 @@ function $h_Lterminus_Erase$erase$() {
 $h_Lterminus_Erase$erase$.prototype = $c_Lterminus_Erase$erase$.prototype;
 var $d_Lterminus_Erase$erase$ = new $TypeData().initClass($c_Lterminus_Erase$erase$, "terminus.Erase$erase$", ({
   Lterminus_Erase$erase$: 1
+}));
+/** @constructor */
+function $c_Lterminus_Format$format$(outer) {
+  this.Lterminus_Format$format$__f_underline$lzy1 = null;
+  this.Lterminus_Format$format$__f_underlinebitmap$1 = false;
+  if ((outer === null)) {
+    throw $ct_jl_NullPointerException__(new $c_jl_NullPointerException());
+  }
+}
+$c_Lterminus_Format$format$.prototype = new $h_O();
+$c_Lterminus_Format$format$.prototype.constructor = $c_Lterminus_Format$format$;
+/** @constructor */
+function $h_Lterminus_Format$format$() {
+}
+$h_Lterminus_Format$format$.prototype = $c_Lterminus_Format$format$.prototype;
+$c_Lterminus_Format$format$.prototype.underline__Lterminus_Format$format$underline$ = (function() {
+  if ((!this.Lterminus_Format$format$__f_underlinebitmap$1)) {
+    this.Lterminus_Format$format$__f_underline$lzy1 = new $c_Lterminus_Format$format$underline$();
+    this.Lterminus_Format$format$__f_underlinebitmap$1 = true;
+  }
+  return this.Lterminus_Format$format$__f_underline$lzy1;
+});
+var $d_Lterminus_Format$format$ = new $TypeData().initClass($c_Lterminus_Format$format$, "terminus.Format$format$", ({
+  Lterminus_Format$format$: 1
+}));
+/** @constructor */
+function $c_Lterminus_Format$format$underline$() {
+}
+$c_Lterminus_Format$format$underline$.prototype = new $h_O();
+$c_Lterminus_Format$format$underline$.prototype.constructor = $c_Lterminus_Format$format$underline$;
+/** @constructor */
+function $h_Lterminus_Format$format$underline$() {
+}
+$h_Lterminus_Format$format$underline$.prototype = $c_Lterminus_Format$format$underline$.prototype;
+var $d_Lterminus_Format$format$underline$ = new $TypeData().initClass($c_Lterminus_Format$format$underline$, "terminus.Format$format$underline$", ({
+  Lterminus_Format$format$underline$: 1
 }));
 /** @constructor */
 function $c_Lterminus_XtermJsOptions$() {
@@ -4299,164 +4299,6 @@ function $m_Lterminus_effect_AnsiCodes$cursor$up$() {
   return $n_Lterminus_effect_AnsiCodes$cursor$up$;
 }
 /** @constructor */
-function $c_Lterminus_effect_AnsiCodes$display$blink$() {
-  this.Lterminus_effect_AnsiCodes$display$blink$__f_on = null;
-  this.Lterminus_effect_AnsiCodes$display$blink$__f_off = null;
-  $n_Lterminus_effect_AnsiCodes$display$blink$ = this;
-  this.Lterminus_effect_AnsiCodes$display$blink$__f_on = $m_Lterminus_effect_AnsiCodes$().sgr__T__T("5");
-  this.Lterminus_effect_AnsiCodes$display$blink$__f_off = $m_Lterminus_effect_AnsiCodes$().sgr__T__T("25");
-}
-$c_Lterminus_effect_AnsiCodes$display$blink$.prototype = new $h_O();
-$c_Lterminus_effect_AnsiCodes$display$blink$.prototype.constructor = $c_Lterminus_effect_AnsiCodes$display$blink$;
-/** @constructor */
-function $h_Lterminus_effect_AnsiCodes$display$blink$() {
-}
-$h_Lterminus_effect_AnsiCodes$display$blink$.prototype = $c_Lterminus_effect_AnsiCodes$display$blink$.prototype;
-var $d_Lterminus_effect_AnsiCodes$display$blink$ = new $TypeData().initClass($c_Lterminus_effect_AnsiCodes$display$blink$, "terminus.effect.AnsiCodes$display$blink$", ({
-  Lterminus_effect_AnsiCodes$display$blink$: 1
-}));
-var $n_Lterminus_effect_AnsiCodes$display$blink$;
-function $m_Lterminus_effect_AnsiCodes$display$blink$() {
-  if ((!$n_Lterminus_effect_AnsiCodes$display$blink$)) {
-    $n_Lterminus_effect_AnsiCodes$display$blink$ = new $c_Lterminus_effect_AnsiCodes$display$blink$();
-  }
-  return $n_Lterminus_effect_AnsiCodes$display$blink$;
-}
-/** @constructor */
-function $c_Lterminus_effect_AnsiCodes$display$bold$() {
-  this.Lterminus_effect_AnsiCodes$display$bold$__f_on = null;
-  this.Lterminus_effect_AnsiCodes$display$bold$__f_off = null;
-  $n_Lterminus_effect_AnsiCodes$display$bold$ = this;
-  this.Lterminus_effect_AnsiCodes$display$bold$__f_on = $m_Lterminus_effect_AnsiCodes$().sgr__T__T("1");
-  this.Lterminus_effect_AnsiCodes$display$bold$__f_off = $m_Lterminus_effect_AnsiCodes$().sgr__T__T("22");
-}
-$c_Lterminus_effect_AnsiCodes$display$bold$.prototype = new $h_O();
-$c_Lterminus_effect_AnsiCodes$display$bold$.prototype.constructor = $c_Lterminus_effect_AnsiCodes$display$bold$;
-/** @constructor */
-function $h_Lterminus_effect_AnsiCodes$display$bold$() {
-}
-$h_Lterminus_effect_AnsiCodes$display$bold$.prototype = $c_Lterminus_effect_AnsiCodes$display$bold$.prototype;
-var $d_Lterminus_effect_AnsiCodes$display$bold$ = new $TypeData().initClass($c_Lterminus_effect_AnsiCodes$display$bold$, "terminus.effect.AnsiCodes$display$bold$", ({
-  Lterminus_effect_AnsiCodes$display$bold$: 1
-}));
-var $n_Lterminus_effect_AnsiCodes$display$bold$;
-function $m_Lterminus_effect_AnsiCodes$display$bold$() {
-  if ((!$n_Lterminus_effect_AnsiCodes$display$bold$)) {
-    $n_Lterminus_effect_AnsiCodes$display$bold$ = new $c_Lterminus_effect_AnsiCodes$display$bold$();
-  }
-  return $n_Lterminus_effect_AnsiCodes$display$bold$;
-}
-/** @constructor */
-function $c_Lterminus_effect_AnsiCodes$display$invert$() {
-  this.Lterminus_effect_AnsiCodes$display$invert$__f_on = null;
-  this.Lterminus_effect_AnsiCodes$display$invert$__f_off = null;
-  $n_Lterminus_effect_AnsiCodes$display$invert$ = this;
-  this.Lterminus_effect_AnsiCodes$display$invert$__f_on = $m_Lterminus_effect_AnsiCodes$().sgr__T__T("7");
-  this.Lterminus_effect_AnsiCodes$display$invert$__f_off = $m_Lterminus_effect_AnsiCodes$().sgr__T__T("27");
-}
-$c_Lterminus_effect_AnsiCodes$display$invert$.prototype = new $h_O();
-$c_Lterminus_effect_AnsiCodes$display$invert$.prototype.constructor = $c_Lterminus_effect_AnsiCodes$display$invert$;
-/** @constructor */
-function $h_Lterminus_effect_AnsiCodes$display$invert$() {
-}
-$h_Lterminus_effect_AnsiCodes$display$invert$.prototype = $c_Lterminus_effect_AnsiCodes$display$invert$.prototype;
-var $d_Lterminus_effect_AnsiCodes$display$invert$ = new $TypeData().initClass($c_Lterminus_effect_AnsiCodes$display$invert$, "terminus.effect.AnsiCodes$display$invert$", ({
-  Lterminus_effect_AnsiCodes$display$invert$: 1
-}));
-var $n_Lterminus_effect_AnsiCodes$display$invert$;
-function $m_Lterminus_effect_AnsiCodes$display$invert$() {
-  if ((!$n_Lterminus_effect_AnsiCodes$display$invert$)) {
-    $n_Lterminus_effect_AnsiCodes$display$invert$ = new $c_Lterminus_effect_AnsiCodes$display$invert$();
-  }
-  return $n_Lterminus_effect_AnsiCodes$display$invert$;
-}
-/** @constructor */
-function $c_Lterminus_effect_AnsiCodes$display$invisible$() {
-  this.Lterminus_effect_AnsiCodes$display$invisible$__f_on = null;
-  this.Lterminus_effect_AnsiCodes$display$invisible$__f_off = null;
-  $n_Lterminus_effect_AnsiCodes$display$invisible$ = this;
-  this.Lterminus_effect_AnsiCodes$display$invisible$__f_on = $m_Lterminus_effect_AnsiCodes$().sgr__T__T("8");
-  this.Lterminus_effect_AnsiCodes$display$invisible$__f_off = $m_Lterminus_effect_AnsiCodes$().sgr__T__T("28");
-}
-$c_Lterminus_effect_AnsiCodes$display$invisible$.prototype = new $h_O();
-$c_Lterminus_effect_AnsiCodes$display$invisible$.prototype.constructor = $c_Lterminus_effect_AnsiCodes$display$invisible$;
-/** @constructor */
-function $h_Lterminus_effect_AnsiCodes$display$invisible$() {
-}
-$h_Lterminus_effect_AnsiCodes$display$invisible$.prototype = $c_Lterminus_effect_AnsiCodes$display$invisible$.prototype;
-var $d_Lterminus_effect_AnsiCodes$display$invisible$ = new $TypeData().initClass($c_Lterminus_effect_AnsiCodes$display$invisible$, "terminus.effect.AnsiCodes$display$invisible$", ({
-  Lterminus_effect_AnsiCodes$display$invisible$: 1
-}));
-var $n_Lterminus_effect_AnsiCodes$display$invisible$;
-function $m_Lterminus_effect_AnsiCodes$display$invisible$() {
-  if ((!$n_Lterminus_effect_AnsiCodes$display$invisible$)) {
-    $n_Lterminus_effect_AnsiCodes$display$invisible$ = new $c_Lterminus_effect_AnsiCodes$display$invisible$();
-  }
-  return $n_Lterminus_effect_AnsiCodes$display$invisible$;
-}
-/** @constructor */
-function $c_Lterminus_effect_AnsiCodes$display$strikethrough$() {
-  this.Lterminus_effect_AnsiCodes$display$strikethrough$__f_on = null;
-  this.Lterminus_effect_AnsiCodes$display$strikethrough$__f_off = null;
-  $n_Lterminus_effect_AnsiCodes$display$strikethrough$ = this;
-  this.Lterminus_effect_AnsiCodes$display$strikethrough$__f_on = $m_Lterminus_effect_AnsiCodes$().sgr__T__T("9");
-  this.Lterminus_effect_AnsiCodes$display$strikethrough$__f_off = $m_Lterminus_effect_AnsiCodes$().sgr__T__T("29");
-}
-$c_Lterminus_effect_AnsiCodes$display$strikethrough$.prototype = new $h_O();
-$c_Lterminus_effect_AnsiCodes$display$strikethrough$.prototype.constructor = $c_Lterminus_effect_AnsiCodes$display$strikethrough$;
-/** @constructor */
-function $h_Lterminus_effect_AnsiCodes$display$strikethrough$() {
-}
-$h_Lterminus_effect_AnsiCodes$display$strikethrough$.prototype = $c_Lterminus_effect_AnsiCodes$display$strikethrough$.prototype;
-var $d_Lterminus_effect_AnsiCodes$display$strikethrough$ = new $TypeData().initClass($c_Lterminus_effect_AnsiCodes$display$strikethrough$, "terminus.effect.AnsiCodes$display$strikethrough$", ({
-  Lterminus_effect_AnsiCodes$display$strikethrough$: 1
-}));
-var $n_Lterminus_effect_AnsiCodes$display$strikethrough$;
-function $m_Lterminus_effect_AnsiCodes$display$strikethrough$() {
-  if ((!$n_Lterminus_effect_AnsiCodes$display$strikethrough$)) {
-    $n_Lterminus_effect_AnsiCodes$display$strikethrough$ = new $c_Lterminus_effect_AnsiCodes$display$strikethrough$();
-  }
-  return $n_Lterminus_effect_AnsiCodes$display$strikethrough$;
-}
-/** @constructor */
-function $c_Lterminus_effect_AnsiCodes$display$underline$() {
-  this.Lterminus_effect_AnsiCodes$display$underline$__f_off = null;
-  this.Lterminus_effect_AnsiCodes$display$underline$__f_curly = null;
-  this.Lterminus_effect_AnsiCodes$display$underline$__f_default = null;
-  $n_Lterminus_effect_AnsiCodes$display$underline$ = this;
-  this.Lterminus_effect_AnsiCodes$display$underline$__f_off = $m_Lterminus_effect_AnsiCodes$().sgr__T__T("24");
-  $m_Lterminus_effect_AnsiCodes$().sgr__T__T("4");
-  $m_Lterminus_effect_AnsiCodes$().sgr__T__T("4:2");
-  this.Lterminus_effect_AnsiCodes$display$underline$__f_curly = $m_Lterminus_effect_AnsiCodes$().sgr__T__T("4:3");
-  $m_Lterminus_effect_AnsiCodes$().sgr__T__T("4:4");
-  $m_Lterminus_effect_AnsiCodes$().sgr__T__T("4:5");
-  this.Lterminus_effect_AnsiCodes$display$underline$__f_default = $m_Lterminus_effect_AnsiCodes$().sgr__T__T("59");
-  $m_Lterminus_effect_AnsiCodes$().sgr__T__T("50");
-  $m_Lterminus_effect_AnsiCodes$().sgr__T__T("51");
-  $m_Lterminus_effect_AnsiCodes$().sgr__T__T("52");
-  $m_Lterminus_effect_AnsiCodes$().sgr__T__T("53");
-  $m_Lterminus_effect_AnsiCodes$().sgr__T__T("54");
-  $m_Lterminus_effect_AnsiCodes$().sgr__T__T("55");
-  $m_Lterminus_effect_AnsiCodes$().sgr__T__T("56");
-  $m_Lterminus_effect_AnsiCodes$().sgr__T__T("57");
-}
-$c_Lterminus_effect_AnsiCodes$display$underline$.prototype = new $h_O();
-$c_Lterminus_effect_AnsiCodes$display$underline$.prototype.constructor = $c_Lterminus_effect_AnsiCodes$display$underline$;
-/** @constructor */
-function $h_Lterminus_effect_AnsiCodes$display$underline$() {
-}
-$h_Lterminus_effect_AnsiCodes$display$underline$.prototype = $c_Lterminus_effect_AnsiCodes$display$underline$.prototype;
-var $d_Lterminus_effect_AnsiCodes$display$underline$ = new $TypeData().initClass($c_Lterminus_effect_AnsiCodes$display$underline$, "terminus.effect.AnsiCodes$display$underline$", ({
-  Lterminus_effect_AnsiCodes$display$underline$: 1
-}));
-var $n_Lterminus_effect_AnsiCodes$display$underline$;
-function $m_Lterminus_effect_AnsiCodes$display$underline$() {
-  if ((!$n_Lterminus_effect_AnsiCodes$display$underline$)) {
-    $n_Lterminus_effect_AnsiCodes$display$underline$ = new $c_Lterminus_effect_AnsiCodes$display$underline$();
-  }
-  return $n_Lterminus_effect_AnsiCodes$display$underline$;
-}
-/** @constructor */
 function $c_Lterminus_effect_AnsiCodes$erase$() {
   this.Lterminus_effect_AnsiCodes$erase$__f_down = null;
   $n_Lterminus_effect_AnsiCodes$erase$ = this;
@@ -4521,6 +4363,164 @@ function $m_Lterminus_effect_AnsiCodes$foreground$() {
     $n_Lterminus_effect_AnsiCodes$foreground$ = new $c_Lterminus_effect_AnsiCodes$foreground$();
   }
   return $n_Lterminus_effect_AnsiCodes$foreground$;
+}
+/** @constructor */
+function $c_Lterminus_effect_AnsiCodes$format$blink$() {
+  this.Lterminus_effect_AnsiCodes$format$blink$__f_on = null;
+  this.Lterminus_effect_AnsiCodes$format$blink$__f_off = null;
+  $n_Lterminus_effect_AnsiCodes$format$blink$ = this;
+  this.Lterminus_effect_AnsiCodes$format$blink$__f_on = $m_Lterminus_effect_AnsiCodes$().sgr__T__T("5");
+  this.Lterminus_effect_AnsiCodes$format$blink$__f_off = $m_Lterminus_effect_AnsiCodes$().sgr__T__T("25");
+}
+$c_Lterminus_effect_AnsiCodes$format$blink$.prototype = new $h_O();
+$c_Lterminus_effect_AnsiCodes$format$blink$.prototype.constructor = $c_Lterminus_effect_AnsiCodes$format$blink$;
+/** @constructor */
+function $h_Lterminus_effect_AnsiCodes$format$blink$() {
+}
+$h_Lterminus_effect_AnsiCodes$format$blink$.prototype = $c_Lterminus_effect_AnsiCodes$format$blink$.prototype;
+var $d_Lterminus_effect_AnsiCodes$format$blink$ = new $TypeData().initClass($c_Lterminus_effect_AnsiCodes$format$blink$, "terminus.effect.AnsiCodes$format$blink$", ({
+  Lterminus_effect_AnsiCodes$format$blink$: 1
+}));
+var $n_Lterminus_effect_AnsiCodes$format$blink$;
+function $m_Lterminus_effect_AnsiCodes$format$blink$() {
+  if ((!$n_Lterminus_effect_AnsiCodes$format$blink$)) {
+    $n_Lterminus_effect_AnsiCodes$format$blink$ = new $c_Lterminus_effect_AnsiCodes$format$blink$();
+  }
+  return $n_Lterminus_effect_AnsiCodes$format$blink$;
+}
+/** @constructor */
+function $c_Lterminus_effect_AnsiCodes$format$bold$() {
+  this.Lterminus_effect_AnsiCodes$format$bold$__f_on = null;
+  this.Lterminus_effect_AnsiCodes$format$bold$__f_off = null;
+  $n_Lterminus_effect_AnsiCodes$format$bold$ = this;
+  this.Lterminus_effect_AnsiCodes$format$bold$__f_on = $m_Lterminus_effect_AnsiCodes$().sgr__T__T("1");
+  this.Lterminus_effect_AnsiCodes$format$bold$__f_off = $m_Lterminus_effect_AnsiCodes$().sgr__T__T("22");
+}
+$c_Lterminus_effect_AnsiCodes$format$bold$.prototype = new $h_O();
+$c_Lterminus_effect_AnsiCodes$format$bold$.prototype.constructor = $c_Lterminus_effect_AnsiCodes$format$bold$;
+/** @constructor */
+function $h_Lterminus_effect_AnsiCodes$format$bold$() {
+}
+$h_Lterminus_effect_AnsiCodes$format$bold$.prototype = $c_Lterminus_effect_AnsiCodes$format$bold$.prototype;
+var $d_Lterminus_effect_AnsiCodes$format$bold$ = new $TypeData().initClass($c_Lterminus_effect_AnsiCodes$format$bold$, "terminus.effect.AnsiCodes$format$bold$", ({
+  Lterminus_effect_AnsiCodes$format$bold$: 1
+}));
+var $n_Lterminus_effect_AnsiCodes$format$bold$;
+function $m_Lterminus_effect_AnsiCodes$format$bold$() {
+  if ((!$n_Lterminus_effect_AnsiCodes$format$bold$)) {
+    $n_Lterminus_effect_AnsiCodes$format$bold$ = new $c_Lterminus_effect_AnsiCodes$format$bold$();
+  }
+  return $n_Lterminus_effect_AnsiCodes$format$bold$;
+}
+/** @constructor */
+function $c_Lterminus_effect_AnsiCodes$format$invert$() {
+  this.Lterminus_effect_AnsiCodes$format$invert$__f_on = null;
+  this.Lterminus_effect_AnsiCodes$format$invert$__f_off = null;
+  $n_Lterminus_effect_AnsiCodes$format$invert$ = this;
+  this.Lterminus_effect_AnsiCodes$format$invert$__f_on = $m_Lterminus_effect_AnsiCodes$().sgr__T__T("7");
+  this.Lterminus_effect_AnsiCodes$format$invert$__f_off = $m_Lterminus_effect_AnsiCodes$().sgr__T__T("27");
+}
+$c_Lterminus_effect_AnsiCodes$format$invert$.prototype = new $h_O();
+$c_Lterminus_effect_AnsiCodes$format$invert$.prototype.constructor = $c_Lterminus_effect_AnsiCodes$format$invert$;
+/** @constructor */
+function $h_Lterminus_effect_AnsiCodes$format$invert$() {
+}
+$h_Lterminus_effect_AnsiCodes$format$invert$.prototype = $c_Lterminus_effect_AnsiCodes$format$invert$.prototype;
+var $d_Lterminus_effect_AnsiCodes$format$invert$ = new $TypeData().initClass($c_Lterminus_effect_AnsiCodes$format$invert$, "terminus.effect.AnsiCodes$format$invert$", ({
+  Lterminus_effect_AnsiCodes$format$invert$: 1
+}));
+var $n_Lterminus_effect_AnsiCodes$format$invert$;
+function $m_Lterminus_effect_AnsiCodes$format$invert$() {
+  if ((!$n_Lterminus_effect_AnsiCodes$format$invert$)) {
+    $n_Lterminus_effect_AnsiCodes$format$invert$ = new $c_Lterminus_effect_AnsiCodes$format$invert$();
+  }
+  return $n_Lterminus_effect_AnsiCodes$format$invert$;
+}
+/** @constructor */
+function $c_Lterminus_effect_AnsiCodes$format$invisible$() {
+  this.Lterminus_effect_AnsiCodes$format$invisible$__f_on = null;
+  this.Lterminus_effect_AnsiCodes$format$invisible$__f_off = null;
+  $n_Lterminus_effect_AnsiCodes$format$invisible$ = this;
+  this.Lterminus_effect_AnsiCodes$format$invisible$__f_on = $m_Lterminus_effect_AnsiCodes$().sgr__T__T("8");
+  this.Lterminus_effect_AnsiCodes$format$invisible$__f_off = $m_Lterminus_effect_AnsiCodes$().sgr__T__T("28");
+}
+$c_Lterminus_effect_AnsiCodes$format$invisible$.prototype = new $h_O();
+$c_Lterminus_effect_AnsiCodes$format$invisible$.prototype.constructor = $c_Lterminus_effect_AnsiCodes$format$invisible$;
+/** @constructor */
+function $h_Lterminus_effect_AnsiCodes$format$invisible$() {
+}
+$h_Lterminus_effect_AnsiCodes$format$invisible$.prototype = $c_Lterminus_effect_AnsiCodes$format$invisible$.prototype;
+var $d_Lterminus_effect_AnsiCodes$format$invisible$ = new $TypeData().initClass($c_Lterminus_effect_AnsiCodes$format$invisible$, "terminus.effect.AnsiCodes$format$invisible$", ({
+  Lterminus_effect_AnsiCodes$format$invisible$: 1
+}));
+var $n_Lterminus_effect_AnsiCodes$format$invisible$;
+function $m_Lterminus_effect_AnsiCodes$format$invisible$() {
+  if ((!$n_Lterminus_effect_AnsiCodes$format$invisible$)) {
+    $n_Lterminus_effect_AnsiCodes$format$invisible$ = new $c_Lterminus_effect_AnsiCodes$format$invisible$();
+  }
+  return $n_Lterminus_effect_AnsiCodes$format$invisible$;
+}
+/** @constructor */
+function $c_Lterminus_effect_AnsiCodes$format$strikethrough$() {
+  this.Lterminus_effect_AnsiCodes$format$strikethrough$__f_on = null;
+  this.Lterminus_effect_AnsiCodes$format$strikethrough$__f_off = null;
+  $n_Lterminus_effect_AnsiCodes$format$strikethrough$ = this;
+  this.Lterminus_effect_AnsiCodes$format$strikethrough$__f_on = $m_Lterminus_effect_AnsiCodes$().sgr__T__T("9");
+  this.Lterminus_effect_AnsiCodes$format$strikethrough$__f_off = $m_Lterminus_effect_AnsiCodes$().sgr__T__T("29");
+}
+$c_Lterminus_effect_AnsiCodes$format$strikethrough$.prototype = new $h_O();
+$c_Lterminus_effect_AnsiCodes$format$strikethrough$.prototype.constructor = $c_Lterminus_effect_AnsiCodes$format$strikethrough$;
+/** @constructor */
+function $h_Lterminus_effect_AnsiCodes$format$strikethrough$() {
+}
+$h_Lterminus_effect_AnsiCodes$format$strikethrough$.prototype = $c_Lterminus_effect_AnsiCodes$format$strikethrough$.prototype;
+var $d_Lterminus_effect_AnsiCodes$format$strikethrough$ = new $TypeData().initClass($c_Lterminus_effect_AnsiCodes$format$strikethrough$, "terminus.effect.AnsiCodes$format$strikethrough$", ({
+  Lterminus_effect_AnsiCodes$format$strikethrough$: 1
+}));
+var $n_Lterminus_effect_AnsiCodes$format$strikethrough$;
+function $m_Lterminus_effect_AnsiCodes$format$strikethrough$() {
+  if ((!$n_Lterminus_effect_AnsiCodes$format$strikethrough$)) {
+    $n_Lterminus_effect_AnsiCodes$format$strikethrough$ = new $c_Lterminus_effect_AnsiCodes$format$strikethrough$();
+  }
+  return $n_Lterminus_effect_AnsiCodes$format$strikethrough$;
+}
+/** @constructor */
+function $c_Lterminus_effect_AnsiCodes$format$underline$() {
+  this.Lterminus_effect_AnsiCodes$format$underline$__f_off = null;
+  this.Lterminus_effect_AnsiCodes$format$underline$__f_curly = null;
+  this.Lterminus_effect_AnsiCodes$format$underline$__f_default = null;
+  $n_Lterminus_effect_AnsiCodes$format$underline$ = this;
+  this.Lterminus_effect_AnsiCodes$format$underline$__f_off = $m_Lterminus_effect_AnsiCodes$().sgr__T__T("24");
+  $m_Lterminus_effect_AnsiCodes$().sgr__T__T("4");
+  $m_Lterminus_effect_AnsiCodes$().sgr__T__T("4:2");
+  this.Lterminus_effect_AnsiCodes$format$underline$__f_curly = $m_Lterminus_effect_AnsiCodes$().sgr__T__T("4:3");
+  $m_Lterminus_effect_AnsiCodes$().sgr__T__T("4:4");
+  $m_Lterminus_effect_AnsiCodes$().sgr__T__T("4:5");
+  this.Lterminus_effect_AnsiCodes$format$underline$__f_default = $m_Lterminus_effect_AnsiCodes$().sgr__T__T("59");
+  $m_Lterminus_effect_AnsiCodes$().sgr__T__T("50");
+  $m_Lterminus_effect_AnsiCodes$().sgr__T__T("51");
+  $m_Lterminus_effect_AnsiCodes$().sgr__T__T("52");
+  $m_Lterminus_effect_AnsiCodes$().sgr__T__T("53");
+  $m_Lterminus_effect_AnsiCodes$().sgr__T__T("54");
+  $m_Lterminus_effect_AnsiCodes$().sgr__T__T("55");
+  $m_Lterminus_effect_AnsiCodes$().sgr__T__T("56");
+  $m_Lterminus_effect_AnsiCodes$().sgr__T__T("57");
+}
+$c_Lterminus_effect_AnsiCodes$format$underline$.prototype = new $h_O();
+$c_Lterminus_effect_AnsiCodes$format$underline$.prototype.constructor = $c_Lterminus_effect_AnsiCodes$format$underline$;
+/** @constructor */
+function $h_Lterminus_effect_AnsiCodes$format$underline$() {
+}
+$h_Lterminus_effect_AnsiCodes$format$underline$.prototype = $c_Lterminus_effect_AnsiCodes$format$underline$.prototype;
+var $d_Lterminus_effect_AnsiCodes$format$underline$ = new $TypeData().initClass($c_Lterminus_effect_AnsiCodes$format$underline$, "terminus.effect.AnsiCodes$format$underline$", ({
+  Lterminus_effect_AnsiCodes$format$underline$: 1
+}));
+var $n_Lterminus_effect_AnsiCodes$format$underline$;
+function $m_Lterminus_effect_AnsiCodes$format$underline$() {
+  if ((!$n_Lterminus_effect_AnsiCodes$format$underline$)) {
+    $n_Lterminus_effect_AnsiCodes$format$underline$ = new $c_Lterminus_effect_AnsiCodes$format$underline$();
+  }
+  return $n_Lterminus_effect_AnsiCodes$format$underline$;
 }
 /** @constructor */
 function $c_Lterminus_effect_Color$background$(outer) {
@@ -4595,65 +4595,6 @@ var $d_Lterminus_effect_Cursor$cursor$ = new $TypeData().initClass($c_Lterminus_
   Lterminus_effect_Cursor$cursor$: 1
 }));
 /** @constructor */
-function $c_Lterminus_effect_Display$display$(outer) {
-  this.Lterminus_effect_Display$display$__f_fontWeightStack = null;
-  this.Lterminus_effect_Display$display$__f_underline$lzy1 = null;
-  this.Lterminus_effect_Display$display$__f_underlinebitmap$1 = false;
-  this.Lterminus_effect_Display$display$__f_invertToggle = null;
-  this.Lterminus_effect_Display$display$__f_strikethroughToggle = null;
-  this.Lterminus_effect_Display$display$__f_$outer = null;
-  if ((outer === null)) {
-    throw $ct_jl_NullPointerException__(new $c_jl_NullPointerException());
-  }
-  this.Lterminus_effect_Display$display$__f_$outer = outer;
-  var reset = $m_Lterminus_effect_AnsiCodes$display$bold$().Lterminus_effect_AnsiCodes$display$bold$__f_off;
-  this.Lterminus_effect_Display$display$__f_fontWeightStack = new $c_Lterminus_effect_Stack(reset);
-  $m_Lterminus_effect_AnsiCodes$display$blink$();
-  $m_Lterminus_effect_AnsiCodes$display$blink$();
-  this.Lterminus_effect_Display$display$__f_invertToggle = new $c_Lterminus_effect_Toggle($m_Lterminus_effect_AnsiCodes$display$invert$().Lterminus_effect_AnsiCodes$display$invert$__f_on, $m_Lterminus_effect_AnsiCodes$display$invert$().Lterminus_effect_AnsiCodes$display$invert$__f_off);
-  $m_Lterminus_effect_AnsiCodes$display$invisible$();
-  $m_Lterminus_effect_AnsiCodes$display$invisible$();
-  this.Lterminus_effect_Display$display$__f_strikethroughToggle = new $c_Lterminus_effect_Toggle($m_Lterminus_effect_AnsiCodes$display$strikethrough$().Lterminus_effect_AnsiCodes$display$strikethrough$__f_on, $m_Lterminus_effect_AnsiCodes$display$strikethrough$().Lterminus_effect_AnsiCodes$display$strikethrough$__f_off);
-}
-$c_Lterminus_effect_Display$display$.prototype = new $h_O();
-$c_Lterminus_effect_Display$display$.prototype.constructor = $c_Lterminus_effect_Display$display$;
-/** @constructor */
-function $h_Lterminus_effect_Display$display$() {
-}
-$h_Lterminus_effect_Display$display$.prototype = $c_Lterminus_effect_Display$display$.prototype;
-$c_Lterminus_effect_Display$display$.prototype.underline__Lterminus_effect_Display$display$underline$ = (function() {
-  if ((!this.Lterminus_effect_Display$display$__f_underlinebitmap$1)) {
-    this.Lterminus_effect_Display$display$__f_underline$lzy1 = new $c_Lterminus_effect_Display$display$underline$(this);
-    this.Lterminus_effect_Display$display$__f_underlinebitmap$1 = true;
-  }
-  return this.Lterminus_effect_Display$display$__f_underline$lzy1;
-});
-var $d_Lterminus_effect_Display$display$ = new $TypeData().initClass($c_Lterminus_effect_Display$display$, "terminus.effect.Display$display$", ({
-  Lterminus_effect_Display$display$: 1
-}));
-/** @constructor */
-function $c_Lterminus_effect_Display$display$underline$(outer) {
-  this.Lterminus_effect_Display$display$underline$__f_underlineStyleStack = null;
-  this.Lterminus_effect_Display$display$underline$__f_$outer = null;
-  if ((outer === null)) {
-    throw $ct_jl_NullPointerException__(new $c_jl_NullPointerException());
-  }
-  this.Lterminus_effect_Display$display$underline$__f_$outer = outer;
-  var reset = $m_Lterminus_effect_AnsiCodes$display$underline$().Lterminus_effect_AnsiCodes$display$underline$__f_off;
-  this.Lterminus_effect_Display$display$underline$__f_underlineStyleStack = new $c_Lterminus_effect_Stack(reset);
-  var reset$1 = $m_Lterminus_effect_AnsiCodes$display$underline$().Lterminus_effect_AnsiCodes$display$underline$__f_default;
-  new $c_Lterminus_effect_Stack(reset$1);
-}
-$c_Lterminus_effect_Display$display$underline$.prototype = new $h_O();
-$c_Lterminus_effect_Display$display$underline$.prototype.constructor = $c_Lterminus_effect_Display$display$underline$;
-/** @constructor */
-function $h_Lterminus_effect_Display$display$underline$() {
-}
-$h_Lterminus_effect_Display$display$underline$.prototype = $c_Lterminus_effect_Display$display$underline$.prototype;
-var $d_Lterminus_effect_Display$display$underline$ = new $TypeData().initClass($c_Lterminus_effect_Display$display$underline$, "terminus.effect.Display$display$underline$", ({
-  Lterminus_effect_Display$display$underline$: 1
-}));
-/** @constructor */
 function $c_Lterminus_effect_Erase$erase$(outer) {
   this.Lterminus_effect_Erase$erase$__f_$outer = null;
   if ((outer === null)) {
@@ -4672,6 +4613,65 @@ $c_Lterminus_effect_Erase$erase$.prototype.down__V = (function() {
 });
 var $d_Lterminus_effect_Erase$erase$ = new $TypeData().initClass($c_Lterminus_effect_Erase$erase$, "terminus.effect.Erase$erase$", ({
   Lterminus_effect_Erase$erase$: 1
+}));
+/** @constructor */
+function $c_Lterminus_effect_Format$format$(outer) {
+  this.Lterminus_effect_Format$format$__f_fontWeightStack = null;
+  this.Lterminus_effect_Format$format$__f_underline$lzy1 = null;
+  this.Lterminus_effect_Format$format$__f_underlinebitmap$1 = false;
+  this.Lterminus_effect_Format$format$__f_invertToggle = null;
+  this.Lterminus_effect_Format$format$__f_strikethroughToggle = null;
+  this.Lterminus_effect_Format$format$__f_$outer = null;
+  if ((outer === null)) {
+    throw $ct_jl_NullPointerException__(new $c_jl_NullPointerException());
+  }
+  this.Lterminus_effect_Format$format$__f_$outer = outer;
+  var reset = $m_Lterminus_effect_AnsiCodes$format$bold$().Lterminus_effect_AnsiCodes$format$bold$__f_off;
+  this.Lterminus_effect_Format$format$__f_fontWeightStack = new $c_Lterminus_effect_Stack(reset);
+  $m_Lterminus_effect_AnsiCodes$format$blink$();
+  $m_Lterminus_effect_AnsiCodes$format$blink$();
+  this.Lterminus_effect_Format$format$__f_invertToggle = new $c_Lterminus_effect_Toggle($m_Lterminus_effect_AnsiCodes$format$invert$().Lterminus_effect_AnsiCodes$format$invert$__f_on, $m_Lterminus_effect_AnsiCodes$format$invert$().Lterminus_effect_AnsiCodes$format$invert$__f_off);
+  $m_Lterminus_effect_AnsiCodes$format$invisible$();
+  $m_Lterminus_effect_AnsiCodes$format$invisible$();
+  this.Lterminus_effect_Format$format$__f_strikethroughToggle = new $c_Lterminus_effect_Toggle($m_Lterminus_effect_AnsiCodes$format$strikethrough$().Lterminus_effect_AnsiCodes$format$strikethrough$__f_on, $m_Lterminus_effect_AnsiCodes$format$strikethrough$().Lterminus_effect_AnsiCodes$format$strikethrough$__f_off);
+}
+$c_Lterminus_effect_Format$format$.prototype = new $h_O();
+$c_Lterminus_effect_Format$format$.prototype.constructor = $c_Lterminus_effect_Format$format$;
+/** @constructor */
+function $h_Lterminus_effect_Format$format$() {
+}
+$h_Lterminus_effect_Format$format$.prototype = $c_Lterminus_effect_Format$format$.prototype;
+$c_Lterminus_effect_Format$format$.prototype.underline__Lterminus_effect_Format$format$underline$ = (function() {
+  if ((!this.Lterminus_effect_Format$format$__f_underlinebitmap$1)) {
+    this.Lterminus_effect_Format$format$__f_underline$lzy1 = new $c_Lterminus_effect_Format$format$underline$(this);
+    this.Lterminus_effect_Format$format$__f_underlinebitmap$1 = true;
+  }
+  return this.Lterminus_effect_Format$format$__f_underline$lzy1;
+});
+var $d_Lterminus_effect_Format$format$ = new $TypeData().initClass($c_Lterminus_effect_Format$format$, "terminus.effect.Format$format$", ({
+  Lterminus_effect_Format$format$: 1
+}));
+/** @constructor */
+function $c_Lterminus_effect_Format$format$underline$(outer) {
+  this.Lterminus_effect_Format$format$underline$__f_underlineStyleStack = null;
+  this.Lterminus_effect_Format$format$underline$__f_$outer = null;
+  if ((outer === null)) {
+    throw $ct_jl_NullPointerException__(new $c_jl_NullPointerException());
+  }
+  this.Lterminus_effect_Format$format$underline$__f_$outer = outer;
+  var reset = $m_Lterminus_effect_AnsiCodes$format$underline$().Lterminus_effect_AnsiCodes$format$underline$__f_off;
+  this.Lterminus_effect_Format$format$underline$__f_underlineStyleStack = new $c_Lterminus_effect_Stack(reset);
+  var reset$1 = $m_Lterminus_effect_AnsiCodes$format$underline$().Lterminus_effect_AnsiCodes$format$underline$__f_default;
+  new $c_Lterminus_effect_Stack(reset$1);
+}
+$c_Lterminus_effect_Format$format$underline$.prototype = new $h_O();
+$c_Lterminus_effect_Format$format$underline$.prototype.constructor = $c_Lterminus_effect_Format$format$underline$;
+/** @constructor */
+function $h_Lterminus_effect_Format$format$underline$() {
+}
+$h_Lterminus_effect_Format$format$underline$.prototype = $c_Lterminus_effect_Format$format$underline$.prototype;
+var $d_Lterminus_effect_Format$format$underline$ = new $TypeData().initClass($c_Lterminus_effect_Format$format$underline$, "terminus.effect.Format$format$underline$", ({
+  Lterminus_effect_Format$format$underline$: 1
 }));
 /** @constructor */
 function $c_Lterminus_effect_Toggle(set, reset) {
@@ -4716,11 +4716,11 @@ $c_Lterminus_examples_ColorForegroundGreen$.prototype.go__T__V = (function(id) {
   var options = $m_Lterminus_XtermJsOptions$().apply__I__I__Lterminus_XtermJsOptions(3, 80);
   var element = document.getElementById(id);
   var terminal = new $c_Lterminus_Terminal(element, options);
-  $n($m_Lterminus_Terminal$().display__Lterminus_Display$display$());
-  var this$3 = $n(terminal.display__Lterminus_effect_Display$display$());
-  var this$4 = $n(this$3.Lterminus_effect_Display$display$__f_$outer);
-  var stack = this$3.Lterminus_effect_Display$display$__f_fontWeightStack;
-  var code = $m_Lterminus_effect_AnsiCodes$display$bold$().Lterminus_effect_AnsiCodes$display$bold$__f_on;
+  $n($m_Lterminus_Terminal$().format__Lterminus_Format$format$());
+  var this$3 = $n(terminal.format__Lterminus_effect_Format$format$());
+  var this$4 = $n(this$3.Lterminus_effect_Format$format$__f_$outer);
+  var stack = this$3.Lterminus_effect_Format$format$__f_fontWeightStack;
+  var code = $m_Lterminus_effect_AnsiCodes$format$bold$().Lterminus_effect_AnsiCodes$format$bold$__f_on;
   $n(stack).push__T__Lterminus_effect_Writer__V(code, this$4);
   try {
     $n($m_Lterminus_Terminal$().foreground__Lterminus_Color$foreground$());
@@ -4765,17 +4765,17 @@ $c_Lterminus_examples_Format$.prototype.go__T__V = (function(id) {
   var options = $m_Lterminus_XtermJsOptions$().apply__I__I__Lterminus_XtermJsOptions(3, 80);
   var element = document.getElementById(id);
   var terminal = new $c_Lterminus_Terminal(element, options);
-  $n($m_Lterminus_Terminal$().display__Lterminus_Display$display$());
-  var this$3 = $n(terminal.display__Lterminus_effect_Display$display$());
-  var this$4 = $n(this$3.Lterminus_effect_Display$display$__f_$outer);
-  var stack = this$3.Lterminus_effect_Display$display$__f_fontWeightStack;
-  var code = $m_Lterminus_effect_AnsiCodes$display$bold$().Lterminus_effect_AnsiCodes$display$bold$__f_on;
+  $n($m_Lterminus_Terminal$().format__Lterminus_Format$format$());
+  var this$3 = $n(terminal.format__Lterminus_effect_Format$format$());
+  var this$4 = $n(this$3.Lterminus_effect_Format$format$__f_$outer);
+  var stack = this$3.Lterminus_effect_Format$format$__f_fontWeightStack;
+  var code = $m_Lterminus_effect_AnsiCodes$format$bold$().Lterminus_effect_AnsiCodes$format$bold$__f_on;
   $n(stack).push__T__Lterminus_effect_Writer__V(code, this$4);
   try {
-    $n($m_Lterminus_Terminal$().display__Lterminus_Display$display$());
-    var this$6 = $n(this$4.display__Lterminus_effect_Display$display$());
-    var this$7 = $n(this$6.Lterminus_effect_Display$display$__f_$outer);
-    var toggle = this$6.Lterminus_effect_Display$display$__f_strikethroughToggle;
+    $n($m_Lterminus_Terminal$().format__Lterminus_Format$format$());
+    var this$6 = $n(this$4.format__Lterminus_effect_Format$format$());
+    var this$7 = $n(this$6.Lterminus_effect_Format$format$__f_$outer);
+    var toggle = this$6.Lterminus_effect_Format$format$__f_strikethroughToggle;
     $n(toggle).on__Lterminus_effect_Writer__V(this$7);
     try {
       this$7.write__T__V("Bold and strikethrough\r\n");
@@ -4806,17 +4806,17 @@ $c_Lterminus_examples_Format$.prototype.go__T__V = (function(id) {
   } finally {
     $n(stack$1).pop__Lterminus_effect_Writer__V(this$11);
   }
-  $n($m_Lterminus_Terminal$().display__Lterminus_Display$display$());
-  var this$17 = $n(terminal.display__Lterminus_effect_Display$display$());
-  var this$18 = $n(this$17.Lterminus_effect_Display$display$__f_$outer);
-  var toggle$1 = this$17.Lterminus_effect_Display$display$__f_invertToggle;
+  $n($m_Lterminus_Terminal$().format__Lterminus_Format$format$());
+  var this$17 = $n(terminal.format__Lterminus_effect_Format$format$());
+  var this$18 = $n(this$17.Lterminus_effect_Format$format$__f_$outer);
+  var toggle$1 = this$17.Lterminus_effect_Format$format$__f_invertToggle;
   $n(toggle$1).on__Lterminus_effect_Writer__V(this$18);
   try {
-    $n($n($m_Lterminus_Terminal$().display__Lterminus_Display$display$()).underline__Lterminus_Display$display$underline$());
-    var this$20 = $n($n(this$18.display__Lterminus_effect_Display$display$()).underline__Lterminus_effect_Display$display$underline$());
-    var this$21 = $n($n(this$20.Lterminus_effect_Display$display$underline$__f_$outer).Lterminus_effect_Display$display$__f_$outer);
-    var stack$3 = this$20.Lterminus_effect_Display$display$underline$__f_underlineStyleStack;
-    var code$3 = $m_Lterminus_effect_AnsiCodes$display$underline$().Lterminus_effect_AnsiCodes$display$underline$__f_curly;
+    $n($n($m_Lterminus_Terminal$().format__Lterminus_Format$format$()).underline__Lterminus_Format$format$underline$());
+    var this$20 = $n($n(this$18.format__Lterminus_effect_Format$format$()).underline__Lterminus_effect_Format$format$underline$());
+    var this$21 = $n($n(this$20.Lterminus_effect_Format$format$underline$__f_$outer).Lterminus_effect_Format$format$__f_$outer);
+    var stack$3 = this$20.Lterminus_effect_Format$format$underline$__f_underlineStyleStack;
+    var code$3 = $m_Lterminus_effect_AnsiCodes$format$underline$().Lterminus_effect_AnsiCodes$format$underline$__f_curly;
     $n(stack$3).push__T__Lterminus_effect_Writer__V(code$3, this$21);
     try {
       this$21.write__T__V("Inverted with curly underline");
@@ -4912,11 +4912,11 @@ $c_Lterminus_examples_Prompt$.prototype.clear__Lterminus_Terminal__V = (function
 });
 $c_Lterminus_examples_Prompt$.prototype.writeChoice__T__Z__Lterminus_Terminal__V = (function(description, selected, evidence$2) {
   if (selected) {
-    $n($m_Lterminus_Terminal$().display__Lterminus_Display$display$());
-    var this$2 = $n($n(evidence$2).display__Lterminus_effect_Display$display$());
-    var this$3 = $n(this$2.Lterminus_effect_Display$display$__f_$outer);
-    var stack = this$2.Lterminus_effect_Display$display$__f_fontWeightStack;
-    var code = $m_Lterminus_effect_AnsiCodes$display$bold$().Lterminus_effect_AnsiCodes$display$bold$__f_on;
+    $n($m_Lterminus_Terminal$().format__Lterminus_Format$format$());
+    var this$2 = $n($n(evidence$2).format__Lterminus_effect_Format$format$());
+    var this$3 = $n(this$2.Lterminus_effect_Format$format$__f_$outer);
+    var stack = this$2.Lterminus_effect_Format$format$__f_fontWeightStack;
+    var code = $m_Lterminus_effect_AnsiCodes$format$bold$().Lterminus_effect_AnsiCodes$format$bold$__f_on;
     $n(stack).push__T__Lterminus_effect_Writer__V(code, this$3);
     try {
       var string = (("> " + description) + "\r\n");
@@ -11280,8 +11280,8 @@ function $c_Lterminus_Terminal$() {
   this.Lterminus_Terminal$__f_backgroundbitmap$2 = false;
   this.Lterminus_Terminal$__f_cursor$lzy2 = null;
   this.Lterminus_Terminal$__f_cursorbitmap$2 = false;
-  this.Lterminus_Terminal$__f_display$lzy2 = null;
-  this.Lterminus_Terminal$__f_displaybitmap$2 = false;
+  this.Lterminus_Terminal$__f_format$lzy2 = null;
+  this.Lterminus_Terminal$__f_formatbitmap$2 = false;
   this.Lterminus_Terminal$__f_erase$lzy2 = null;
   this.Lterminus_Terminal$__f_erasebitmap$2 = false;
 }
@@ -11312,12 +11312,12 @@ $c_Lterminus_Terminal$.prototype.cursor__Lterminus_Cursor$cursor$ = (function() 
   }
   return this.Lterminus_Terminal$__f_cursor$lzy2;
 });
-$c_Lterminus_Terminal$.prototype.display__Lterminus_Display$display$ = (function() {
-  if ((!this.Lterminus_Terminal$__f_displaybitmap$2)) {
-    this.Lterminus_Terminal$__f_display$lzy2 = new $c_Lterminus_Display$display$(this);
-    this.Lterminus_Terminal$__f_displaybitmap$2 = true;
+$c_Lterminus_Terminal$.prototype.format__Lterminus_Format$format$ = (function() {
+  if ((!this.Lterminus_Terminal$__f_formatbitmap$2)) {
+    this.Lterminus_Terminal$__f_format$lzy2 = new $c_Lterminus_Format$format$(this);
+    this.Lterminus_Terminal$__f_formatbitmap$2 = true;
   }
-  return this.Lterminus_Terminal$__f_display$lzy2;
+  return this.Lterminus_Terminal$__f_format$lzy2;
 });
 $c_Lterminus_Terminal$.prototype.erase__Lterminus_Erase$erase$ = (function() {
   if ((!this.Lterminus_Terminal$__f_erasebitmap$2)) {
@@ -11330,7 +11330,7 @@ var $d_Lterminus_Terminal$ = new $TypeData().initClass($c_Lterminus_Terminal$, "
   Lterminus_Terminal$: 1,
   Lterminus_Color: 1,
   Lterminus_Cursor: 1,
-  Lterminus_Display: 1,
+  Lterminus_Format: 1,
   Lterminus_Erase: 1,
   Lterminus_Writer: 1
 }));
@@ -12727,8 +12727,8 @@ function $c_Lterminus_Terminal(root, options) {
   this.Lterminus_Terminal__f_backgroundbitmap$1 = false;
   this.Lterminus_Terminal__f_cursor$lzy1 = null;
   this.Lterminus_Terminal__f_cursorbitmap$1 = false;
-  this.Lterminus_Terminal__f_display$lzy1 = null;
-  this.Lterminus_Terminal__f_displaybitmap$1 = false;
+  this.Lterminus_Terminal__f_format$lzy1 = null;
+  this.Lterminus_Terminal__f_formatbitmap$1 = false;
   this.Lterminus_Terminal__f_erase$lzy1 = null;
   this.Lterminus_Terminal__f_erasebitmap$1 = false;
   this.Lterminus_Terminal__f_keyBuffer = null;
@@ -12769,12 +12769,12 @@ $c_Lterminus_Terminal.prototype.cursor__Lterminus_effect_Cursor$cursor$ = (funct
   }
   return this.Lterminus_Terminal__f_cursor$lzy1;
 });
-$c_Lterminus_Terminal.prototype.display__Lterminus_effect_Display$display$ = (function() {
-  if ((!this.Lterminus_Terminal__f_displaybitmap$1)) {
-    this.Lterminus_Terminal__f_display$lzy1 = new $c_Lterminus_effect_Display$display$(this);
-    this.Lterminus_Terminal__f_displaybitmap$1 = true;
+$c_Lterminus_Terminal.prototype.format__Lterminus_effect_Format$format$ = (function() {
+  if ((!this.Lterminus_Terminal__f_formatbitmap$1)) {
+    this.Lterminus_Terminal__f_format$lzy1 = new $c_Lterminus_effect_Format$format$(this);
+    this.Lterminus_Terminal__f_formatbitmap$1 = true;
   }
-  return this.Lterminus_Terminal__f_display$lzy1;
+  return this.Lterminus_Terminal__f_format$lzy1;
 });
 $c_Lterminus_Terminal.prototype.erase__Lterminus_effect_Erase$erase$ = (function() {
   if ((!this.Lterminus_Terminal__f_erasebitmap$1)) {
@@ -12800,7 +12800,7 @@ var $d_Lterminus_Terminal = new $TypeData().initClass($c_Lterminus_Terminal, "te
   Lterminus_effect_Writer: 1,
   Lterminus_effect_Cursor: 1,
   Lterminus_effect_WithToggle: 1,
-  Lterminus_effect_Display: 1,
+  Lterminus_effect_Format: 1,
   Lterminus_effect_Erase: 1
 }));
 function $f_sc_Seq__equals__O__Z($thiz, o) {
