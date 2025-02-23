@@ -26,7 +26,7 @@ import scala.concurrent.Promise
 class Terminal(root: HTMLElement, options: XtermJsOptions)
     extends effect.Color[Terminal],
       effect.Cursor,
-      effect.Display[Terminal],
+      effect.Format[Terminal],
       effect.Erase,
       effect.Writer {
 
@@ -58,7 +58,7 @@ class Terminal(root: HTMLElement, options: XtermJsOptions)
 }
 type Program[A] = Terminal ?=> A
 
-object Terminal extends Color, Cursor, Display, Erase, Writer {
+object Terminal extends Color, Cursor, Format, Erase, Writer {
   def readKey(): Program[Future[String]] =
     terminal ?=> terminal.readKey()
 

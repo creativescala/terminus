@@ -15,11 +15,11 @@ We want to support differences across terminals, but where common functionality 
 
 A backend specific `Terminal` type is the union of the interfaces, or effects, that describe the functionality it supports. For example, here is the JVM `Terminal` type at the time of writing:
 
-```scala
+```scala 3
 trait Terminal
     extends effect.Color[Terminal],
       effect.Cursor,
-      effect.Display[Terminal],
+      effect.Format[Terminal],
       effect.Erase,
       effect.AlternateScreenMode[Terminal],
       effect.ApplicationMode[Terminal],
@@ -32,7 +32,7 @@ As the above suggests, the interfaces defining the functionality live in the pac
 
 Let's now see an example of an effect type. Here's @:api(terminus.effect.Writer), one of the most basic types:
 
-```scala
+```scala 3
 /** Interface for writing to a console. */
 trait Writer extends Effect {
 
@@ -49,7 +49,7 @@ trait Writer extends Effect {
 
 As we can see, it just defines some abstract methods that will be implemented in a backend specific way. The effect type can provide a default implementation where there is a reasonable cross-backend way to do so. Here's @:api(terminus.effect.Erase), which sends standard escape codes. A backend specific implementation could override this if there was some advantage to doing so.
 
-```scala
+```scala 3
 /** Functionality for clearing contents on the terminal. */
 trait Erase extends Writer {
   object erase {
@@ -78,15 +78,15 @@ There are a few things to note:
 1. `Erase` extends `Writer`, and uses the `write` method from `Writer`.
 2. The methods are name-spaced by putting them inside an object named `erase`. This is aesthetic choice, leading to method calls like `erase.up()` and `cursor.up()` instead of `eraseUp()` and `cursorUp()`.
 
-There is one final kind of effect that is more involved, which is an effect that only applies to some scope. @:api(terminus.effect.Display) is an example, as is @:api(terminues.effect.Color). These all change the way output is displayed, but only for the `Program` they take as a parameter. Here's part of the implementation of `Display`, which is a bit simpler than `Color`.
+There is one final kind of effect that is more involved, which is an effect that only applies to some scope. @:api(terminus.effect.Format) is an example, as is @:api(terminues.effect.Color). These all change the way output is formatted, but only for the `Program` they take as a parameter. Here's part of the implementation of `Format`, which is a bit simpler than `Color`.
 
-```scala
-trait Display[+F <: Writer] extends WithStack[F], WithToggle[F] { self: F =>
-  object display {
+```scala 3
+trait Format[+F <: Writer] extends WithStack[F], WithToggle[F] { self: F =>
+  object format {
     // ...
 
     private val invertToggle =
-      Toggle(AnsiCodes.display.invert.on, AnsiCodes.display.invert.off)
+      Toggle(AnsiCodes.format.invert.on, AnsiCodes.format.invert.off)
 
     def invert[A](f: F ?=> A): A =
       withToggle(invertToggle)(f)
@@ -98,28 +98,28 @@ trait Display[+F <: Writer] extends WithStack[F], WithToggle[F] { self: F =>
 
 When we create a program like 
 
-```scala
+```scala 3
 Terminal.invert(Terminal.write("Inverted"))
 ```
 
-we want only the `Program` inside the call to `Terminal.invert` (that `Program` is `Terminal.write("Inverted")`) to be displayed with inverted text. Inversion is relatively simply, as it is either on or off. This is what the call to `withToggle` does: it sends the code to turn on inverted text when we enter the block and turns it off when we exit. It also handles nested calls correctly. For more complicated cases, like color, there is also a stack abstraction which reverts to the previous setting when a block exits.
+we want only the `Program` inside the call to `Terminal.invert` (that `Program` is `Terminal.write("Inverted")`) to be formatted with inverted text. Inversion is relatively simply, as it is either on or off. This is what the call to `withToggle` does: it sends the code to turn on inverted text when we enter the block and turns it off when we exit. It also handles nested calls correctly. For more complicated cases, like color, there is also a stack abstraction which reverts to the previous setting when a block exits.
 
-The types deserve some explanation. We call `invert` with some `Program` type. Remember that `Program` is `Terminal ?=> A` and `Terminal` is backend specific. In the `Display` effect we need to actually carry out the effects within the `Program`, so we need to pass an instance of `Terminal` to the `Program`. Where do we get this instance from? It is `this`. 
+The types deserve some explanation. We call `invert` with some `Program` type. Remember that `Program` is `Terminal ?=> A` and `Terminal` is backend specific. In the `Format` effect we need to actually carry out the effects within the `Program`, so we need to pass an instance of `Terminal` to the `Program`. Where do we get this instance from? It is `this`. 
 
-How do we make sure that `Terminal` is actually of the same type as `this`? Firstly, in `invert` the type of a program is `F ?=> A`, where `F` is a type parameter of `Display`. The meaning of `F` is all the effect types that make up a particular `Terminal` type. If you look at the definition of the JVM terminal above you will see
+How do we make sure that `Terminal` is actually of the same type as `this`? Firstly, in `invert` the type of a program is `F ?=> A`, where `F` is a type parameter of `Format`. The meaning of `F` is all the effect types that make up a particular `Terminal` type. If you look at the definition of the JVM terminal above you will see
 
-```scala
-      effect.Display[Terminal],
+```scala 3
+      effect.Format[Terminal],
 ```
 
-so `F` *is* `Terminal`. The [self type](https://docs.scala-lang.org/tour/self-types.html) ensures that instances of `Display` are mixed into the correct type, and hence `this` is `F`.
+so `F` *is* `Terminal`. The [self type](https://docs.scala-lang.org/tour/self-types.html) ensures that instances of `Format` are mixed into the correct type, and hence `this` is `F`.
 
 
 ## Implementing Programs
 
 Now let's look at how the `Program` types are implemented. We'll start with @:api(terminus.Writer), as it is very simple.
 
-```scala
+```scala 3
 /** Interface for writing to a console. */
 trait Writer {
 
@@ -139,25 +139,25 @@ trait Writer {
 
 Firstly, notice this is the `Writer` *program* **not** the `Writer` effect. They are separate concepts. A `Program` is just `Terminal ?=> A`. In the specific case of `Writer` these programs simply require a `Writer` effect and then call the appropriate method on that effect.
 
-`Display` is a bit more complex. Here's the definition, with most of the methods removed.
+`Format` is a bit more complex. Here's the definition, with most of the methods removed.
 
-```scala
-trait Display {
-  object display {
+```scala 3
+trait Format {
+  object format {
   
     // ...
 
     def invert[F <: effect.Writer, A](
         f: F ?=> A
-    ): (F & effect.Display[F]) ?=> A =
-      effect ?=> effect.display.invert(f)
+    ): (F & effect.Format[F]) ?=> A =
+      effect ?=> effect.format.invert(f)
 
     // ...
   }
 }
 ```
 
-`invert` wraps a `Program` with another `Program`. What is the type of the inner program, the method argument `f`? It is whatever effects it requires to run, with the constraint that these effects much include the `Writer` effect. This is represented by the type parameter `F`. The result of calling `invert` is another program that requires all the effects of the argument `f` *and* the `Display` effect. In this way programs are constructed to require only the effects they need to run. So long as we apply them to a concrete `Terminal` type that is a super-type of these effects they can be run.
+`invert` wraps a `Program` with another `Program`. What is the type of the inner program, the method argument `f`? It is whatever effects it requires to run, with the constraint that these effects much include the `Writer` effect. This is represented by the type parameter `F`. The result of calling `invert` is another program that requires all the effects of the argument `f` *and* the `Format` effect. In this way programs are constructed to require only the effects they need to run. So long as we apply them to a concrete `Terminal` type that is a super-type of these effects they can be run.
 
 
 ## Low-level Code
@@ -166,7 +166,7 @@ All the ANSI escape codes used by Terminus are defined in `terminus.effect.AnsiC
 This can be useful if you want to write [escape codes][ansi-escape-codes] directly to the terminal without the abstractions provided by the Terminus DSL.
 Here's a simple example.
 
-```scala mdoc
+```scala 3 mdoc
 import terminus.effect.AnsiCodes
 
 AnsiCodes.foreground.red

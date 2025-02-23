@@ -8,8 +8,8 @@ object Format {
   @JSExport
   def go(id: String) =
     Terminal.run(id, rows = 3) {
-      Terminal.display.bold(
-        Terminal.display.strikethrough(
+      Terminal.format.bold(
+        Terminal.format.strikethrough(
           Terminal.write("Bold and strikethrough\r\n")
         )
       )
@@ -18,8 +18,8 @@ object Format {
           Terminal.write("Foreground and background color\r\n")
         )
       )
-      Terminal.display.invert(
-        Terminal.display.underline.curly(
+      Terminal.format.invert(
+        Terminal.format.underline.curly(
           Terminal.write("Inverted with curly underline")
         )
       )

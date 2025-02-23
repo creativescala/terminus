@@ -125,7 +125,7 @@ object AnsiCodes {
       csi("H", y.toString, x.toString)
   }
 
-  object display {
+  object format {
     object bold {
       val on: String = sgr("1")
       val off: String = sgr("22")

@@ -19,7 +19,7 @@ package terminus
 trait Terminal
     extends effect.Color[Terminal],
       effect.Cursor,
-      effect.Display[Terminal],
+      effect.Format[Terminal],
       effect.Erase,
       effect.AlternateScreenMode[Terminal],
       effect.ApplicationMode[Terminal],
@@ -31,7 +31,7 @@ type Program[A] = Terminal ?=> A
 object Terminal
     extends Color,
       Cursor,
-      Display,
+      Format,
       Erase,
       AlternateScreenMode,
       ApplicationMode,

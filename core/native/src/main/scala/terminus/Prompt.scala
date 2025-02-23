@@ -34,8 +34,7 @@ def clear(): Program[Unit] = {
 
 // Write an option the user can choose. The currently selected option is highlighted.
 def writeChoice(description: String, selected: Boolean): Program[Unit] =
-  if selected then
-    Terminal.display.bold(Terminal.write(s"> ${description}\r\n"))
+  if selected then Terminal.format.bold(Terminal.write(s"> ${description}\r\n"))
   else Terminal.write(s"  ${description}\r\n")
 
 // Write the UI

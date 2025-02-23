@@ -21,19 +21,19 @@ to create a new project. It doesn't matter what name you give this project. Some
 Open `build.sbt` in the project you just created. Above the line that starts with `libraryDependencies` add
 
 ```scala
-libraryDependencies += "org.creativescala" %%% "terminus-core" % "@VERSION@",
+libraryDependencies += "org.creativescala" %%% "terminus-core" % "@VERSION@"
 ```
 
 Note the trailing comma on this line. sbt will be upset if you don't add this.
 
 Now open `src/main/scala/Main.scala` and replace the code with
 
-```scala
+```scala 3
 import terminus.*
 
 @main def hello(): Unit =
   Terminal.run {
-    Terminal.display.bold {
+    Terminal.format.bold {
       Terminal.foreground.green {
         Terminal.write("This is Terminus!")
         Terminal.flush()

@@ -21,7 +21,7 @@ import scala.collection.mutable
 final class StringBuilderTerminal()
     extends effect.Color[StringBuilderTerminal],
       effect.Cursor,
-      effect.Display[StringBuilderTerminal],
+      effect.Format[StringBuilderTerminal],
       effect.Erase,
       effect.Writer {
 

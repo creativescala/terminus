@@ -72,7 +72,7 @@ class JLineTerminal(terminal: JTerminal) extends Terminal {
 object JLineTerminal
     extends Color,
       Cursor,
-      Display,
+      Format,
       Erase,
       AlternateScreenMode,
       ApplicationMode,
