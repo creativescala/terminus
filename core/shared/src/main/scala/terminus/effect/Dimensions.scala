@@ -14,30 +14,19 @@
  * limitations under the License.
  */
 
-package terminus
+package terminus.effect
 
-trait Terminal
-    extends effect.Color[Terminal],
-      effect.Cursor,
-      effect.Format[Terminal],
-      effect.Dimensions,
-      effect.Erase,
-      effect.AlternateScreenMode[Terminal],
-      effect.ApplicationMode[Terminal],
-      effect.RawMode[Terminal],
-      effect.Reader,
-      effect.Writer
-type Program[A] = Terminal ?=> A
+//import org.jline.terminal.Size
 
-object Terminal
-    extends Color,
-      Cursor,
-      Format,
-      Dimensions,
-      AlternateScreenMode,
-      ApplicationMode,
-      RawMode,
-      Reader,
-      Writer {
-  export JLineTerminal.*
+/** Functionalities related to the dimensions of the terminal */
+trait Dimensions extends Effect {
+  def getDimensions: TerminalDimensions
+  def setDimensions(dimensions: TerminalDimensions): Unit
 }
+
+final case class TerminalDimensions(noOfColumns: Int, noOfRows: Int)
+
+//object TerminalDimensions {
+//  extension (size: Size) def fromJLineSize: TerminalDimensions =
+//    TerminalDimensions(size.getColumns, size.getRows)
+//}

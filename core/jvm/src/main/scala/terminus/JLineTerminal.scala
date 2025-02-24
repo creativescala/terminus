@@ -16,10 +16,12 @@
 
 package terminus
 
+import org.jline.terminal.Size
 import org.jline.terminal.Terminal as JTerminal
 import org.jline.terminal.TerminalBuilder
 import org.jline.utils.InfoCmp.Capability
 import terminus.effect.Eof
+import terminus.effect.TerminalDimensions
 
 class JLineTerminal(terminal: JTerminal) extends Terminal {
   private val reader = terminal.reader()
@@ -47,6 +49,14 @@ class JLineTerminal(terminal: JTerminal) extends Terminal {
     }
   }
 
+  def getDimensions: effect.TerminalDimensions = {
+    val size = terminal.getSize
+    TerminalDimensions(size.getColumns, size.getRows)
+  }
+
+  def setDimensions(dimensions: TerminalDimensions): Unit =
+    terminal.setSize(Size(dimensions.noOfColumns, dimensions.noOfRows))
+
   def application[A](f: Terminal ?=> A): A = {
     try {
       terminal.puts(Capability.keypad_xmit)
@@ -73,6 +83,7 @@ object JLineTerminal
     extends Color,
       Cursor,
       Format,
+      Dimensions,
       Erase,
       AlternateScreenMode,
       ApplicationMode,

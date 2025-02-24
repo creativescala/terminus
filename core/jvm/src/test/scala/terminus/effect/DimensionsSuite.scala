@@ -14,30 +14,22 @@
  * limitations under the License.
  */
 
-package terminus
+package terminus.effect
 
-trait Terminal
-    extends effect.Color[Terminal],
-      effect.Cursor,
-      effect.Format[Terminal],
-      effect.Dimensions,
-      effect.Erase,
-      effect.AlternateScreenMode[Terminal],
-      effect.ApplicationMode[Terminal],
-      effect.RawMode[Terminal],
-      effect.Reader,
-      effect.Writer
-type Program[A] = Terminal ?=> A
+import munit.FunSuite
+import terminus.JLineTerminal
 
-object Terminal
-    extends Color,
-      Cursor,
-      Format,
-      Dimensions,
-      AlternateScreenMode,
-      ApplicationMode,
-      RawMode,
-      Reader,
-      Writer {
-  export JLineTerminal.*
+class DimensionsSuite extends FunSuite {
+
+  test("Should set and get the dimensions of the current terminal size") {
+
+    val userInputDimensions = TerminalDimensions(50, 50)
+
+    val outputDimensions = JLineTerminal.run {
+      JLineTerminal.dimensions.set(userInputDimensions)
+      JLineTerminal.dimensions.get
+    }
+
+    assertEquals(outputDimensions, userInputDimensions)
+  }
 }
