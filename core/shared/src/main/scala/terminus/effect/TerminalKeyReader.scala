@@ -73,8 +73,9 @@ trait TerminalKeyReader(timeout: Duration = 100.millis) extends KeyReader {
       case '\u007f' => Key.backspace
       case Ascii.ESC =>
         read(timeout) match {
-          case Eof     => Key.escape
-          case Timeout => Key.escape
+          case Eof      => Key.escape
+          case Timeout  => Key.escape
+          case Ascii.HT => Key.backTab
           // Normal mode
           case '[' =>
             read() match {
@@ -85,9 +86,56 @@ trait TerminalKeyReader(timeout: Duration = 100.millis) extends KeyReader {
               case 'D' => Key.left
               case 'F' => Key.`end`
               case 'H' => Key.home
+              case 'Z' => Key.backTab
               case digit: Char if digit.isDigit =>
                 read() match {
                   case Eof => Eof
+                  case digit2: Char if digit2.isDigit =>
+                    read() match {
+                      case Eof => Eof
+                      case '~' =>
+                        digit match {
+                          case '1' =>
+                            digit2 match {
+                              case '1' => Key.f1
+                              case '2' => Key.f2
+                              case '3' => Key.f3
+                              case '4' => Key.f4
+                              case '5' => Key.f5
+                              case '7' => Key.f6
+                              case '8' => Key.f7
+                              case '9' => Key.f8
+                              case other =>
+                                Key.unknown(s"${Ascii.ESC}[${digit}${digit2}~")
+                            }
+                          case '2' =>
+                            digit2 match {
+                              case '0' => Key.f9
+                              case '1' => Key.f10
+                              case '3' => Key.f11
+                              case '4' => Key.f12
+                              case '5' => Key.f13
+                              case '6' => Key.f14
+                              case '8' => Key.f15
+                              case '9' => Key.f16
+                              case other =>
+                                Key.unknown(s"${Ascii.ESC}[${digit}${digit2}~")
+                            }
+                          case '3' =>
+                            digit2 match {
+                              case '1' => Key.f17
+                              case '2' => Key.f18
+                              case '3' => Key.f19
+                              case '4' => Key.f20
+                              case other =>
+                                Key.unknown(s"${Ascii.ESC}[${digit}${digit2}~")
+                            }
+                          case other =>
+                            Key.unknown(s"${Ascii.ESC}[${digit}${digit2}~")
+                        }
+                      case other: Char =>
+                        Key.unknown(s"${Ascii.ESC}[${digit}${digit2}${other}")
+                    }
                   case '~' =>
                     digit match {
                       case '1'         => Key.home // tmux
@@ -102,7 +150,17 @@ trait TerminalKeyReader(timeout: Duration = 100.millis) extends KeyReader {
                     }
                   case other: Char => Key.unknown(s"${Ascii.ESC}[${other}")
                 }
-              case 'Z'         => Key.backTab
+              case '[' =>
+                read() match {
+                  case Eof         => Eof
+                  case 'A'         => Key.f1
+                  case 'B'         => Key.f2
+                  case 'C'         => Key.f3
+                  case 'D'         => Key.f4
+                  case 'E'         => Key.f5
+                  case other: Char => Key.unknown(s"${Ascii.ESC}[[${other}")
+                }
+              case '~'         => Key.backTab
               case other: Char => Key.unknown(s"${Ascii.ESC}[${other}")
             }
           // Application mode
@@ -115,6 +173,10 @@ trait TerminalKeyReader(timeout: Duration = 100.millis) extends KeyReader {
               case 'D'         => Key.left
               case 'F'         => Key.`end`
               case 'H'         => Key.home
+              case 'P'         => Key.f1
+              case 'Q'         => Key.f2
+              case 'R'         => Key.f3
+              case 'S'         => Key.f4
               case other: Char => Key.unknown(s"${Ascii.ESC}O${other}")
             }
           case other: Char => Key.unknown(s"${Ascii.ESC}${other}")
