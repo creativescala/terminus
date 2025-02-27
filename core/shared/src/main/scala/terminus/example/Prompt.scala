@@ -23,8 +23,8 @@ import scala.annotation.tailrec
 
 class Prompt[
     Terminal <: effect.Color[Terminal] & effect.Cursor &
-      effect.Display[Terminal] & effect.Erase & effect.KeyReader & effect.Writer
-](terminal: Color & Cursor & Display & Erase & KeyReader & Writer) {
+      effect.Format[Terminal] & effect.Erase & effect.KeyReader & effect.Writer
+](terminal: Color & Cursor & Format & Erase & KeyReader & Writer) {
 
   type Program[A] = Terminal ?=> A
 
@@ -40,7 +40,7 @@ class Prompt[
   // Write an option the user can choose. The currently selected option is highlighted.
   def writeChoice(description: String, selected: Boolean): Program[Unit] =
     if selected then
-      terminal.display.bold(terminal.write(s"> ${description}\r\n"))
+      terminal.format.bold(terminal.write(s"> ${description}\r\n"))
     else terminal.write(s"  ${description}\r\n")
 
   // Write the UI

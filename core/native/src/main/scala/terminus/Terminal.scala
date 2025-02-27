@@ -35,7 +35,7 @@ object Terminal
       ApplicationMode,
       Color,
       Cursor,
-      Display,
+      Format,
       Erase,
       KeyReader,
       NonBlockingReader,

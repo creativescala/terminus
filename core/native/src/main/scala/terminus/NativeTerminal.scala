@@ -33,9 +33,10 @@ object NativeTerminal
     extends Terminal,
       WithEffect[Terminal],
       TerminalKeyReader {
-  private val termios =
-    if LinktimeInfo.isMac then Termios[TermiosStruct.clong_flags]
-    else if LinktimeInfo.isLinux then Termios[TermiosStruct.cint_flags]
+
+  private given termiosAccess: TermiosAccess[?] =
+    if LinktimeInfo.isMac then clongTermiosAccess
+    else if LinktimeInfo.isLinux then cintTermiosAccess
     else
       sys.error(
         s"""Your platform, {LinktimeInfo.target.os}, is not currently supported by Terminus on Scala Native.
@@ -47,6 +48,8 @@ object NativeTerminal
            |
            |to get support added for your platform.""".stripMargin
       )
+
+  private val termios = Termios(using termiosAccess)
 
   def run[A](f: Program[A]): A = {
     val result = f(using this)
@@ -67,8 +70,11 @@ object NativeTerminal
       val origAttrs = termios.getAttributes()
       val attrs = termios.getAttributes()
       try {
-        termios.setVMin(attrs, 0)
-        termios.setVTime(attrs, (duration.toMillis / 100).toByte)
+        attrs.setSpecialCharacter(posix.termios.VMIN, 0)
+        attrs.setSpecialCharacter(
+          posix.termios.VTIME,
+          (duration.toMillis / 100).toByte
+        )
         termios.setAttributes(attrs)
 
         val buf: Ptr[Byte] = stackalloc[Byte]()

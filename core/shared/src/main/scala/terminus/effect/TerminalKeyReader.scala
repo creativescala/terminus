@@ -18,7 +18,6 @@ package terminus.effect
 
 import terminus.Eof
 import terminus.Key
-import terminus.KeyCode
 import terminus.Timeout
 
 import scala.concurrent.duration.*
