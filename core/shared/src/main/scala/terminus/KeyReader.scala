@@ -14,12 +14,14 @@
  * limitations under the License.
  */
 
-package terminus.effect
+package terminus
 
-// Miscellaneous types that don't fit elsewhere.
+import terminus.effect.Eof
+import terminus.effect.Key
 
-sealed trait Eof
-object Eof extends Eof
+trait KeyReader {
 
-sealed trait Timeout
-object Timeout extends Timeout
+  /** Block waiting for a key. */
+  def readKey(): effect.KeyReader ?=> Eof | Key =
+    effect ?=> effect.readKey()
+}

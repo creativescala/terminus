@@ -16,10 +16,6 @@
 
 package terminus.effect
 
-// Miscellaneous types that don't fit elsewhere.
-
-sealed trait Eof
-object Eof extends Eof
-
-sealed trait Timeout
-object Timeout extends Timeout
+trait KeyReader extends Effect {
+  def readKey(): Eof | Key
+}

@@ -16,13 +16,16 @@
 
 package terminus
 
-import terminus.effect.Ascii
 import terminus.effect.Eof
+import terminus.effect.Key
 
+import scala.annotation.tailrec
+
+// The only keys we care about
 enum KeyCode {
-  case Down
-  case Up
   case Enter
+  case Up
+  case Down
 }
 
 // Clear the text we've written
@@ -46,34 +49,17 @@ def write(selected: Int): Program[Unit] = {
   Terminal.flush()
 }
 
+@tailrec
 def read(): Program[KeyCode] = {
-  Terminal.read() match {
+  Terminal.readKey() match {
     case Eof =>
       throw new Exception("Received an EOF")
-    case char: Char =>
-      char match {
-        case Ascii.LF | Ascii.CR => KeyCode.Enter
-        case Ascii.ESC =>
-          Terminal.read() match {
-            // Normal mode
-            case '[' =>
-              Terminal.read() match {
-                case 'A'   => KeyCode.Up
-                case 'B'   => KeyCode.Down
-                case other => read()
-              }
-
-            // Application mode
-            case 'O' =>
-              Terminal.read() match {
-                case 'A'   => KeyCode.Up
-                case 'B'   => KeyCode.Down
-                case other => read()
-              }
-
-            case other => read()
-          }
-        case other => read()
+    case key: Key =>
+      key match {
+        case Key.Enter => KeyCode.Enter
+        case Key.Up    => KeyCode.Up
+        case Key.Down  => KeyCode.Down
+        case other     => read()
       }
   }
 }
