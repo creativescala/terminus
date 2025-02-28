@@ -16,15 +16,10 @@
 
 package terminus
 
-import terminus.example.Prompt
+// Miscellaneous types that don't fit elsewhere.
 
-@main def prompt(): Unit = {
-  val idx =
-    Terminal.run(
-      Terminal.raw {
-        Prompt[Terminal](Terminal).loop(0)
-      }
-    )
+sealed trait Eof
+object Eof extends Eof
 
-  println(s"Selected $idx")
-}
+sealed trait Timeout
+object Timeout extends Timeout

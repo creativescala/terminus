@@ -16,15 +16,9 @@
 
 package terminus
 
-import terminus.example.Prompt
+import scala.concurrent.duration.Duration
 
-@main def prompt(): Unit = {
-  val idx =
-    Terminal.run(
-      Terminal.raw {
-        Prompt[Terminal](Terminal).loop(0)
-      }
-    )
-
-  println(s"Selected $idx")
+trait Peeker {
+  def peek(duration: Duration): effect.Peeker ?=> Timeout | Eof | Char =
+    effect ?=> effect.peek(duration)
 }

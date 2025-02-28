@@ -16,8 +16,7 @@
 
 package terminus.effect
 
-sealed trait Eof
-object Eof extends Eof
+import terminus.Eof
 
 trait Reader extends Effect {
   def read(): Eof | Char

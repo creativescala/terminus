@@ -17,15 +17,37 @@
 package terminus
 
 trait Terminal
-    extends effect.Color[Terminal],
+    extends effect.AlternateScreenMode[Terminal],
+      effect.ApplicationMode[Terminal],
+      effect.Color[Terminal],
       effect.Cursor,
       effect.Format[Terminal],
       effect.Erase,
-      effect.AlternateScreenMode[Terminal],
-      effect.ApplicationMode[Terminal],
+      effect.KeyReader,
+      effect.NonBlockingReader,
       effect.RawMode[Terminal],
       effect.Reader,
       effect.Writer
 type Program[A] = Terminal ?=> A
 
-val Terminal = NativeTerminal
+object Terminal
+    extends AlternateScreenMode,
+      ApplicationMode,
+      Color,
+      Cursor,
+      Format,
+      Erase,
+      KeyReader,
+      NonBlockingReader,
+      Peeker,
+      RawMode,
+      Reader,
+      Writer {
+
+  def run[A](f: Program[A]): A = {
+    val terminal = NativeTerminal
+    val result = f(using terminal)
+
+    result
+  }
+}

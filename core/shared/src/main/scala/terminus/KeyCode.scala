@@ -16,15 +16,35 @@
 
 package terminus
 
-import terminus.example.Prompt
+enum KeyCode {
+  case BackTab
+  case Backspace
+  case CapsLock
+  case Character(char: Char)
+  case Delete
+  case Down
+  case End
+  case Enter
+  case Escape
+  case F(value: Byte)
+  case Home
+  case Insert
+  case KeypadBegin
+  case Left
+  case Menu
+  case Null
+  case NumLock
+  case PageDown
+  case PageUp
+  case Pause
+  case PrintScreen
+  case Right
+  case ScrollLock
+  case Tab
+  case Up
 
-@main def prompt(): Unit = {
-  val idx =
-    Terminal.run(
-      Terminal.raw {
-        Prompt[Terminal](Terminal).loop(0)
-      }
-    )
-
-  println(s"Selected $idx")
+  /** This case represents a sequence of codes that we don't know how to
+    * interpret. The entire sequence is contained here for debugging purposes.
+    */
+  case Unknown(code: String)
 }

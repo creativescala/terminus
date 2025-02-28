@@ -14,17 +14,30 @@
  * limitations under the License.
  */
 
-package terminus
+package terminus.effect
 
-import terminus.example.Prompt
+import terminus.Eof
+import terminus.Timeout
 
-@main def prompt(): Unit = {
-  val idx =
-    Terminal.run(
-      Terminal.raw {
-        Prompt[Terminal](Terminal).loop(0)
-      }
-    )
+import scala.concurrent.duration.Duration
 
-  println(s"Selected $idx")
+/** A Reader that reads input from the given String. Mostly useful for testing.
+  */
+class StringBufferReader(input: String)
+    extends Reader,
+      NonBlockingReader,
+      KeyReader,
+      TerminalKeyReader {
+  private var index: Int = 0
+
+  def read(): Eof | Char =
+    if index >= input.size then Eof
+    else {
+      val char = input(index)
+      index = index + 1
+      char
+    }
+
+  def read(duration: Duration): Timeout | Eof | Char =
+    read()
 }

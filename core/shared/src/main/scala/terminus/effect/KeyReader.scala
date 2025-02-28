@@ -14,17 +14,11 @@
  * limitations under the License.
  */
 
-package terminus
+package terminus.effect
 
-import terminus.example.Prompt
+import terminus.Eof
+import terminus.Key
 
-@main def prompt(): Unit = {
-  val idx =
-    Terminal.run(
-      Terminal.raw {
-        Prompt[Terminal](Terminal).loop(0)
-      }
-    )
-
-  println(s"Selected $idx")
+trait KeyReader extends Effect {
+  def readKey(): Eof | Key
 }

@@ -14,17 +14,13 @@
  * limitations under the License.
  */
 
-package terminus
+package terminus.effect
 
-import terminus.example.Prompt
+import terminus.Eof
+import terminus.Timeout
 
-@main def prompt(): Unit = {
-  val idx =
-    Terminal.run(
-      Terminal.raw {
-        Prompt[Terminal](Terminal).loop(0)
-      }
-    )
+import scala.concurrent.duration.Duration
 
-  println(s"Selected $idx")
+trait Peeker extends Effect {
+  def peek(duration: Duration): Timeout | Eof | Char
 }

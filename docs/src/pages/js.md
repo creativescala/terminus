@@ -13,7 +13,7 @@ When running a `Terminal` you need to provide the ID of a DOM element where you 
 
 you would construct a `Terminal` with the following.
 
-```scala 3
+```scala
 Terminal.run("id"){ 
   // Terminal code here
 }
@@ -21,7 +21,7 @@ Terminal.run("id"){
 
 There are optional arguments to specify the number of rows and columns the terminal occupies.
 
-```scala 3
+```scala
 Terminal.run("id", rows = 24, cols = 80){ 
   // Terminal code here
 }

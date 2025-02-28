@@ -88,6 +88,12 @@ trait TermiosAccess[T] {
 
   /** Remove flags from termios c_lflag struct member */
   def removeLocalFlags(attrs: Ptr[T], flags: CInt): Unit
+
+  /** Set the value at the given index of the termios c_cc struct member. Valid
+    * indices are defined as constants such as `VMIN` and `VTIME` in
+    * [[scala.scalanative.posix.termios]]
+    */
+  def setSpecialCharacter(attrs: Ptr[T], idx: CInt, value: CChar): Unit
 }
 
 /** Extension methods to simplify modifying a termios struct */
@@ -100,6 +106,8 @@ extension [T](ptr: Ptr[T])(using au: TermiosAccess[T]) {
   def removeControlFlags(flags: CInt): Unit = au.removeControlFlags(ptr, flags)
   def addLocalFlags(flags: CInt): Unit = au.addLocalFlags(ptr, flags)
   def removeLocalFlags(flags: CInt): Unit = au.removeLocalFlags(ptr, flags)
+  def setSpecialCharacter(idx: CInt, value: CChar) =
+    au.setSpecialCharacter(ptr, idx, value)
 }
 
 /** [[TermiosAccess]] instance for structs with CLong bitflags */
@@ -167,6 +175,12 @@ given clongTermiosAccess: TermiosAccess[TermiosStruct.clong_flags] =
         flags: CInt
     ): Unit =
       attrs._4 = attrs._4 & ~flags
+
+    override def setSpecialCharacter(
+        attrs: Ptr[TermiosStruct.clong_flags],
+        idx: CInt,
+        value: CChar
+    ): Unit = attrs._5(idx) = value
   }
 
 /** [[TermiosAccess]] instance for structs with CInt bitflags */
@@ -231,6 +245,12 @@ given cintTermiosAccess: TermiosAccess[TermiosStruct.cint_flags] =
         attrs: Ptr[TermiosStruct.cint_flags],
         flags: CInt
     ): Unit = attrs._4 = attrs._4 & ~flags
+
+    override def setSpecialCharacter(
+        attrs: Ptr[TermiosStruct.cint_flags],
+        idx: CInt,
+        value: CChar
+    ): Unit = attrs._5(idx) = value
 
     // Custom `tcgetattr` and `tcsetattr` definitions, since we can't use the ones defined in scala native since
     // they use CLong for bitflags. These should point to the functions defined in the systems termios library
