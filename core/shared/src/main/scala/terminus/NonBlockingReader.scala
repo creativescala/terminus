@@ -16,9 +16,6 @@
 
 package terminus
 
-import terminus.effect.Eof
-import terminus.effect.Timeout
-
 import scala.concurrent.duration.Duration
 
 trait NonBlockingReader {

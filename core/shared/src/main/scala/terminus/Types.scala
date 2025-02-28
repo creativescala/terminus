@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package terminus.effect
+package terminus
 
 // Miscellaneous types that don't fit elsewhere.
 

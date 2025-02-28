@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package terminus.effect
+package terminus
 
 /** Enumeration describing the key presses we recognize from the terminal */
 enum Key {

@@ -16,8 +16,6 @@
 
 package terminus
 
-import terminus.effect.Eof
-
 trait Reader {
   def read(): effect.Reader ?=> Eof | Char =
     effect ?=> effect.read()

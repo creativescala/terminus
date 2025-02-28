@@ -16,9 +16,6 @@
 
 package terminus
 
-import terminus.effect.Eof
-import terminus.effect.Key
-
 import scala.annotation.tailrec
 
 // The only keys we care about

@@ -23,7 +23,6 @@ import org.jline.utils.InfoCmp.Capability
 import terminus.effect.Eof
 import terminus.effect.TerminalDimensions
 import terminus.effect.TerminalKeyReader
-import terminus.effect.Timeout
 
 import scala.concurrent.duration.Duration
 

@@ -16,6 +16,8 @@
 
 package terminus.effect
 
+import terminus.Eof
+
 trait Reader extends Effect {
   def read(): Eof | Char
 }

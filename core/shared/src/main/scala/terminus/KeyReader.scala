@@ -16,9 +16,6 @@
 
 package terminus
 
-import terminus.effect.Eof
-import terminus.effect.Key
-
 trait KeyReader {
 
   /** Block waiting for a key. */
