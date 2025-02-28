@@ -37,6 +37,13 @@ class JLineTerminal(terminal: JTerminal) extends Terminal {
       case char => char.toChar
     }
 
+  def read(duration: Duration): Timeout | Eof | Char =
+    reader.read(duration.toMillis) match {
+      case -2   => Timeout
+      case -1   => Eof
+      case char => char.toChar
+    }
+
   def read(): Eof | Char =
     reader.read() match {
       case -1   => Eof

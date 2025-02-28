@@ -18,9 +18,6 @@ package terminus.effect
 
 import scala.concurrent.duration.Duration
 
-sealed trait Timeout
-object Timeout extends Timeout
-
 trait Peeker extends Effect {
   def peek(duration: Duration): Timeout | Eof | Char
 }

@@ -16,6 +16,8 @@
 
 package terminus.effect
 
-trait Reader extends Effect {
-  def read(): Eof | Char
+import scala.concurrent.duration.Duration
+
+trait NonBlockingReader extends Effect {
+  def read(duration: Duration): Timeout | Eof | Char
 }
