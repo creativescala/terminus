@@ -18,7 +18,13 @@ package terminus
 
 trait KeyReader {
 
-  /** Block waiting for a key. */
+  /** Read a [[Key]] from the terminal.
+    *
+    * This method converts the most common escape code sent by the terminal into
+    * the more useful representation defined in [[Key]]. It is a blocking
+    * operation, and will not return until a key has been read or end-of-file
+    * (EOF) is received.
+    */
   def readKey(): effect.KeyReader ?=> Eof | Key =
     effect ?=> effect.readKey()
 }

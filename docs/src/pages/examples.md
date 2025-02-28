@@ -8,7 +8,7 @@ This example shows a simple UI you can easily build with Terminus. This is the k
 
 Here's the code for this example, running on the JVM backend. (The JS code is slightly different due to differences in how input is handled.)
 
-```scala 3
+```scala
 import terminus.effect.{ Ascii, Eof }
 
 // The only keys we care about

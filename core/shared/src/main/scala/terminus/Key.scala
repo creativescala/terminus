@@ -20,6 +20,9 @@ package terminus
   * any modifiers that were pressed. We only interpret modifiers if the terminal
   * passes that information to us. So, for example, 'A' is not represented as
   * Shift + 'a' as the terminal does not send that information.
+  *
+  * The majority of special keys (up as arrow keys and function keys) as defined
+  * as constants on the companion object.
   */
 final case class Key(modifiers: KeyModifier, code: KeyCode)
 object Key {

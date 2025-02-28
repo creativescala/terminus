@@ -21,14 +21,14 @@ libraryDependencies += "org.creativescala" %%% "terminus-core" % "@VERSION@"
 
 Import Terminus
 
-```scala 3 mdoc:silent
+```scala mdoc:silent
 import terminus.*
 ```
 
 Now call methods on the `Terminal` object. The core methods are `read` and `write`, but there are also methods to change color, move the cursor, erase content, and so on. On most terminals you will need to call `flush` or your output won't appear. Wrap a call to `run` around your entire program. Here's a small example that prints green text.
 
 
-```scala 3 mdoc:compile-only
+```scala mdoc:compile-only
 Terminal.run {
   Terminal.format.bold {
     Terminal.foreground.green {
@@ -52,7 +52,7 @@ All the ANSI escape codes used by Terminus are defined in `terminus.effect.AnsiC
 This can be useful if you want to write [escape codes][ansi-escape-codes] directly to the terminal without the abstractions provided by the Terminus DSL.
 Here's a simple example.
 
-```scala 3 mdoc
+```scala mdoc
 import terminus.effect.AnsiCodes
 
 AnsiCodes.foreground.red
