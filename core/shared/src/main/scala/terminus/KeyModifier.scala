@@ -21,8 +21,14 @@ object KeyModifier {
   val Shift: KeyModifier = 0x0001
   val Control: KeyModifier = 0x0002
   val Alt: KeyModifier = 0x0004
+
+  /** Super is usually bound to the Windows key, or the Command key on MacOS. */
   val Super: KeyModifier = 0x0008
+
+  /** The Hyper key is usually not available on modern keyboards. */
   val Hyper: KeyModifier = 0x0010
+
+  /** The Meta key is usually not available on modern keyboards. */
   val Meta: KeyModifier = 0x0020
   val None: KeyModifier = 0x0000
 
