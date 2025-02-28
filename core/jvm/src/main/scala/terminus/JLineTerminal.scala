@@ -20,7 +20,6 @@ import org.jline.terminal.Size
 import org.jline.terminal.Terminal as JTerminal
 import org.jline.terminal.TerminalBuilder
 import org.jline.utils.InfoCmp.Capability
-import terminus.effect.Eof
 import terminus.effect.TerminalDimensions
 import terminus.effect.TerminalKeyReader
 
