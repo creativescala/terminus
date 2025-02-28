@@ -103,7 +103,7 @@
 
 <h2 id="programs" class="section">Programs</h2>
 <p>In Terminus you construct a program that says what you want to do with the terminal, and then <code>run</code> that program when it is fully constructed. This is similar to using the <code>IO</code> monad, where you construct the monad stating what you want to do and then call one of the <code>unsafe</code> methods to carry out those actions.</p>
-<p>In Terminus program is basically a function that accepts some state representing the terminal and returns a value of type <code>A</code>. More concretely it is</p>
+<p>A Terminus program is basically a function that accepts some state representing the terminal and returns a value of type <code>A</code>. More concretely it is context function with type</p>
 <pre><code class="nohighlight"><span class="keyword">type</span><span> </span><span class="type-name">Program</span><span>[</span><span class="type-name">A</span><span>] = </span><span class="type-name">Terminal</span><span> ?=&gt; </span><span class="type-name">A</span></code></pre>
 <p>where <code>Terminal</code> is a backend specific implementation that handles interfacing with the terminal on that platform.</p>
 
@@ -132,8 +132,10 @@
   </span><span class="type-name">Terminal</span><span>.</span><span class="identifier">flush</span><span>()
   </span><span class="identifier">result</span><span>
 }</span></code></pre>
-<p>The final rule is if we don&#39;t tell the compiler we&#39;re expecting a context function, we may get an error when the compiler attempts to apply a context function to a given value that does not exist.</p>
-<pre><code class="nohighlight"><span class="type-name">Terminal</span><span>.</span><span class="identifier">write</span><span>(</span><span class="string-literal">&quot;Some output&quot;</span><span>)</span></code></pre>
+<p>The final rule is that if we don&#39;t tell the compiler we&#39;re expecting a context function, we may get an error when the compiler attempts to apply a context function to a given value that does not exist.</p>
+<pre><code class="nohighlight"><span class="type-name">Terminal</span><span>.</span><span class="identifier">write</span><span>(</span><span class="string-literal">&quot;Some output&quot;</span><span>)
+</span><span class="comment">// error: 
+// No given instance of type terminus.effect.Writer was found for parameter of (terminus.effect.Writer) ?=&gt; Unit</span></code></pre>
 <p>We can solve this by either adding a context function type annotation</p>
 <pre><code class="nohighlight"><span class="keyword">val</span><span> </span><span class="identifier">ok</span><span>: </span><span class="type-name">Program</span><span>[</span><span class="type-name">Unit</span><span>] = </span><span class="type-name">Terminal</span><span>.</span><span class="identifier">write</span><span>(</span><span class="string-literal">&quot;Some output&quot;</span><span>)</span></code></pre>
 <p>or by providing a <code>given</code> value of the required type, which is what <code>Terminal.run</code> does.</p>
@@ -145,7 +147,10 @@
 <h3 id="writing-to-the-terminal" class="section">Writing to the Terminal</h3>
 <p>Call the <code>write</code> method to send a <code>String</code> or <code>Char</code> to the terminal. On most terminals you&#39;ll need to call <code>flush</code> before your output actually appears.</p>
 <pre><code class="nohighlight"><span class="type-name">Terminal</span><span>.</span><span class="identifier">run</span><span> {
-  </span><span class="type-name">Terminal</span><span>.</span><span class="identifier">write</span><span>(</span><span class="string-literal">&quot;“Either write things worth reading or do things worth the writing.”</span><span class="escape-sequence">\r\n</span><span class="string-literal">  -Benjamin Franklin&quot;</span><span>)
+  </span><span class="type-name">Terminal</span><span>.</span><span class="identifier">write</span><span>(
+    </span><span class="string-literal">&quot;“Either write things worth reading or do things worth the writing.”</span><span class="escape-sequence">\r\n</span><span class="string-literal">&quot;</span><span>
+  )
+  </span><span class="type-name">Terminal</span><span>.</span><span class="identifier">write</span><span>(</span><span class="string-literal">&quot;  -Benjamin Franklin&quot;</span><span>)
   </span><span class="type-name">Terminal</span><span>.</span><span class="identifier">flush</span><span>()
 }</span></code></pre>
 <p>This produces the output shown below. Note that the terminal does not follow the Unix convention and interpret a newline (<code>\n</code>) as both a carriage return (<code>\r</code>) and a newline. We must specify both if we want to move down a line and return to the leftmost column.</p>
@@ -153,7 +158,25 @@
 <script>Write.go("write")</script>
 
 <h3 id="reading-from-the-terminal" class="section">Reading from the Terminal</h3>
-<p>Call <code>read</code> to wait for a character from the terminal. This returns character codes directly as sent by the terminal, which uses escape codes to encode various keys. For example, the up arrow is represented as the sequence of characters <code>ESC</code>, <code>[</code>, and <code>A</code>. You&#39;ll have to, for now, parse these yourself.</p>
+<p>You will normally want to use <code>readKey</code> which returns a <a class="api" href="https://javadoc.io/doc/org.creativescala/terminus-docs_3/latest/terminus/Key.html">Key</a>. This represents key presses in a structured way that is easy for applications to deal with. A typical input loop might look like the following.</p>
+<pre><code class="nohighlight"><span class="comment">// Our program only cares about arrow keys
+</span><span class="identifier">enum</span><span> </span><span class="type-name">ArrowKey</span><span> {
+  </span><span class="keyword">case</span><span> </span><span class="type-name">Up</span><span>
+  </span><span class="keyword">case</span><span> </span><span class="type-name">Down</span><span>
+  </span><span class="keyword">case</span><span> </span><span class="type-name">Right</span><span>
+  </span><span class="keyword">case</span><span> </span><span class="type-name">Left</span><span>
+}
+
+</span><span class="keyword">def</span><span> </span><span class="declaration-name">readArrowKey</span><span>(): </span><span class="type-name">Program</span><span>[</span><span class="type-name">ArrowKey</span><span>] =
+  </span><span class="type-name">Terminal</span><span>.</span><span class="identifier">readKey</span><span>() </span><span class="keyword">match</span><span> {
+    </span><span class="keyword">case</span><span> </span><span class="type-name">Key</span><span>.</span><span class="identifier">up</span><span> =&gt; </span><span class="type-name">ArrowKey</span><span>.</span><span class="type-name">Up</span><span>
+    </span><span class="keyword">case</span><span> </span><span class="type-name">Key</span><span>.</span><span class="identifier">down</span><span> =&gt; </span><span class="type-name">ArrowKey</span><span>.</span><span class="type-name">Down</span><span>
+    </span><span class="keyword">case</span><span> </span><span class="type-name">Key</span><span>.</span><span class="identifier">right</span><span> =&gt; </span><span class="type-name">ArrowKey</span><span>.</span><span class="type-name">Right</span><span>
+    </span><span class="keyword">case</span><span> </span><span class="type-name">Key</span><span>.</span><span class="identifier">left</span><span> =&gt; </span><span class="type-name">ArrowKey</span><span>.</span><span class="type-name">Left</span><span>
+    </span><span class="comment">// Discard keys that are not arrow keys and read again
+</span><span>    </span><span class="keyword">case</span><span> </span><span class="identifier">other</span><span> =&gt; </span><span class="identifier">readArrowKey</span><span>()
+  }</span></code></pre>
+<p>For lower level input you can use <code>read</code> to wait for a character from the terminal. This returns character codes directly as sent by the terminal, which uses escape codes to encode various keys. For example, the up arrow is represented as the sequence of characters <code>ESC</code>, <code>[</code>, and <code>A</code>. You&#39;ll have to parse these yourself.</p>
 
 <h3 id="formatting-output" class="section">Formatting Output</h3>
 <p>Terminus provides many methods to control the formatting of text in the terminal. You can set the foreground or background, make text bold, make text blink, and a lot more. See the <a class="api" href="https://javadoc.io/doc/org.creativescala/terminus-docs_3/latest/terminus/effect/Format.html">Format</a> and <a class="api" href="https://javadoc.io/doc/org.creativescala/terminus-docs_3/latest/terminus/effect/Color.html">Color</a> API documentation to see everything that is available.</p>

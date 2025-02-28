@@ -98,6 +98,7 @@
 <p>Here&#39;s the code for this example, running on the JVM backend. (The JS code is slightly different due to differences in how input is handled.)</p>
 <pre><code class="nohighlight"><span class="keyword">import</span><span> </span><span class="identifier">terminus</span><span>.</span><span class="identifier">effect</span><span>.{ </span><span class="type-name">Ascii</span><span>, </span><span class="type-name">Eof</span><span> }
 
+</span><span class="comment">// The only keys we care about
 </span><span class="identifier">enum</span><span> </span><span class="type-name">KeyCode</span><span> {
   </span><span class="keyword">case</span><span> </span><span class="type-name">Down</span><span>
   </span><span class="keyword">case</span><span> </span><span class="type-name">Up</span><span>
@@ -128,33 +129,15 @@
 
 </span><span class="annotation">@tailrec</span><span>
 </span><span class="keyword">def</span><span> </span><span class="declaration-name">read</span><span>(): </span><span class="type-name">Program</span><span>[</span><span class="type-name">KeyCode</span><span>] = {
-  </span><span class="type-name">Terminal</span><span>.</span><span class="identifier">read</span><span>() </span><span class="keyword">match</span><span> {
+  </span><span class="type-name">Terminal</span><span>.</span><span class="identifier">readKey</span><span>() </span><span class="keyword">match</span><span> {
     </span><span class="keyword">case</span><span> </span><span class="type-name">Eof</span><span> =&gt;
       </span><span class="keyword">throw</span><span> </span><span class="keyword">new</span><span> </span><span class="type-name">Exception</span><span>(</span><span class="string-literal">&quot;Received an EOF&quot;</span><span>)
-    </span><span class="keyword">case</span><span> </span><span class="identifier">char</span><span>: </span><span class="type-name">Char</span><span> =&gt;
-      </span><span class="identifier">char</span><span> </span><span class="keyword">match</span><span> {
-        </span><span class="keyword">case</span><span> </span><span class="type-name">Ascii</span><span>.</span><span class="type-name">LF</span><span> | </span><span class="type-name">Ascii</span><span>.</span><span class="type-name">CR</span><span> =&gt; </span><span class="type-name">KeyCode</span><span>.</span><span class="type-name">Enter</span><span>
-        </span><span class="keyword">case</span><span> </span><span class="type-name">Ascii</span><span>.</span><span class="type-name">ESC</span><span> =&gt;
-          </span><span class="type-name">Terminal</span><span>.</span><span class="identifier">read</span><span>() </span><span class="keyword">match</span><span> {
-            </span><span class="comment">// Normal mode
-</span><span>            </span><span class="keyword">case</span><span> </span><span class="char-literal">&#39;[&#39;</span><span> =&gt;
-              </span><span class="type-name">Terminal</span><span>.</span><span class="identifier">read</span><span>() </span><span class="keyword">match</span><span> {
-                </span><span class="keyword">case</span><span> </span><span class="char-literal">&#39;A&#39;</span><span>   =&gt; </span><span class="type-name">KeyCode</span><span>.</span><span class="type-name">Up</span><span>
-                </span><span class="keyword">case</span><span> </span><span class="char-literal">&#39;B&#39;</span><span>   =&gt; </span><span class="type-name">KeyCode</span><span>.</span><span class="type-name">Down</span><span>
-                </span><span class="keyword">case</span><span> </span><span class="identifier">other</span><span> =&gt; </span><span class="identifier">read</span><span>()
-              }
-
-            </span><span class="comment">// Application mode
-</span><span>            </span><span class="keyword">case</span><span> </span><span class="char-literal">&#39;O&#39;</span><span> =&gt;
-              </span><span class="type-name">Terminal</span><span>.</span><span class="identifier">read</span><span>() </span><span class="keyword">match</span><span> {
-                </span><span class="keyword">case</span><span> </span><span class="char-literal">&#39;A&#39;</span><span>   =&gt; </span><span class="type-name">KeyCode</span><span>.</span><span class="type-name">Up</span><span>
-                </span><span class="keyword">case</span><span> </span><span class="char-literal">&#39;B&#39;</span><span>   =&gt; </span><span class="type-name">KeyCode</span><span>.</span><span class="type-name">Down</span><span>
-                </span><span class="keyword">case</span><span> </span><span class="identifier">other</span><span> =&gt; </span><span class="identifier">read</span><span>()
-              }
-
-            </span><span class="keyword">case</span><span> </span><span class="identifier">other</span><span> =&gt; </span><span class="identifier">read</span><span>()
-          }
-        </span><span class="keyword">case</span><span> </span><span class="identifier">other</span><span> =&gt; </span><span class="identifier">read</span><span>()
+    </span><span class="keyword">case</span><span> </span><span class="identifier">key</span><span>: </span><span class="type-name">Key</span><span> =&gt;
+      </span><span class="identifier">key</span><span> </span><span class="keyword">match</span><span> {
+        </span><span class="keyword">case</span><span> </span><span class="type-name">Key</span><span>.</span><span class="type-name">Enter</span><span> =&gt; </span><span class="type-name">KeyCode</span><span>.</span><span class="type-name">Enter</span><span>
+        </span><span class="keyword">case</span><span> </span><span class="type-name">Key</span><span>.</span><span class="type-name">Up</span><span>    =&gt; </span><span class="type-name">KeyCode</span><span>.</span><span class="type-name">Up</span><span>
+        </span><span class="keyword">case</span><span> </span><span class="type-name">Key</span><span>.</span><span class="type-name">Down</span><span>  =&gt; </span><span class="type-name">KeyCode</span><span>.</span><span class="type-name">Down</span><span>
+        </span><span class="keyword">case</span><span> </span><span class="identifier">other</span><span>     =&gt; </span><span class="identifier">read</span><span>()
       }
   }
 }

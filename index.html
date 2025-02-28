@@ -126,7 +126,9 @@ Here&#39;s a simple example.</p>
 <pre><code class="nohighlight"><span class="keyword">import</span><span> </span><span class="identifier">terminus</span><span>.</span><span class="identifier">effect</span><span>.</span><span class="type-name">AnsiCodes</span><span>
 
 </span><span class="type-name">AnsiCodes</span><span>.</span><span class="identifier">foreground</span><span>.</span><span class="identifier">red</span><span>
-</span><span class="type-name">AnsiCodes</span><span>.</span><span class="identifier">erase</span><span>.</span><span class="identifier">line</span></code></pre>
+</span><span class="comment">// res1: String = &quot;\u001b[31m&quot;
+</span><span class="type-name">AnsiCodes</span><span>.</span><span class="identifier">erase</span><span>.</span><span class="identifier">line</span><span>
+</span><span class="comment">// res2: String = &quot;\u001b[2K&quot;</span></code></pre>
 
 <h2 id="notes" class="section">Notes</h2>
 <p>You won&#39;t be able to run terminal programs from sbt if the JVM forks when running. That is, if you have the setting</p>
