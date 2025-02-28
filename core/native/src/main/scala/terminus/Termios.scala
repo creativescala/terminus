@@ -17,7 +17,8 @@
 package terminus
 
 import scala.scalanative.posix
-import scala.scalanative.unsafe.{Ptr, Zone}
+import scala.scalanative.unsafe.Ptr
+import scala.scalanative.unsafe.Zone
 
 /** An abstraction over the c termios library that contains only the
   * functionality that we need, hiding the details of reading, updating, and

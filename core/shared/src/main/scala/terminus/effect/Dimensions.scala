@@ -24,9 +24,4 @@ trait Dimensions extends Effect {
   def setDimensions(dimensions: TerminalDimensions): Unit
 }
 
-final case class TerminalDimensions(noOfColumns: Int, noOfRows: Int)
-
-//object TerminalDimensions {
-//  extension (size: Size) def fromJLineSize: TerminalDimensions =
-//    TerminalDimensions(size.getColumns, size.getRows)
-//}
+final case class TerminalDimensions(columns: Int, rows: Int)
