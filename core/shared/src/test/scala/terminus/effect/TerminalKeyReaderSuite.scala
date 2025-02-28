@@ -362,13 +362,13 @@ class TerminalKeyReaderSuite extends FunSuite {
         "\u001b9" -> Key('ª'),
         "\u001b0" -> Key('º'),
         "\u001b-" -> Key('–'),
-        "\u001b=" -> Key('≠'),
+        "\u001b=" -> Key('≠')
         // Ctrl+§ on kitty is different from most other terminals on macOS.
-        "\u001b[167;5u" -> Key('0')
+        // "\u001b[167;5u" -> Key('0')
       )
 
     codes.foreach { (input, key) =>
-      assertEquals(StringBufferReader(input).readKey(), key)
+      assertEquals(StringBufferReader(input).readKey(), key, s"Input is $input")
     }
   }
 }

@@ -30,6 +30,20 @@ import scala.concurrent.duration.*
 trait TerminalKeyReader(timeout: Duration = 100.millis) extends KeyReader {
   self: NonBlockingReader & Reader =>
 
+  /** Read a character. If it matches char return key otherwise construct an
+    * unknown key using prefix as the path to reach this point.
+    */
+  private inline def readMatchOrUnknown(
+      char: Char,
+      key: Key,
+      prefix: String
+  ): Eof | Key =
+    read() match {
+      case Eof              => Eof
+      case ch if ch == char => key
+      case other: Char      => Key.unknown(prefix :+ other)
+    }
+
   // Some references on parsing terminal codes:
   //   https://github.com/crossterm-rs/crossterm/blob/master/src/event/sys/unix/parse.rs
   //   https://github.com/Textualize/textual/blob/main/src/textual/_ansi_sequences.py
@@ -76,10 +90,16 @@ trait TerminalKeyReader(timeout: Duration = 100.millis) extends KeyReader {
           case Eof      => Key.escape
           case Timeout  => Key.escape
           case Ascii.HT => Key.backTab
+          case 'b'      => Key.controlLeft
+          case 'f'      => Key.controlRight
           // Normal mode
           case '[' =>
             read() match {
               case Eof => Eof
+              case 'a' => Key.shiftUp
+              case 'b' => Key.shiftDown
+              case 'c' => Key.shiftRight
+              case 'd' => Key.shiftLeft
               case 'A' => Key.up
               case 'B' => Key.down
               case 'C' => Key.right
@@ -87,68 +107,538 @@ trait TerminalKeyReader(timeout: Duration = 100.millis) extends KeyReader {
               case 'F' => Key.`end`
               case 'H' => Key.home
               case 'Z' => Key.backTab
-              case digit: Char if digit.isDigit =>
+              case '1' =>
                 read() match {
                   case Eof => Eof
-                  case digit2: Char if digit2.isDigit =>
+                  case '1' =>
+                    read() match {
+                      case Eof   => Eof
+                      case '^'   => Key.controlF1
+                      case '~'   => Key.f1
+                      case other => Key.unknown(s"${Ascii.ESC}[11${other}")
+                    }
+                  case '2' =>
+                    read() match {
+                      case Eof   => Eof
+                      case '^'   => Key.controlF2
+                      case '~'   => Key.f2
+                      case other => Key.unknown(s"${Ascii.ESC}[12${other}")
+                    }
+                  case '3' =>
+                    read() match {
+                      case Eof   => Eof
+                      case '^'   => Key.controlF3
+                      case '~'   => Key.f3
+                      case other => Key.unknown(s"${Ascii.ESC}[13${other}")
+                    }
+                  case '4' =>
+                    read() match {
+                      case Eof   => Eof
+                      case '^'   => Key.controlF4
+                      case '~'   => Key.f4
+                      case other => Key.unknown(s"${Ascii.ESC}[14${other}")
+                    }
+                  case '5' =>
                     read() match {
                       case Eof => Eof
-                      case '~' =>
-                        digit match {
-                          case '1' =>
-                            digit2 match {
-                              case '1' => Key.f1
-                              case '2' => Key.f2
-                              case '3' => Key.f3
-                              case '4' => Key.f4
-                              case '5' => Key.f5
-                              case '7' => Key.f6
-                              case '8' => Key.f7
-                              case '9' => Key.f8
-                              case other =>
-                                Key.unknown(s"${Ascii.ESC}[${digit}${digit2}~")
-                            }
+                      case '^' => Key.controlF5
+                      case ';' =>
+                        read() match {
+                          case Eof => Eof
                           case '2' =>
-                            digit2 match {
-                              case '0' => Key.f9
-                              case '1' => Key.f10
-                              case '3' => Key.f11
-                              case '4' => Key.f12
-                              case '5' => Key.f13
-                              case '6' => Key.f14
-                              case '8' => Key.f15
-                              case '9' => Key.f16
+                            read() match {
+                              case Eof => Eof
+                              case '~' => Key.f17
                               case other =>
-                                Key.unknown(s"${Ascii.ESC}[${digit}${digit2}~")
+                                Key.unknown(s"${Ascii.ESC}[15;2${other}")
                             }
-                          case '3' =>
-                            digit2 match {
-                              case '1' => Key.f17
-                              case '2' => Key.f18
-                              case '3' => Key.f19
-                              case '4' => Key.f20
+                          case '5' =>
+                            read() match {
+                              case Eof => Eof
+                              case '~' => Key.controlF5
                               case other =>
-                                Key.unknown(s"${Ascii.ESC}[${digit}${digit2}~")
+                                Key.unknown(s"${Ascii.ESC}[15;5${other}")
                             }
-                          case other =>
-                            Key.unknown(s"${Ascii.ESC}[${digit}${digit2}~")
+                          case '6' =>
+                            read() match {
+                              case Eof => Eof
+                              case '~' => Key.controlF17
+                              case other =>
+                                Key.unknown(s"${Ascii.ESC}[15;6${other}")
+                            }
+                          case other => Key.unknown(s"${Ascii.ESC}[15;${other}")
                         }
-                      case other: Char =>
-                        Key.unknown(s"${Ascii.ESC}[${digit}${digit2}${other}")
+                      case '~'   => Key.f5
+                      case other => Key.unknown(s"${Ascii.ESC}[15${other}")
                     }
-                  case '~' =>
-                    digit match {
-                      case '1'         => Key.home // tmux
-                      case '2'         => Key.insert
-                      case '3'         => Key.delete
-                      case '4'         => Key.`end` // tmux
-                      case '5'         => Key.pageUp
-                      case '6'         => Key.pageDown
-                      case '7'         => Key.home // xrvt
-                      case '8'         => Key.`end` // xrvt
-                      case other: Char => Key.unknown(s"${Ascii.ESC}[~${other}")
+                  case '7' =>
+                    read() match {
+                      case Eof => Eof
+                      case '^' => Key.controlF6
+                      case ';' =>
+                        read() match {
+                          case Eof => Eof
+                          case '2' =>
+                            read() match {
+                              case Eof => Eof
+                              case '~' => Key.f18
+                              case other =>
+                                Key.unknown(s"${Ascii.ESC}[17;2${other}")
+                            }
+                          case '5' =>
+                            read() match {
+                              case Eof => Eof
+                              case '~' => Key.controlF6
+                              case other =>
+                                Key.unknown(s"${Ascii.ESC}[17;5${other}")
+                            }
+                          case '6' =>
+                            read() match {
+                              case Eof => Eof
+                              case '~' => Key.controlF18
+                              case other =>
+                                Key.unknown(s"${Ascii.ESC}[17;6${other}")
+                            }
+                          case other => Key.unknown(s"${Ascii.ESC}[17;${other}")
+                        }
+                      case '~'   => Key.f6
+                      case other => Key.unknown(s"${Ascii.ESC}[17${other}")
                     }
-                  case other: Char => Key.unknown(s"${Ascii.ESC}[${other}")
+                  case '8' =>
+                    read() match {
+                      case Eof => Eof
+                      case '^' => Key.controlF7
+                      case ';' =>
+                        read() match {
+                          case Eof => Eof
+                          case '2' =>
+                            read() match {
+                              case Eof => Eof
+                              case '~' => Key.f19
+                              case other =>
+                                Key.unknown(s"${Ascii.ESC}[18;2${other}")
+                            }
+                          case '5' =>
+                            read() match {
+                              case Eof => Eof
+                              case '~' => Key.controlF7
+                              case other =>
+                                Key.unknown(s"${Ascii.ESC}[18;5${other}")
+                            }
+                          case '6' =>
+                            read() match {
+                              case Eof => Eof
+                              case '~' => Key.controlF19
+                              case other =>
+                                Key.unknown(s"${Ascii.ESC}[18;6${other}")
+                            }
+                          case other => Key.unknown(s"${Ascii.ESC}[18;${other}")
+                        }
+                      case '~'   => Key.f7
+                      case other => Key.unknown(s"${Ascii.ESC}[18${other}")
+                    }
+                  case '9' =>
+                    read() match {
+                      case Eof => Eof
+                      case '^' => Key.controlF8
+                      case ';' =>
+                        read() match {
+                          case Eof => Eof
+                          case '2' =>
+                            read() match {
+                              case Eof => Eof
+                              case '~' => Key.f20
+                              case other =>
+                                Key.unknown(s"${Ascii.ESC}[19;2${other}")
+                            }
+                          case '5' =>
+                            read() match {
+                              case Eof => Eof
+                              case '~' => Key.controlF8
+                              case other =>
+                                Key.unknown(s"${Ascii.ESC}[19;5${other}")
+                            }
+                          case '6' =>
+                            read() match {
+                              case Eof => Eof
+                              case '~' => Key.controlF20
+                              case other =>
+                                Key.unknown(s"${Ascii.ESC}[19;6${other}")
+                            }
+                          case other => Key.unknown(s"${Ascii.ESC}[19;${other}")
+                        }
+                      case '~'   => Key.f8
+                      case other => Key.unknown(s"${Ascii.ESC}[19${other}")
+                    }
+                  case ';' =>
+                    read() match {
+                      case Eof => Eof
+                      case '2' =>
+                        read() match {
+                          case Eof   => Eof
+                          case 'A'   => Key.shiftUp
+                          case 'B'   => Key.shiftDown
+                          case 'C'   => Key.shiftRight
+                          case 'D'   => Key.shiftLeft
+                          case 'F'   => Key.shiftEnd
+                          case 'H'   => Key.shiftHome
+                          case 'P'   => Key.f13
+                          case 'Q'   => Key.f14
+                          case 'R'   => Key.f15
+                          case 'S'   => Key.f16
+                          case other => Key.unknown(s"${Ascii.ESC}[1;2${other}")
+                        }
+                      case '5' =>
+                        read() match {
+                          case Eof   => Eof
+                          case 'A'   => Key.controlUp
+                          case 'B'   => Key.controlDown
+                          case 'C'   => Key.controlRight
+                          case 'D'   => Key.controlLeft
+                          case 'F'   => Key.controlEnd
+                          case 'H'   => Key.controlHome
+                          case 'P'   => Key.controlF1
+                          case 'Q'   => Key.controlF2
+                          case 'R'   => Key.controlF3
+                          case 'S'   => Key.controlF4
+                          case other => Key.unknown(s"${Ascii.ESC}[1;5${other}")
+                        }
+                      case '6' =>
+                        read() match {
+                          case Eof   => Eof
+                          case 'A'   => Key.controlShiftUp
+                          case 'B'   => Key.controlShiftDown
+                          case 'C'   => Key.controlShiftRight
+                          case 'D'   => Key.controlShiftLeft
+                          case 'F'   => Key.controlShiftEnd
+                          case 'H'   => Key.controlShiftHome
+                          case 'P'   => Key.controlF13
+                          case 'Q'   => Key.controlF14
+                          case 'R'   => Key.controlF15
+                          case 'S'   => Key.controlF16
+                          case other => Key.unknown(s"${Ascii.ESC}[1;6{other}")
+                        }
+                      case other => Key.unknown(s"${Ascii.ESC}[1;${other}")
+                    }
+                  case '~'   => Key.home
+                  case other => Key.unknown(s"${Ascii.ESC}[1${other}")
+                }
+
+              case '2' =>
+                read() match {
+                  case Eof => Eof
+                  case '0' =>
+                    read() match {
+                      case Eof => Eof
+                      case '^' => Key.controlF9
+                      case ';' =>
+                        read() match {
+                          case Eof => Eof
+                          case '2' =>
+                            read() match {
+                              case Eof => Eof
+                              case '~' => Key.f21
+                              case other =>
+                                Key.unknown(s"${Ascii.ESC}[20;2${other}")
+                            }
+                          case '5' =>
+                            read() match {
+                              case Eof => Eof
+                              case '~' => Key.controlF9
+                              case other =>
+                                Key.unknown(s"${Ascii.ESC}[20;5${other}")
+                            }
+                          case '6' =>
+                            read() match {
+                              case Eof => Eof
+                              case '~' => Key.controlF21
+                              case other =>
+                                Key.unknown(s"${Ascii.ESC}[20;6${other}")
+                            }
+                          case other => Key.unknown(s"${Ascii.ESC}[20;${other}")
+                        }
+                      case '~'   => Key.f9
+                      case other => Key.unknown(s"${Ascii.ESC}[20${other}")
+                    }
+                  case '1' =>
+                    read() match {
+                      case Eof => Eof
+                      case '^' => Key.controlF10
+                      case ';' =>
+                        read() match {
+                          case Eof => Eof
+                          case '2' =>
+                            read() match {
+                              case Eof => Eof
+                              case '~' => Key.f22
+                              case other =>
+                                Key.unknown(s"${Ascii.ESC}[21;2${other}")
+                            }
+                          case '5' =>
+                            read() match {
+                              case Eof => Eof
+                              case '~' => Key.controlF10
+                              case other =>
+                                Key.unknown(s"${Ascii.ESC}[21;5${other}")
+                            }
+                          case '6' =>
+                            read() match {
+                              case Eof => Eof
+                              case '~' => Key.controlF22
+                              case other =>
+                                Key.unknown(s"${Ascii.ESC}[21;6${other}")
+                            }
+                          case other => Key.unknown(s"${Ascii.ESC}[21;${other}")
+                        }
+                      case '~'   => Key.f10
+                      case other => Key.unknown(s"${Ascii.ESC}[21${other}")
+                    }
+                  case '3' =>
+                    read() match {
+                      case Eof => Eof
+                      case '@' => Key.controlF21
+                      case '^' => Key.controlF11
+                      case '$' => Key.f23
+                      case ';' =>
+                        read() match {
+                          case Eof => Eof
+                          case '2' =>
+                            read() match {
+                              case Eof => Eof
+                              case '~' => Key.f23
+                              case other =>
+                                Key.unknown(s"${Ascii.ESC}[23;2${other}")
+                            }
+                          case '5' =>
+                            read() match {
+                              case Eof => Eof
+                              case '~' => Key.controlF11
+                              case other =>
+                                Key.unknown(s"${Ascii.ESC}[23;5${other}")
+                            }
+                          case '6' =>
+                            read() match {
+                              case Eof => Eof
+                              case '~' => Key.controlF23
+                              case other =>
+                                Key.unknown(s"${Ascii.ESC}[23;6${other}")
+                            }
+                          case other => Key.unknown(s"${Ascii.ESC}[23;${other}")
+                        }
+                      case '~'   => Key.f11
+                      case other => Key.unknown(s"${Ascii.ESC}[23${other}")
+                    }
+                  case '4' =>
+                    read() match {
+                      case Eof => Eof
+                      case '@' => Key.controlF22
+                      case '^' => Key.controlF12
+                      case '$' => Key.f24
+                      case ';' =>
+                        read() match {
+                          case Eof => Eof
+                          case '2' =>
+                            read() match {
+                              case Eof => Eof
+                              case '~' => Key.f24
+                              case other =>
+                                Key.unknown(s"${Ascii.ESC}[24;2${other}")
+                            }
+                          case '5' =>
+                            read() match {
+                              case Eof => Eof
+                              case '~' => Key.controlF12
+                              case other =>
+                                Key.unknown(s"${Ascii.ESC}[24;5${other}")
+                            }
+                          case '6' =>
+                            read() match {
+                              case Eof => Eof
+                              case '~' => Key.controlF24
+                              case other =>
+                                Key.unknown(s"${Ascii.ESC}[24;6${other}")
+                            }
+                          case other => Key.unknown(s"${Ascii.ESC}[24;${other}")
+                        }
+                      case '~'   => Key.f12
+                      case other => Key.unknown(s"${Ascii.ESC}[24${other}")
+                    }
+                  case '5' =>
+                    read() match {
+                      case Eof   => Eof
+                      case '^'   => Key.controlF13
+                      case '~'   => Key.f13
+                      case other => Key.unknown(s"${Ascii.ESC}[25${other}")
+                    }
+                  case '6' =>
+                    read() match {
+                      case Eof   => Eof
+                      case '^'   => Key.controlF14
+                      case '~'   => Key.f14
+                      case other => Key.unknown(s"${Ascii.ESC}[26${other}")
+                    }
+                  case '8' =>
+                    read() match {
+                      case Eof   => Eof
+                      case '^'   => Key.controlF15
+                      case '~'   => Key.f15
+                      case other => Key.unknown(s"${Ascii.ESC}[28${other}")
+                    }
+                  case '9' =>
+                    read() match {
+                      case Eof   => Eof
+                      case '^'   => Key.controlF16
+                      case '~'   => Key.f16
+                      case other => Key.unknown(s"${Ascii.ESC}[29${other}")
+                    }
+                  case '~'   => Key.insert
+                  case other => Key.unknown(s"${Ascii.ESC}[2${other}")
+                }
+
+              case '3' =>
+                read() match {
+                  case Eof => Eof
+                  case '1' =>
+                    read() match {
+                      case Eof   => Eof
+                      case '^'   => Key.controlF17
+                      case '~'   => Key.f17
+                      case other => Key.unknown(s"${Ascii.ESC}[31${other}")
+                    }
+                  case '2' =>
+                    read() match {
+                      case Eof   => Eof
+                      case '^'   => Key.controlF18
+                      case '~'   => Key.f18
+                      case other => Key.unknown(s"${Ascii.ESC}[32${other}")
+                    }
+                  case '3' =>
+                    read() match {
+                      case Eof   => Eof
+                      case '^'   => Key.controlF19
+                      case '~'   => Key.f19
+                      case other => Key.unknown(s"${Ascii.ESC}[33${other}")
+                    }
+                  case '4' =>
+                    read() match {
+                      case Eof   => Eof
+                      case '^'   => Key.controlF20
+                      case '~'   => Key.f20
+                      case other => Key.unknown(s"${Ascii.ESC}[34${other}")
+                    }
+                  case '^' => Key.controlDelete
+                  case '$' => Key.shiftDelete
+                  case ';' =>
+                    read() match {
+                      case Eof => Eof
+                      case '2' =>
+                        readMatchOrUnknown(
+                          '~',
+                          Key.shiftDelete,
+                          s"${Ascii.ESC}[3;2"
+                        )
+                      case '5' =>
+                        readMatchOrUnknown(
+                          '~',
+                          Key.controlDelete,
+                          s"${Ascii.ESC}[3;5"
+                        )
+                      case '6' =>
+                        readMatchOrUnknown(
+                          '~',
+                          Key.controlShiftDelete,
+                          s"${Ascii.ESC}[3;6"
+                        )
+                      case other => Key.unknown(s"${Ascii.ESC}[3;${other}")
+                    }
+                  case '~'   => Key.delete
+                  case other => Key.unknown(s"${Ascii.ESC}[3${other}")
+                }
+              case '4' =>
+                read() match {
+                  case Eof   => Eof
+                  case '~'   => Key.`end`
+                  case other => Key.unknown(s"${Ascii.ESC}[4${other}")
+                }
+              case '5' =>
+                read() match {
+                  case Eof => Eof
+                  case 'A' => Key.controlUp
+                  case 'B' => Key.controlDown
+                  case 'C' => Key.controlRight
+                  case 'D' => Key.controlLeft
+                  case '^' => Key.controlPageUp
+                  case ';' =>
+                    read() match {
+                      case Eof => Eof
+                      case '2' =>
+                        readMatchOrUnknown(
+                          '~',
+                          Key.shiftPageUp,
+                          s"${Ascii.ESC}[5;2"
+                        )
+                      case '5' =>
+                        readMatchOrUnknown(
+                          '~',
+                          Key.controlPageUp,
+                          s"${Ascii.ESC}[5;5"
+                        )
+                      case '6' =>
+                        readMatchOrUnknown(
+                          '~',
+                          Key.controlShiftPageUp,
+                          s"${Ascii.ESC}[5;6"
+                        )
+                      case other => Key.unknown(s"${Ascii.ESC}[5;${other}")
+                    }
+                  case '~'   => Key.pageUp
+                  case other => Key.unknown(s"${Ascii.ESC}[5${other}")
+                }
+              case '6' =>
+                read() match {
+                  case Eof => Eof
+                  case '^' => Key.controlPageDown
+                  case ';' =>
+                    read() match {
+                      case Eof => Eof
+                      case '2' =>
+                        readMatchOrUnknown(
+                          '~',
+                          Key.shiftPageDown,
+                          s"${Ascii.ESC}[6;2"
+                        )
+                      case '5' =>
+                        readMatchOrUnknown(
+                          '~',
+                          Key.controlPageDown,
+                          s"${Ascii.ESC}[6;5"
+                        )
+                      case '6' =>
+                        readMatchOrUnknown(
+                          '~',
+                          Key.controlShiftPageDown,
+                          s"${Ascii.ESC}[6;6"
+                        )
+                      case other => Key.unknown(s"${Ascii.ESC}[6;${other}")
+                    }
+                  case '~'   => Key.pageDown
+                  case other => Key.unknown(s"${Ascii.ESC}[6${other}")
+                }
+              case '7' =>
+                read() match {
+                  case Eof   => Eof
+                  case '^'   => Key.controlEnd
+                  case '$'   => Key.shiftHome
+                  case '~'   => Key.home
+                  case other => Key.unknown(s"${Ascii.ESC}[7${other}")
+                }
+              case '8' =>
+                read() match {
+                  case Eof   => Eof
+                  case '^'   => Key.controlHome
+                  case '$'   => Key.shiftEnd
+                  case '~'   => Key.`end`
+                  case other => Key.unknown(s"${Ascii.ESC}[8${other}")
                 }
               case '[' =>
                 read() match {
@@ -160,6 +650,11 @@ trait TerminalKeyReader(timeout: Duration = 100.millis) extends KeyReader {
                   case 'E'         => Key.f5
                   case other: Char => Key.unknown(s"${Ascii.ESC}[[${other}")
                 }
+              case ';' =>
+                read() match {
+                  case Eof   => Eof
+                  case other => Key.unknown(s"${Ascii.ESC}[;{other}")
+                }
               case '~'         => Key.backTab
               case other: Char => Key.unknown(s"${Ascii.ESC}[${other}")
             }
@@ -167,18 +662,52 @@ trait TerminalKeyReader(timeout: Duration = 100.millis) extends KeyReader {
           case 'O' =>
             read() match {
               case Eof         => Eof
+              case 'a'         => Key.controlUp
+              case 'b'         => Key.controlUp
+              case 'c'         => Key.controlRight
+              case 'd'         => Key.controlLeft
+              case 'j'         => Key('*')
+              case 'k'         => Key('+')
+              case 'm'         => Key('-')
+              case 'n'         => Key('.')
+              case 'o'         => Key('/')
+              case 'p'         => Key('0')
+              case 'q'         => Key('1')
+              case 'r'         => Key('2')
+              case 's'         => Key('3')
+              case 't'         => Key('4')
+              case 'u'         => Key('5')
+              case 'v'         => Key('6')
+              case 'w'         => Key('7')
+              case 'x'         => Key('8')
+              case 'y'         => Key('9')
               case 'A'         => Key.up
               case 'B'         => Key.down
               case 'C'         => Key.right
               case 'D'         => Key.left
               case 'F'         => Key.`end`
               case 'H'         => Key.home
+              case 'M'         => Key.enter
               case 'P'         => Key.f1
               case 'Q'         => Key.f2
               case 'R'         => Key.f3
               case 'S'         => Key.f4
               case other: Char => Key.unknown(s"${Ascii.ESC}O${other}")
             }
+
+          case '§'         => Key('§')
+          case '1'         => Key('¡')
+          case '2'         => Key('™')
+          case '3'         => Key('£')
+          case '4'         => Key('¢')
+          case '5'         => Key('∞')
+          case '6'         => Key('§')
+          case '7'         => Key('¶')
+          case '8'         => Key('•')
+          case '9'         => Key('ª')
+          case '0'         => Key('º')
+          case '-'         => Key('–')
+          case '='         => Key('≠')
           case other: Char => Key.unknown(s"${Ascii.ESC}${other}")
         }
 
