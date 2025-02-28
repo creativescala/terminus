@@ -96,7 +96,8 @@ class JLineTerminal(terminal: JTerminal) extends Terminal, TerminalKeyReader {
   def close(): Unit = terminal.close()
 }
 object JLineTerminal
-    extends Color,
+    extends Alert,
+      Color,
       Cursor,
       Format,
       Dimensions,
