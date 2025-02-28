@@ -1,3 +1,10 @@
+# v0.4.0 28-Feb-2025
+
+- Structured key parsing (JVM and Native)
+- Dimensions effect to get and set terminal size (JVM only)
+- Display effect renamed to Format
+
+
 # v0.3 13-Jan-2025
 
 - Styles nest correctly
