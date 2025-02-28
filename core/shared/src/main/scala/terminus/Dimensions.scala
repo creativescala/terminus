@@ -16,28 +16,17 @@
 
 package terminus
 
-trait Terminal
-    extends effect.Color[Terminal],
-      effect.Cursor,
-      effect.Format[Terminal],
-      effect.Dimensions,
-      effect.Erase,
-      effect.AlternateScreenMode[Terminal],
-      effect.ApplicationMode[Terminal],
-      effect.RawMode[Terminal],
-      effect.Reader,
-      effect.Writer
-type Program[A] = Terminal ?=> A
+import terminus.effect.TerminalDimensions
 
-object Terminal
-    extends Color,
-      Cursor,
-      Format,
-      Dimensions,
-      AlternateScreenMode,
-      ApplicationMode,
-      RawMode,
-      Reader,
-      Writer {
-  export JLineTerminal.*
+/** Functionalities related to the dimensions of the terminal */
+trait Dimensions {
+  object dimensions {
+    def get: effect.Dimensions ?=> TerminalDimensions = effect ?=>
+      effect.getDimensions
+
+    def set[F <: effect.Effect](
+        dimensions: TerminalDimensions
+    ): (F & effect.Dimensions) ?=> Unit =
+      effect ?=> effect.setDimensions(dimensions)
+  }
 }
