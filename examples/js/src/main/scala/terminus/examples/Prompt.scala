@@ -39,7 +39,7 @@ object Prompt {
   // See https://developer.mozilla.org/en-US/docs/Web/API/KeyboardEvent/key
   def read(): Program[Future[KeyCode]] = {
     Terminal
-      .readKeyF()
+      .readKey()
       .flatMap(keyCode =>
         keyCode match {
           case "Enter"     => Future.successful(KeyCode.Enter)
