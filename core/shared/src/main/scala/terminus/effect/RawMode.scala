@@ -18,9 +18,13 @@ package terminus.effect
 
 trait RawMode[+F <: Effect] { self: F =>
 
-  /** Run the given terminal program `f` in raw mode, which means that the
-    * program can read user input a character at a time. In canonical mode,
-    * which is the default, user input is only available a line at a time.
+  /** Sets the terminal to raw mode and returns thunk that rolls back the
+    * terminal mode to its original state. This returned thunk should not be
+    * called more than once.
+    *
+    * This is a low level method that is slightly dangerous. Care must be taken
+    * to ensure raw mode is closed and as such, this method is package private
+    * to avoid exposure.
     */
-  def raw[A](f: F ?=> A): A
+  private[terminus] def setRawMode(): () => Unit
 }

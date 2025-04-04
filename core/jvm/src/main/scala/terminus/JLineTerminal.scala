@@ -55,14 +55,9 @@ class JLineTerminal(terminal: JTerminal) extends Terminal, TerminalKeyReader {
 
   def write(string: String): Unit = writer.write(string)
 
-  def raw[A](f: Terminal ?=> A): A = {
+  private[terminus] def setRawMode(): () => Unit = {
     val attrs = terminal.enterRawMode()
-    try {
-      val result = f(using this)
-      result
-    } finally {
-      terminal.setAttributes(attrs)
-    }
+    () => terminal.setAttributes(attrs)
   }
 
   def getDimensions: effect.TerminalDimensions = {

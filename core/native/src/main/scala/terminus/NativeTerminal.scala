@@ -122,15 +122,14 @@ object NativeTerminal
     )(f)
   }
 
-  def raw[A](f: Terminal ?=> A): A = {
-    Zone {
-      val origAttrs = termios.getAttributes()
-      try {
-        termios.setRawMode()
-        f(using this)
-      } finally {
-        termios.setAttributes(origAttrs)
-      }
+  private[terminus] def setRawMode(): () => Unit = {
+    implicit val z: Zone = Zone.open()
+    val origAttrs = termios.getAttributes()
+    termios.setRawMode()
+
+    () => {
+      termios.setAttributes(origAttrs)
+      z.close()
     }
   }
 }
