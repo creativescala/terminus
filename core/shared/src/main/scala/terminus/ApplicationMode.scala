@@ -25,5 +25,12 @@ trait ApplicationMode {
   def application[F <: effect.Effect, A](
       f: F ?=> A
   ): (F & effect.ApplicationMode[F]) ?=> A =
-    effect ?=> effect.application(f)
+    effect ?=>
+      val finalizer = effect.setApplicationMode()
+
+      try {
+        f(using effect)
+      } finally {
+        finalizer()
+      }
 }

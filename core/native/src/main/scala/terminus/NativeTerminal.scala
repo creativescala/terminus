@@ -111,17 +111,6 @@ object NativeTerminal
     }
   }
 
-  def application[A](f: (terminus.Terminal) ?=> A): A = {
-    withEffect(AnsiCodes.mode.application.on, AnsiCodes.mode.application.off)(f)
-  }
-
-  def alternateScreen[A](f: (terminus.Terminal) ?=> A): A = {
-    withEffect(
-      AnsiCodes.mode.alternateScreen.on,
-      AnsiCodes.mode.alternateScreen.off
-    )(f)
-  }
-
   private[terminus] def setRawMode(): () => Unit = {
     implicit val z: Zone = Zone.open()
     val origAttrs = termios.getAttributes()
@@ -132,4 +121,16 @@ object NativeTerminal
       z.close()
     }
   }
+
+  private[terminus] def setApplicationMode(): () => Unit =
+    effectDeferRollback(
+      AnsiCodes.mode.application.on,
+      AnsiCodes.mode.application.off
+    )
+
+  private[terminus] def setAlternateScreenMode(): () => Unit =
+    effectDeferRollback(
+      AnsiCodes.mode.alternateScreen.on,
+      AnsiCodes.mode.alternateScreen.off
+    )
 }

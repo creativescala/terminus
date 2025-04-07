@@ -30,4 +30,9 @@ trait WithEffect[+F <: Writer] { self: F =>
     write(on)
     f(using this)
   }
+
+  protected def effectDeferRollback(on: String, off: String): () => Unit = {
+    write(on)
+    () => write(off)
+  }
 }

@@ -21,7 +21,10 @@ trait ApplicationMode[+F <: Effect] { self: F =>
   /** Run the given terminal program `f` in application mode, which changes the
     * input sent to the program when arrow keys are pressed. See
     * https://invisible-island.net/xterm/xterm.faq.html#xterm_arrows
+    *
+    * This is a low level method that is slightly dangerous. Care must be taken
+    * to ensure raw mode is closed and as such, this method is package private
+    * to avoid exposure.
     */
-  def application[A](f: F ?=> A): A
-
+  private[terminus] def setApplicationMode(): () => Unit
 }

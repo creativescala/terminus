@@ -21,6 +21,10 @@ trait AlternateScreenMode[+F <: Effect] { self: F =>
   /** Run the given terminal program `f` in alternate screen mode, which means
     * that whatever is displayed by `f` will not been shown when the program
     * exits, and similarly key presses will not be saved in the history buffer.
+    *
+    * This is a low level method that is slightly dangerous. Care must be taken
+    * to ensure raw mode is closed and as such, this method is package private
+    * to avoid exposure.
     */
-  def alternateScreen[A](f: F ?=> A): A
+  private[terminus] def setAlternateScreenMode(): () => Unit
 }
