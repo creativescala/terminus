@@ -2,6 +2,11 @@ package terminus
 
 import terminus.effect.Ascii
 
+class KeySequence(val root: Key, val sequences: Map[String, Key]):
+  val subSequences: Set[String] = sequences.keySet.flatMap(s =>
+    if s.length <= 2 then Set.empty
+    else (2 until s.length).map(s.substring(0, _)).toSet)
+
 object KeyMappings:
   lazy val escapeSequences: Map[String, Key] = Map(
     // Simple ESC sequences
@@ -203,12 +208,7 @@ object KeyMappings:
     s"${Ascii.ESC}OS" -> Key.f4
   )
 
-  lazy val escapeSubsequences: Set[String] =
-    escapeSequences.keySet.flatMap(s =>
-      if s.length <= 2 then Set.empty
-      else (2 until s.length).map(s.substring(0, _)).toSet)
-
-  lazy val default: Map[Char, Key | Map[String, Key]] = Map(
+  lazy val default: Map[Char, Key | KeySequence] = Map(
     ' '       -> Key.space,
     Ascii.NUL -> Key.controlAt, // Control-At (Also for Ctrl-Space)
     Ascii.SOH -> Key.controlA, // Control-A (home)
@@ -244,11 +244,5 @@ object KeyMappings:
     '\u001e' -> Key.controlCircumflex,
     '\u001f' -> Key.controlUnderscore,
     '\u007f' -> Key.backspace,
-    Ascii.ESC -> escapeSequences
+    Ascii.ESC -> KeySequence(Key.escape, escapeSequences)
   )
-
-  private def prefixSubstrings(s: String): Set[String] =
-    if s.length <= 2 then Set.empty
-    else (2 until s.length).map(s.substring(0, _)).toSet
-
-
