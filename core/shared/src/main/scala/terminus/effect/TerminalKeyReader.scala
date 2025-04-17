@@ -38,7 +38,7 @@ trait TerminalKeyReader(timeout: Duration = 100.millis) extends KeyReader {
       case Eof => Eof
       case c: Char =>
         KeyMappings.default.get(c) match
-          case None => Key(c)
+          case None         => Key(c)
           case Some(k: Key) => k
           case Some(ks: KeySequence) =>
             read(timeout) match {
@@ -51,7 +51,7 @@ trait TerminalKeyReader(timeout: Duration = 100.millis) extends KeyReader {
   private def readKeySequence(acc: String, sequence: KeySequence): Eof | Key = {
     (sequence.sequences.get(acc), sequence.subSequences.contains(acc)) match
       case (Some(key), _) => key
-      case (None, false) => Key.unknown(acc)
+      case (None, false)  => Key.unknown(acc)
       case (None, true) =>
         read() match {
           case Eof     => Eof
