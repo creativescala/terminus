@@ -19,6 +19,9 @@ package terminus
 import terminus.effect.Ascii
 
 class KeySequence(val root: Key, val sequences: Map[String, Key]):
+  /** A set of subsequences, used to determine whether a sequence of Chars has
+    * partially matched a sequence
+    */
   val subSequences: Set[String] = sequences.keySet.flatMap(s =>
     if s.length <= 2 then Set.empty
     else (2 until s.length).map(s.substring(0, _)).toSet
@@ -63,9 +66,10 @@ object KeyMappings:
     '\u007f' -> Key.backspace,
     Ascii.ESC -> KeySequence(Key.escape, escapeSequences)
   )
-  
+
   import Ascii.ESC
 
+  // Escape sequences
   private lazy val escapeSequences: Map[String, Key] = Map(
     // Simple ESC sequences
     s"$ESC${Ascii.HT}" -> Key.backTab,
