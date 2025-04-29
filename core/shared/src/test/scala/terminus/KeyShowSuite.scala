@@ -17,7 +17,6 @@
 package terminus
 
 import munit.FunSuite
-import cats.Show
 import cats.syntax.show.*
 
 class KeyShowSuite extends FunSuite {
