@@ -16,6 +16,8 @@
 
 package terminus
 
+import cats.Show
+
 /** Represents a key press. The information is split between the key code and
   * any modifiers that were pressed. We only interpret modifiers if the terminal
   * passes that information to us. So, for example, 'A' is not represented as
@@ -193,4 +195,34 @@ object Key {
   val controlShiftDelete = Key(KeyModifier.ControlShift, KeyCode.Delete)
   val controlShiftPageUp = Key(KeyModifier.ControlShift, KeyCode.PageUp)
   val controlShiftPageDown = Key(KeyModifier.ControlShift, KeyCode.PageDown)
+
+  given Show[Key] = (key: Key) => {
+    val modifiersStr = {
+      val parts = List(
+        if key.modifiers.hasControl then Some("Control") else None,
+        if key.modifiers.hasShift then Some("Shift") else None,
+        if key.modifiers.hasAlt then Some("Alt") else None,
+        if key.modifiers.hasSuper then Some("Super") else None,
+        if key.modifiers.hasHyper then Some("Hyper") else None,
+        if key.modifiers.hasMeta then Some("Meta") else None
+      ).flatten
+
+      if parts.isEmpty then "" else parts.mkString("-") + "-"
+    }
+
+    val codeStr = key.code match {
+      case KeyCode.Character(char) =>
+        char match {
+          case ' '   => "Space"
+          case '\t'  => "Tab"
+          case '\n'  => "Newline"
+          case other => other.toString
+        }
+      case KeyCode.F(value)      => s"F$value"
+      case KeyCode.Unknown(code) => s"Unknown($code)"
+      case other                 => other.toString.replaceAll("^[^.]*\\.", "")
+    }
+
+    modifiersStr + codeStr
+  }
 }
