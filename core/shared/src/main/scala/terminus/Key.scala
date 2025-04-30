@@ -220,7 +220,7 @@ object Key {
         }
       case KeyCode.F(value)      => s"F$value"
       case KeyCode.Unknown(code) => s"Unknown($code)"
-      case other                 => other.toString.replaceAll("^[^.]*\\.", "")
+      case other                 => other.toString
     }
 
     modifiersStr + codeStr
