@@ -17,62 +17,51 @@
 package terminus.effect
 
 import munit.FunSuite
+import terminus.StringBuilderTerminal
 
 class CursorSuite extends FunSuite {
-  
-  // Test implementation for Writer trait to record what's written
-  trait TestWriter extends Writer {
-    var written: String = ""
-    def write(str: String): Unit = written += str
-    def write(char: Char): Unit = written += char
-    def flush(): Unit = ()
-    def clear(): Unit = written = ""
-  }
-  
-  // Test implementation for Cursor that uses our TestWriter
-  class TestCursor extends Cursor with TestWriter
 
   test("cursor.left moves cursor left by default 1 column") {
-    val cursor = new TestCursor()
-    cursor.cursor.left()
-    assertEquals(cursor.written, s"${Ascii.ESC}[1D")
+    val terminal = new StringBuilderTerminal()
+    terminal.cursor.left()
+    assertEquals(terminal.result(), s"${Ascii.ESC}[1D")
   }
   
   test("cursor.left moves cursor left by specified columns") {
-    val cursor = new TestCursor()
-    cursor.cursor.left(5)
-    assertEquals(cursor.written, s"${Ascii.ESC}[5D")
+    val terminal = new StringBuilderTerminal()
+    terminal.cursor.left(5)
+    assertEquals(terminal.result(), s"${Ascii.ESC}[5D")
   }
   
   test("cursor.right moves cursor right by default 1 column") {
-    val cursor = new TestCursor()
-    cursor.cursor.right()
-    assertEquals(cursor.written, s"${Ascii.ESC}[1C")
+    val terminal = new StringBuilderTerminal()
+    terminal.cursor.right()
+    assertEquals(terminal.result(), s"${Ascii.ESC}[1C")
   }
   
   test("cursor.right moves cursor right by specified columns") {
-    val cursor = new TestCursor()
-    cursor.cursor.right(3)
-    assertEquals(cursor.written, s"${Ascii.ESC}[3C")
+    val terminal = new StringBuilderTerminal()
+    terminal.cursor.right(3)
+    assertEquals(terminal.result(), s"${Ascii.ESC}[3C")
   }
   
   test("all cursor movement methods emit correct ANSI codes") {
-    val cursor = new TestCursor()
+    val terminal = new StringBuilderTerminal()
     
-    cursor.clear()
-    cursor.cursor.up()
-    assertEquals(cursor.written, s"${Ascii.ESC}[1A")
+    terminal.cursor.up()
+    val up = terminal.result()
+    assertEquals(up, s"${Ascii.ESC}[1A")
     
-    cursor.clear()
-    cursor.cursor.down()
-    assertEquals(cursor.written, s"${Ascii.ESC}[1B")
+    terminal.cursor.down()
+    val down = terminal.result()
+    assertEquals(down, s"${Ascii.ESC}[1B")
     
-    cursor.clear()
-    cursor.cursor.right()
-    assertEquals(cursor.written, s"${Ascii.ESC}[1C")
+    terminal.cursor.right()
+    val right = terminal.result()
+    assertEquals(right, s"${Ascii.ESC}[1C")
     
-    cursor.clear()
-    cursor.cursor.left()
-    assertEquals(cursor.written, s"${Ascii.ESC}[1D")
+    terminal.cursor.left()
+    val left = terminal.result()
+    assertEquals(left, s"${Ascii.ESC}[1D")
   }
 }
