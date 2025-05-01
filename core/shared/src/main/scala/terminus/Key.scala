@@ -197,30 +197,23 @@ object Key {
   val controlShiftPageDown = Key(KeyModifier.ControlShift, KeyCode.PageDown)
 
   given Show[Key] = (key: Key) => {
-    val modifiersStr = {
-      val parts = List(
-        if key.modifiers.hasControl then Some("Control") else None,
-        if key.modifiers.hasShift then Some("Shift") else None,
-        if key.modifiers.hasAlt then Some("Alt") else None,
-        if key.modifiers.hasSuper then Some("Super") else None,
-        if key.modifiers.hasHyper then Some("Hyper") else None,
-        if key.modifiers.hasMeta then Some("Meta") else None
-      ).flatten
-
-      if parts.isEmpty then "" else parts.mkString("-") + "-"
-    }
+    val modifiersStr = List(
+      if key.modifiers.hasControl then Some("Control-") else None,
+      if key.modifiers.hasShift then Some("Shift-") else None,
+      if key.modifiers.hasAlt then Some("Alt-") else None,
+      if key.modifiers.hasSuper then Some("Super-") else None,
+      if key.modifiers.hasHyper then Some("Hyper-") else None,
+      if key.modifiers.hasMeta then Some("Meta-") else None
+    ).flatten.mkString
 
     val codeStr = key.code match {
-      case KeyCode.Character(char) =>
-        char match {
-          case ' '   => "Space"
-          case '\t'  => "Tab"
-          case '\n'  => "Newline"
-          case other => other.toString
-        }
-      case KeyCode.F(value)      => s"F$value"
-      case KeyCode.Unknown(code) => s"Unknown($code)"
-      case other                 => other.toString
+      case KeyCode.Character(' ')  => "Space"
+      case KeyCode.Character('\t') => "Tab"
+      case KeyCode.Character('\n') => "Newline"
+      case KeyCode.Character(char) => char.toString
+      case KeyCode.F(value)        => s"F$value"
+      case KeyCode.Unknown(code)   => s"Unknown($code)"
+      case other                   => other.toString
     }
 
     modifiersStr + codeStr
