@@ -46,12 +46,14 @@ trait Cursor {
     /** Move the cursor down the given number of rows. Defaults to 1 row. */
     def down(lines: Int = 1): effect.Cursor ?=> Unit =
       effect ?=> effect.cursor.down(lines)
-      
-    /** Move the cursor right the given number of columns. Defaults to 1 column. */
+
+    /** Move the cursor right the given number of columns. Defaults to 1 column.
+      */
     def right(columns: Int = 1): effect.Cursor ?=> Unit =
       effect ?=> effect.cursor.right(columns)
-      
-    /** Move the cursor left the given number of columns. Defaults to 1 column. */
+
+    /** Move the cursor left the given number of columns. Defaults to 1 column.
+      */
     def left(columns: Int = 1): effect.Cursor ?=> Unit =
       effect ?=> effect.cursor.left(columns)
   }

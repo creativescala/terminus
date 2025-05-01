@@ -26,40 +26,40 @@ class CursorSuite extends FunSuite {
     terminal.cursor.left()
     assertEquals(terminal.result(), s"${Ascii.ESC}[1D")
   }
-  
+
   test("cursor.left moves cursor left by specified columns") {
     val terminal = new StringBuilderTerminal()
     terminal.cursor.left(5)
     assertEquals(terminal.result(), s"${Ascii.ESC}[5D")
   }
-  
+
   test("cursor.right moves cursor right by default 1 column") {
     val terminal = new StringBuilderTerminal()
     terminal.cursor.right()
     assertEquals(terminal.result(), s"${Ascii.ESC}[1C")
   }
-  
+
   test("cursor.right moves cursor right by specified columns") {
     val terminal = new StringBuilderTerminal()
     terminal.cursor.right(3)
     assertEquals(terminal.result(), s"${Ascii.ESC}[3C")
   }
-  
+
   test("all cursor movement methods emit correct ANSI codes") {
     val terminal = new StringBuilderTerminal()
-    
+
     terminal.cursor.up()
     val up = terminal.result()
     assertEquals(up, s"${Ascii.ESC}[1A")
-    
+
     terminal.cursor.down()
     val down = terminal.result()
     assertEquals(down, s"${Ascii.ESC}[1B")
-    
+
     terminal.cursor.right()
     val right = terminal.result()
     assertEquals(right, s"${Ascii.ESC}[1C")
-    
+
     terminal.cursor.left()
     val left = terminal.result()
     assertEquals(left, s"${Ascii.ESC}[1D")
