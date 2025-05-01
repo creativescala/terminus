@@ -53,11 +53,13 @@ trait Cursor extends Writer {
     def down(lines: Int = 1): Unit =
       write(AnsiCodes.cursor.down(lines))
 
-    /** Move the cursor right the given number of columns. Defaults to 1 column. */
+    /** Move the cursor right the given number of columns. Defaults to 1 column.
+      */
     def right(columns: Int = 1): Unit =
       write(AnsiCodes.cursor.forward(columns))
 
-    /** Move the cursor left the given number of columns. Defaults to 1 column. */
+    /** Move the cursor left the given number of columns. Defaults to 1 column.
+      */
     def left(columns: Int = 1): Unit =
       write(AnsiCodes.cursor.backward(columns))
   }
