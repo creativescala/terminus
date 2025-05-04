@@ -113,10 +113,11 @@ class TerminalKeyReaderBenchmark {
   private def benchmark(input: String): Int = {
     val reader = new StringBufferReader(input)
     var count = 0
+    var done = false
 
-    while true do {
+    while !done do {
       reader.readKey() match {
-        case Eof    => return count
+        case Eof    => done = true
         case _: Key => count += 1
       }
     }
