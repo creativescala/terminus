@@ -49,13 +49,12 @@ trait TerminalKeyReader(timeout: Duration = 100.millis) extends KeyReader {
 
   @tailrec
   private def readKeySequence(acc: String, sequence: KeySequence): Eof | Key = {
-    (sequence.sequences.get(acc), sequence.subSequences.contains(acc)) match
-      case (Some(key), _) => key
-      case (None, false)  => Key.unknown(acc)
-      case (None, true) =>
-        read() match {
-          case Eof     => Eof
-          case c: Char => readKeySequence(acc :+ c, sequence)
-        }
+    if sequence.sequences.contains(acc) then sequence.sequences(acc)
+    else if sequence.subSequences.contains(acc) then
+      read() match {
+        case Eof     => Eof
+        case c: Char => readKeySequence(acc + c.toString, sequence)
+      }
+    else Key.unknown(acc)
   }
 }
