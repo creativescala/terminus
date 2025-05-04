@@ -61,9 +61,8 @@ commands += Command.command("build") { state =>
     state
 }
 
-// Run this (runBenchmark) to run the TerminalKeyReader benchmark
-commands += Command.command("runBenchmark") { state =>
-  "benchmark/Jmh/run -i 10 -wi 5 -f 2 -t 1 terminus.benchmark.TerminalKeyReaderBenchmark" ::
+commands += Command.command("benchmarks") { state =>
+  "benchmark/Jmh/run terminus.benchmark.TerminalKeyReaderBenchmark" ::
     state
 }
 

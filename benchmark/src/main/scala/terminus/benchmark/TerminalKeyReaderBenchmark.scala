@@ -25,19 +25,13 @@ import scala.util.Random
 /** Benchmark for TerminalKeyReader that measures the performance of processing
   * large amounts of input data containing both regular characters and escape
   * sequences.
-  *
-  * To run: sbt "benchmark/Jmh/run -i 10 -wi 5 -f 2 -t 1
-  * terminus.benchmark.TerminalKeyReaderBenchmark"
-  *
-  * Parameters: -i: Number of iterations -wi: Number of warmup iterations -f:
-  * Number of forks -t: Number of threads
   */
 @State(Scope.Benchmark)
 @BenchmarkMode(Array(Mode.AverageTime))
 @OutputTimeUnit(TimeUnit.MILLISECONDS)
 @Warmup(iterations = 5, time = 1, timeUnit = TimeUnit.SECONDS)
 @Measurement(iterations = 10, time = 1, timeUnit = TimeUnit.SECONDS)
-@Fork(1)
+@Fork(2)
 class TerminalKeyReaderBenchmark {
   val percentControl = 10
   val percentEscape = 10
