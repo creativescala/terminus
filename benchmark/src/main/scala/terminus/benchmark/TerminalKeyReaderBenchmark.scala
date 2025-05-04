@@ -21,8 +21,6 @@ import terminus._
 import terminus.effect._
 import java.util.concurrent.TimeUnit
 import scala.util.Random
-import scala.concurrent.duration._
-import cats.syntax.show._
 
 /**
  * Benchmark for TerminalKeyReader that measures the performance of processing
@@ -44,6 +42,8 @@ import cats.syntax.show._
 @Measurement(iterations = 10, time = 1, timeUnit = TimeUnit.SECONDS)
 @Fork(1)
 class TerminalKeyReaderBenchmark {
+  val percentControl = 10
+  val percentEscape = 10
 
   // Common escape sequences
   val escapeSequences = Array(
@@ -67,109 +67,63 @@ class TerminalKeyReaderBenchmark {
 
   // Control characters
   val controlChars = Array(
-    Ascii.NUL.toChar, // Ctrl+@
-    Ascii.SOH.toChar, // Ctrl+A
-    Ascii.STX.toChar, // Ctrl+B
-    Ascii.ETX.toChar, // Ctrl+C
-    Ascii.EOT.toChar, // Ctrl+D
-    Ascii.ENQ.toChar, // Ctrl+E
-    Ascii.ACK.toChar, // Ctrl+F
-    Ascii.BEL.toChar  // Ctrl+G
+    Ascii.NUL, // Ctrl+@
+    Ascii.SOH, // Ctrl+A
+    Ascii.STX, // Ctrl+B
+    Ascii.ETX, // Ctrl+C
+    Ascii.EOT, // Ctrl+D
+    Ascii.ENQ, // Ctrl+E
+    Ascii.ACK, // Ctrl+F
+    Ascii.BEL  // Ctrl+G
   )
 
   // Large mixed input with approximately 10,000 characters
-  val largeInput: String = {
+  private def input(targetLength: Int): String = {
     val sb = new StringBuilder()
     val rand = new Random(42) // Fixed seed for reproducibility
     
-    // Generate approximately 10,000 characters
-    val targetLength = 10000
     while (sb.length < targetLength) {
       val choice = rand.nextInt(100)
       
-      if (choice < 80) {
-        // 80% chance of regular ASCII char
-        sb.append((rand.nextInt(94) + 32).toChar) // Printable ASCII
-      } else if (choice < 90) {
-        // 10% chance of control char
-        sb.append(controlChars(rand.nextInt(controlChars.length)))
-      } else {
-        // 10% chance of escape sequence
+      if (choice < percentEscape)
+        // Print escape sequence
         sb.append(escapeSequences(rand.nextInt(escapeSequences.length)))
-      }
+      else if (choice < (percentControl + percentEscape))
+        // Print control sequence
+        sb.append(controlChars(rand.nextInt(controlChars.length)))
+      else
+        // Printable Ascii character
+        sb.append((rand.nextInt(94) + 32).toChar)
     }
     
     sb.toString
   }
 
   // Varying sized inputs for benchmarking scaling behavior
-  val smallInput: String = largeInput.substring(0, 1000)
-  val mediumInput: String = largeInput.substring(0, 5000)
+  val smallInput: String = input(1000)
+  val mediumInput: String = input(5000)
+  val largeInput: String = input(10000)
 
   @Benchmark
-  def benchmarkSmallInput(): Int = {
-    val reader = new StringBufferReader(smallInput)
-    var count = 0
-    
-    while (true) {
-      reader.readKey() match {
-        case Eof => return count
-        case key: Key => 
-          count += 1
-      }
-    }
-    
-    count
-  }
+  def benchmarkSmallInput(): Int = benchmark(smallInput)
 
   @Benchmark
-  def benchmarkMediumInput(): Int = {
-    val reader = new StringBufferReader(mediumInput)
-    var count = 0
-    
-    while (true) {
-      reader.readKey() match {
-        case Eof => return count
-        case key: Key => 
-          count += 1
-      }
-    }
-    
-    count
-  }
+  def benchmarkMediumInput(): Int = benchmark(mediumInput)
 
   @Benchmark
-  def benchmarkLargeInput(): Int = {
-    val reader = new StringBufferReader(largeInput)
-    var count = 0
-    
-    while (true) {
-      reader.readKey() match {
-        case Eof => return count
-        case key: Key => 
-          count += 1
-      }
-    }
-    
-    count
-  }
+  def benchmarkLargeInput(): Int = benchmark(largeInput)
   
-  // Benchmark that also prints each key (tests Show[Key] performance)
-  @Benchmark
-  def benchmarkLargeInputWithShow(): Int = {
-    val reader = new StringBufferReader(largeInput)
+  private def benchmark(input: String): Int = {
+    val reader = new StringBufferReader(input)
     var count = 0
-    val sb = new StringBuilder()
     
     while (true) {
       reader.readKey() match {
         case Eof => return count
-        case key: Key => 
-          count += 1
-          sb.append(key.show)
+        case _: Key => count += 1
       }
     }
-    
+
     count
   }
 }
