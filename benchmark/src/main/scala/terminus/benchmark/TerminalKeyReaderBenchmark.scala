@@ -16,25 +16,22 @@
 
 package terminus.benchmark
 
-import org.openjdk.jmh.annotations._
-import terminus._
-import terminus.effect._
+import org.openjdk.jmh.annotations.*
+import terminus.*
+import terminus.effect.*
 import java.util.concurrent.TimeUnit
 import scala.util.Random
 
-/**
- * Benchmark for TerminalKeyReader that measures the performance of processing
- * large amounts of input data containing both regular characters and escape sequences.
- *
- * To run:
- * sbt "benchmark/Jmh/run -i 10 -wi 5 -f 2 -t 1 terminus.benchmark.TerminalKeyReaderBenchmark"
- *
- * Parameters:
- * -i: Number of iterations
- * -wi: Number of warmup iterations
- * -f: Number of forks
- * -t: Number of threads
- */
+/** Benchmark for TerminalKeyReader that measures the performance of processing
+  * large amounts of input data containing both regular characters and escape
+  * sequences.
+  *
+  * To run: sbt "benchmark/Jmh/run -i 10 -wi 5 -f 2 -t 1
+  * terminus.benchmark.TerminalKeyReaderBenchmark"
+  *
+  * Parameters: -i: Number of iterations -wi: Number of warmup iterations -f:
+  * Number of forks -t: Number of threads
+  */
 @State(Scope.Benchmark)
 @BenchmarkMode(Array(Mode.AverageTime))
 @OutputTimeUnit(TimeUnit.MILLISECONDS)
@@ -47,22 +44,22 @@ class TerminalKeyReaderBenchmark {
 
   // Common escape sequences
   val escapeSequences = Array(
-    s"${Ascii.ESC}[A",     // Up arrow
-    s"${Ascii.ESC}[B",     // Down arrow
-    s"${Ascii.ESC}[C",     // Right arrow
-    s"${Ascii.ESC}[D",     // Left arrow
-    s"${Ascii.ESC}OP",     // F1
-    s"${Ascii.ESC}OQ",     // F2
-    s"${Ascii.ESC}OR",     // F3
-    s"${Ascii.ESC}OS",     // F4
-    s"${Ascii.ESC}[15~",   // F5
-    s"${Ascii.ESC}[17~",   // F6
-    s"${Ascii.ESC}[1;2A",  // Shift+Up
-    s"${Ascii.ESC}[1;5A",  // Ctrl+Up
-    s"${Ascii.ESC}[1;6A",  // Ctrl+Shift+Up
-    s"${Ascii.ESC}[3~",    // Delete
-    s"${Ascii.ESC}[3;5~",  // Ctrl+Delete
-    s"${Ascii.ESC}[3;6~"   // Ctrl+Shift+Delete
+    s"${Ascii.ESC}[A", // Up arrow
+    s"${Ascii.ESC}[B", // Down arrow
+    s"${Ascii.ESC}[C", // Right arrow
+    s"${Ascii.ESC}[D", // Left arrow
+    s"${Ascii.ESC}OP", // F1
+    s"${Ascii.ESC}OQ", // F2
+    s"${Ascii.ESC}OR", // F3
+    s"${Ascii.ESC}OS", // F4
+    s"${Ascii.ESC}[15~", // F5
+    s"${Ascii.ESC}[17~", // F6
+    s"${Ascii.ESC}[1;2A", // Shift+Up
+    s"${Ascii.ESC}[1;5A", // Ctrl+Up
+    s"${Ascii.ESC}[1;6A", // Ctrl+Shift+Up
+    s"${Ascii.ESC}[3~", // Delete
+    s"${Ascii.ESC}[3;5~", // Ctrl+Delete
+    s"${Ascii.ESC}[3;6~" // Ctrl+Shift+Delete
   )
 
   // Control characters
@@ -74,28 +71,28 @@ class TerminalKeyReaderBenchmark {
     Ascii.EOT, // Ctrl+D
     Ascii.ENQ, // Ctrl+E
     Ascii.ACK, // Ctrl+F
-    Ascii.BEL  // Ctrl+G
+    Ascii.BEL // Ctrl+G
   )
 
   // Large mixed input with approximately 10,000 characters
   private def input(targetLength: Int): String = {
     val sb = new StringBuilder()
     val rand = new Random(42) // Fixed seed for reproducibility
-    
-    while (sb.length < targetLength) {
+
+    while sb.length < targetLength do {
       val choice = rand.nextInt(100)
-      
-      if (choice < percentEscape)
+
+      if choice < percentEscape then
         // Print escape sequence
         sb.append(escapeSequences(rand.nextInt(escapeSequences.length)))
-      else if (choice < (percentControl + percentEscape))
+      else if choice < (percentControl + percentEscape) then
         // Print control sequence
         sb.append(controlChars(rand.nextInt(controlChars.length)))
       else
         // Printable Ascii character
         sb.append((rand.nextInt(94) + 32).toChar)
     }
-    
+
     sb.toString
   }
 
@@ -112,14 +109,14 @@ class TerminalKeyReaderBenchmark {
 
   @Benchmark
   def benchmarkLargeInput(): Int = benchmark(largeInput)
-  
+
   private def benchmark(input: String): Int = {
     val reader = new StringBufferReader(input)
     var count = 0
-    
-    while (true) {
+
+    while true do {
       reader.readKey() match {
-        case Eof => return count
+        case Eof    => return count
         case _: Key => count += 1
       }
     }
