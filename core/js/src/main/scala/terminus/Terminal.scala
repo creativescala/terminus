@@ -28,6 +28,7 @@ class Terminal(root: HTMLElement, options: XtermJsOptions)
       effect.Cursor,
       effect.Format[Terminal],
       effect.Erase,
+      effect.Dimensions, // Add Dimensions trait
       effect.Writer {
 
   private val keyBuffer: mutable.ArrayDeque[Promise[String]] =
@@ -52,9 +53,15 @@ class Terminal(root: HTMLElement, options: XtermJsOptions)
 
   def write(string: String): Unit =
     terminal.write(string)
-
   def write(char: Char): Unit =
     terminal.write(char.toString())
+
+  // Dimensions implementation
+  def getDimensions: effect.TerminalDimensions =
+    effect.TerminalDimensions(terminal.cols, terminal.rows)
+
+  def setDimensions(dimensions: effect.TerminalDimensions): Unit =
+    terminal.resize(dimensions.columns, dimensions.rows)
 }
 type Program[A] = Terminal ?=> A
 
@@ -62,8 +69,15 @@ object Terminal extends Color, Cursor, Format, Erase, Writer {
   def readKey(): Program[Future[String]] =
     terminal ?=> terminal.readKey()
 
-  def run[A](id: String, rows: Int = 24, cols: Int = 80)(f: Program[A]): A = {
-    val options = XtermJsOptions(rows, cols)
+  object dimensions {
+    def get: Program[effect.TerminalDimensions] =
+      terminal ?=> terminal.getDimensions
+
+    def set(dimensions: effect.TerminalDimensions): Program[Unit] =
+      terminal ?=> terminal.setDimensions(dimensions)
+  }
+  def run[A](id: String, cols: Int = 80, rows: Int = 24)(f: Program[A]): A = {
+    val options = XtermJsOptions(cols, rows) // Ensure XtermJsOptions is called with cols, then rows
     run(dom.document.getElementById(id).asInstanceOf[HTMLElement], options)(f)
   }
 
