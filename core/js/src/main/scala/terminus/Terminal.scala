@@ -53,10 +53,10 @@ class Terminal(root: HTMLElement, options: XtermJsOptions)
 
   def write(string: String): Unit =
     terminal.write(string)
+
   def write(char: Char): Unit =
     terminal.write(char.toString())
 
-  // Dimensions implementation
   def getDimensions: effect.TerminalDimensions =
     effect.TerminalDimensions(terminal.cols, terminal.rows)
 
@@ -76,8 +76,9 @@ object Terminal extends Color, Cursor, Format, Erase, Writer {
     def set(dimensions: effect.TerminalDimensions): Program[Unit] =
       terminal ?=> terminal.setDimensions(dimensions)
   }
+
   def run[A](id: String, cols: Int = 80, rows: Int = 24)(f: Program[A]): A = {
-    val options = XtermJsOptions(cols, rows) // Ensure XtermJsOptions is called with cols, then rows
+    val options = XtermJsOptions(cols, rows)
     run(dom.document.getElementById(id).asInstanceOf[HTMLElement], options)(f)
   }
 
