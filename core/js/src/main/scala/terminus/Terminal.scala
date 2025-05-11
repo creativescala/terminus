@@ -28,7 +28,7 @@ class Terminal(root: HTMLElement, options: XtermJsOptions)
       effect.Cursor,
       effect.Format[Terminal],
       effect.Erase,
-      effect.Dimensions, // Add Dimensions trait
+      effect.Dimensions,
       effect.Writer {
 
   private val keyBuffer: mutable.ArrayDeque[Promise[String]] =
