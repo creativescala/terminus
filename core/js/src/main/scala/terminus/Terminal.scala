@@ -69,14 +69,6 @@ object Terminal extends Color, Cursor, Format, Erase, Dimensions, Writer {
   def readKey(): Program[Future[String]] =
     terminal ?=> terminal.readKey()
 
-  object dimensions {
-    def get: Program[effect.TerminalDimensions] =
-      terminal ?=> terminal.getDimensions
-
-    def set(dimensions: effect.TerminalDimensions): Program[Unit] =
-      terminal ?=> terminal.setDimensions(dimensions)
-  }
-
   def run[A](id: String, cols: Int = 80, rows: Int = 24)(f: Program[A]): A = {
     val options = XtermJsOptions(cols, rows)
     run(dom.document.getElementById(id).asInstanceOf[HTMLElement], options)(f)
