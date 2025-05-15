@@ -111,26 +111,26 @@ object NativeTerminal
     }
   }
 
-  def application[A](f: (terminus.Terminal) ?=> A): A = {
-    withEffect(AnsiCodes.mode.application.on, AnsiCodes.mode.application.off)(f)
-  }
+  private[terminus] def setRawMode(): () => Unit = {
+    implicit val z: Zone = Zone.open()
+    val origAttrs = termios.getAttributes()
+    termios.setRawMode()
 
-  def alternateScreen[A](f: (terminus.Terminal) ?=> A): A = {
-    withEffect(
-      AnsiCodes.mode.alternateScreen.on,
-      AnsiCodes.mode.alternateScreen.off
-    )(f)
-  }
-
-  def raw[A](f: Terminal ?=> A): A = {
-    Zone {
-      val origAttrs = termios.getAttributes()
-      try {
-        termios.setRawMode()
-        f(using this)
-      } finally {
-        termios.setAttributes(origAttrs)
-      }
+    () => {
+      termios.setAttributes(origAttrs)
+      z.close()
     }
   }
+
+  private[terminus] def setApplicationMode(): () => Unit =
+    effectDeferRollback(
+      AnsiCodes.mode.application.on,
+      AnsiCodes.mode.application.off
+    )
+
+  private[terminus] def setAlternateScreenMode(): () => Unit =
+    effectDeferRollback(
+      AnsiCodes.mode.alternateScreen.on,
+      AnsiCodes.mode.alternateScreen.off
+    )
 }
