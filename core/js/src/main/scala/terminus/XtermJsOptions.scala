@@ -24,6 +24,6 @@ trait XtermJsOptions extends js.Object {
   val rows: Int = js.native
 }
 object XtermJsOptions {
-  def apply(rows: Int = 80, cols: Int = 24): XtermJsOptions =
-    js.Dynamic.literal(rows = rows, cols = cols).asInstanceOf[XtermJsOptions]
+  def apply(cols: Int = 80, rows: Int = 24): XtermJsOptions =
+    js.Dynamic.literal(cols = cols, rows = rows).asInstanceOf[XtermJsOptions]
 }

@@ -36,4 +36,9 @@ class XtermJsTerminal(@unused options: XtermJsOptions) extends js.Object {
   val onKey: js.Function1[js.Function1[XtermKeyEvent, Unit], Unit] = js.native
   def open(element: dom.HTMLElement): Unit = js.native
   def write(data: String): Unit = js.native
+
+  // Dimensions methods
+  def cols: Int = js.native
+  def rows: Int = js.native
+  def resize(cols: Int, rows: Int): Unit = js.native
 }

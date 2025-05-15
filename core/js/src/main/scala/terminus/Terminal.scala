@@ -28,6 +28,7 @@ class Terminal(root: HTMLElement, options: XtermJsOptions)
       effect.Cursor,
       effect.Format[Terminal],
       effect.Erase,
+      effect.Dimensions,
       effect.Writer {
 
   private val keyBuffer: mutable.ArrayDeque[Promise[String]] =
@@ -55,15 +56,21 @@ class Terminal(root: HTMLElement, options: XtermJsOptions)
 
   def write(char: Char): Unit =
     terminal.write(char.toString())
+
+  def getDimensions: effect.TerminalDimensions =
+    effect.TerminalDimensions(terminal.cols, terminal.rows)
+
+  def setDimensions(dimensions: effect.TerminalDimensions): Unit =
+    terminal.resize(dimensions.columns, dimensions.rows)
 }
 type Program[A] = Terminal ?=> A
 
-object Terminal extends Color, Cursor, Format, Erase, Writer {
+object Terminal extends Color, Cursor, Format, Erase, Dimensions, Writer {
   def readKey(): Program[Future[String]] =
     terminal ?=> terminal.readKey()
 
-  def run[A](id: String, rows: Int = 24, cols: Int = 80)(f: Program[A]): A = {
-    val options = XtermJsOptions(rows, cols)
+  def run[A](id: String, cols: Int = 80, rows: Int = 24)(f: Program[A]): A = {
+    val options = XtermJsOptions(cols, rows)
     run(dom.document.getElementById(id).asInstanceOf[HTMLElement], options)(f)
   }
 
