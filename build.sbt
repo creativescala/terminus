@@ -61,6 +61,11 @@ commands += Command.command("build") { state =>
     state
 }
 
+commands += Command.command("benchmarks") { state =>
+  "benchmark/Jmh/run terminus.benchmark.TerminalKeyReaderBenchmark" ::
+    state
+}
+
 lazy val commonSettings = Seq(
   libraryDependencies ++= Seq(
     Dependencies.munit.value,
@@ -72,7 +77,7 @@ lazy val commonSettings = Seq(
   )
 )
 
-lazy val root = tlCrossRootProject.aggregate(core, unidocs)
+lazy val root = tlCrossRootProject.aggregate(core, unidocs, benchmark)
 
 lazy val core = crossProject(JSPlatform, JVMPlatform, NativePlatform)
   .in(file("core"))
@@ -177,3 +182,17 @@ lazy val examples = crossProject(JSPlatform, JVMPlatform)
       .dependsOn(core.js)
   )
   .dependsOn(core)
+
+lazy val benchmark = project
+  .in(file("benchmark"))
+  .enablePlugins(JmhPlugin)
+  .settings(
+    commonSettings,
+    name := "terminus-benchmark",
+    libraryDependencies ++= Seq(
+      "org.openjdk.jmh" % "jmh-core" % "1.37",
+      "org.openjdk.jmh" % "jmh-generator-annprocess" % "1.37"
+    ),
+    mimaPreviousArtifacts := Set.empty
+  )
+  .dependsOn(core.jvm)
