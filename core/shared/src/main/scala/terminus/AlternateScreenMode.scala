@@ -25,5 +25,13 @@ trait AlternateScreenMode {
   def alternateScreen[F <: effect.Effect, A](
       f: F ?=> A
   ): (F & effect.AlternateScreenMode[F]) ?=> A =
-    effect ?=> effect.alternateScreen(f)
+    effect ?=> {
+      val finalizer = effect.setAlternateScreenMode()
+
+      try {
+        f(using effect)
+      } finally {
+        finalizer()
+      }
+    }
 }

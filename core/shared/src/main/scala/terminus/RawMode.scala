@@ -23,5 +23,13 @@ trait RawMode {
     * which is the default, user input is only available a line at a time.
     */
   def raw[F <: effect.Effect, A](f: F ?=> A): (F & effect.RawMode[F]) ?=> A =
-    effect ?=> effect.raw(f)
+    effect ?=> {
+      val finalizer = effect.setRawMode()
+
+      try {
+        f(using effect)
+      } finally {
+        finalizer()
+      }
+    }
 }
