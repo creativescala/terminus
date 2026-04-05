@@ -22,8 +22,8 @@ import terminus.effect
 import scala.annotation.tailrec
 
 class Prompt[
-    Terminal <: effect.Color[Terminal] & effect.Cursor &
-      effect.Format[Terminal] & effect.Erase & effect.KeyReader & effect.Writer
+    Terminal <: effect.Color & effect.Cursor & effect.Format & effect.Erase &
+      effect.KeyReader & effect.Writer
 ](terminal: Color & Cursor & Format & Erase & KeyReader & Writer) {
 
   type Program[A] = Terminal ?=> A

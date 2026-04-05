@@ -16,8 +16,8 @@
 
 package terminus
 
-import munit.FunSuite
 import cats.syntax.show.*
+import munit.FunSuite
 
 class KeyShowSuite extends FunSuite {
   test("Show[Key] produces the expected string representation") {

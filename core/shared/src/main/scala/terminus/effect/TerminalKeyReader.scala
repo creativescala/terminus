@@ -16,8 +16,13 @@
 
 package terminus.effect
 
+import terminus.Eof
+import terminus.Key
+import terminus.KeyMappings
+import terminus.KeySequence
+import terminus.Timeout
+
 import scala.annotation.tailrec
-import terminus.{Eof, Key, KeyMappings, KeySequence, Timeout}
 import scala.concurrent.duration.*
 
 /** An implementation of KeyReader that interprets the standard terminal escape

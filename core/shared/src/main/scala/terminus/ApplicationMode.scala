@@ -24,6 +24,6 @@ trait ApplicationMode {
     */
   def application[F <: effect.Effect, A](
       f: F ?=> A
-  ): (F & effect.ApplicationMode[F]) ?=> A =
-    effect ?=> effect.application(f)
+  ): (F & effect.ApplicationMode) ?=> A =
+    effect ?=> effect.application(() => f(using effect))
 }

@@ -29,10 +29,7 @@ import scala.scalanative.unsigned.UInt
 import scalanative.unsafe.*
 
 /** A Terminal implementation for Scala Native. */
-object NativeTerminal
-    extends Terminal,
-      WithEffect[Terminal],
-      TerminalKeyReader {
+object NativeTerminal extends Terminal, WithEffect, TerminalKeyReader {
 
   private given termiosAccess: TermiosAccess[?] =
     if LinktimeInfo.isMac then clongTermiosAccess
@@ -111,26 +108,71 @@ object NativeTerminal
     }
   }
 
-  def application[A](f: (terminus.Terminal) ?=> A): A = {
+  def application[A](f: () => A): A = {
     withEffect(AnsiCodes.mode.application.on, AnsiCodes.mode.application.off)(f)
   }
 
-  def alternateScreen[A](f: (terminus.Terminal) ?=> A): A = {
+  def alternateScreen[A](f: () => A): A = {
     withEffect(
       AnsiCodes.mode.alternateScreen.on,
       AnsiCodes.mode.alternateScreen.off
     )(f)
   }
 
-  def raw[A](f: Terminal ?=> A): A = {
+  def raw[A](f: () => A): A = {
     Zone {
       val origAttrs = termios.getAttributes()
       try {
         termios.setRawMode()
-        f(using this)
+        f()
       } finally {
         termios.setAttributes(origAttrs)
       }
     }
   }
 }
+
+// import scala.scalanative.posix.termios
+// import scala.scalanative.posix.unistd.STDIN_FILENO
+
+// object Termios {
+//   def getAttributes()(using Zone): Ptr[termios.termios] = {
+//     val attrs: Ptr[termios.termios] =
+//       alloc[TermiosStruct.clong_flags]()
+//     termios.tcgetattr(STDIN_FILENO, attrs)
+//     attrs
+//   }
+
+//   def setAttributes(ptr: Ptr[termios.termios]): Unit = {
+//     termios.tcsetattr(STDIN_FILENO, termios.TCSAFLUSH, ptr)
+//     // TODO: Error handling
+//     ()
+//   }
+
+//   /** Set the value at the given index of the termios c_cc struct member. Valid
+//     * indices are defined as constants such as `VMIN` and `VTIME` in
+//     * [[scala.scalanative.posix.termios]]
+//     */
+//   def setSpecialCharacter(
+//       attrs: Ptr[termios.termios],
+//       idx: CInt,
+//       value: CUnsignedChar
+//   ): Unit = {
+//     attrs._5(idx) = value
+//   }
+
+//   /** Places the terminal in raw mode.
+//     *
+//     * @see
+//     *   [[https://en.wikipedia.org/wiki/Terminal_mode Terminal Modes]]
+//     */
+//   def setRawMode(): Unit =
+//     Zone {
+//       println("Setting raw mode")
+//       val attrs = getAttributes()
+//       // attrs.removeLocalFlags(posix.termios.ECHO | posix.termios.ICANON)
+//       attrs._4 =
+//         attrs._4 & ~((posix.termios.ECHO | posix.termios.ICANON).toUInt)
+//       setAttributes(attrs)
+//     }
+// }

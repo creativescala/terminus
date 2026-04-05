@@ -20,6 +20,7 @@ import scala.annotation.implicitNotFound
 import scala.scalanative.posix
 import scala.scalanative.posix.unistd.STDIN_FILENO
 import scala.scalanative.unsafe.*
+import scala.scalanative.unsigned.*
 
 /** Typeclass for handling the messiness of reading, updating, and writing
   * termios structs in a platform specific way.
@@ -132,55 +133,55 @@ given clongTermiosAccess: TermiosAccess[TermiosStruct.clong_flags] =
         attrs: Ptr[TermiosStruct.clong_flags],
         flags: CInt
     ): Unit =
-      attrs._1 = attrs._1 | flags
+      attrs._1 = attrs._1 | flags.toUInt
 
     override def removeInputFlags(
         attrs: Ptr[TermiosStruct.clong_flags],
         flags: CInt
     ): Unit =
-      attrs._1 = attrs._1 & ~flags
+      attrs._1 = attrs._1 & ~(flags.toUInt)
 
     override def addOutputFlags(
         attrs: Ptr[TermiosStruct.clong_flags],
         flags: CInt
     ): Unit =
-      attrs._2 = attrs._2 | flags
+      attrs._2 = attrs._2 | flags.toUInt
 
     override def removeOutputFlags(
         attrs: Ptr[TermiosStruct.clong_flags],
         flags: CInt
     ): Unit =
-      attrs._2 = attrs._2 & ~flags
+      attrs._2 = attrs._2 & ~(flags.toUInt)
 
     override def addControlFlags(
         attrs: Ptr[TermiosStruct.clong_flags],
         flags: CInt
     ): Unit =
-      attrs._3 = attrs._3 | flags
+      attrs._3 = attrs._3 | flags.toUInt
 
     override def removeControlFlags(
         attrs: Ptr[TermiosStruct.clong_flags],
         flags: CInt
     ): Unit =
-      attrs._3 = attrs._3 & ~flags
+      attrs._3 = attrs._3 & ~(flags.toUInt)
 
     override def addLocalFlags(
         attrs: Ptr[TermiosStruct.clong_flags],
         flags: CInt
     ): Unit =
-      attrs._4 = attrs._4 | flags
+      attrs._4 = attrs._4 | flags.toUInt
 
     override def removeLocalFlags(
         attrs: Ptr[TermiosStruct.clong_flags],
         flags: CInt
     ): Unit =
-      attrs._4 = attrs._4 & ~flags
+      attrs._4 = attrs._4 & ~(flags.toUInt)
 
     override def setSpecialCharacter(
         attrs: Ptr[TermiosStruct.clong_flags],
         idx: CInt,
         value: CChar
-    ): Unit = attrs._5(idx) = value
+    ): Unit = attrs._5(idx) = value.toUByte
   }
 
 /** [[TermiosAccess]] instance for structs with CInt bitflags */
@@ -250,7 +251,7 @@ given cintTermiosAccess: TermiosAccess[TermiosStruct.cint_flags] =
         attrs: Ptr[TermiosStruct.cint_flags],
         idx: CInt,
         value: CChar
-    ): Unit = attrs._5(idx) = value
+    ): Unit = attrs._5(idx) = value.toUByte
 
     // Custom `tcgetattr` and `tcsetattr` definitions, since we can't use the ones defined in scala native since
     // they use CLong for bitflags. These should point to the functions defined in the systems termios library
