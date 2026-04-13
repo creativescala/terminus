@@ -59,10 +59,11 @@ class Prompt[
         throw new Exception("Received an EOF")
       case key: Key =>
         key match {
-          case Key(_, KeyCode.Enter) => KeyCode.Enter
-          case Key(_, KeyCode.Up)    => KeyCode.Up
-          case Key(_, KeyCode.Down)  => KeyCode.Down
-          case other                 => read()
+          case Key(_, KeyCode.Enter)           => KeyCode.Enter
+          case Key(_, KeyCode.Character('\n')) => KeyCode.Enter
+          case Key(_, KeyCode.Up)              => KeyCode.Up
+          case Key(_, KeyCode.Down)            => KeyCode.Down
+          case other                           => read()
         }
     }
   }
