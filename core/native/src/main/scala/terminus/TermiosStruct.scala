@@ -19,6 +19,7 @@ package terminus
 import scala.scalanative.posix
 import scala.scalanative.unsafe.CInt
 import scala.scalanative.unsafe.CStruct7
+import scala.scalanative.unsafe.CUnsignedLong
 
 /** Type aliases for the two possible termios structures, one with CInt bitflags
   * and one with CLong bitflags. CLong types are the default in scala-native,
