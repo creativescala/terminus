@@ -12,11 +12,11 @@ object Dependencies {
   val scalatagsVersion = "0.13.1"
   val scalajsDomVersion = "2.8.1"
 
-  val jlineVersion = "4.0.10"
+  val jlineVersion = "4.0.12"
 
   val scalaCheckVersion = "1.15.4"
-  val munitVersion = "1.2.4"
-  val munitScalacheckVersion = "1.2.0"
+  val munitVersion = "1.3.0"
+  val munitScalacheckVersion = "1.3.0"
   val munitCatsEffectVersion = "2.0.0"
 
   // Libraries
