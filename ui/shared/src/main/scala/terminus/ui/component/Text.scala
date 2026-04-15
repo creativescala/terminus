@@ -39,7 +39,7 @@ object Text:
         Box.render(bounds, Border.single, style, buf)
         buf.putString(bounds.x + 1, bounds.y + 1, content, style)
 
-  def apply(width: Int, height: Int)(
+  def apply(width: Int, height: Int, style: Style = Style.default)(
       content: String
   )(using ctx: RenderContext): Unit =
-    ctx.add(component(width, height, content))
+    ctx.add(component(width, height, content, style))

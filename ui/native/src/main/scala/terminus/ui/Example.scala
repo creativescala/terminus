@@ -18,15 +18,53 @@ package terminus.ui
 
 import terminus.NativeTerminal
 import terminus.ui.component.Text
+import terminus.ui.style.Color
+import terminus.ui.style.Style
+import terminus.ui.style.Underline
 
-@main def boxes(): Unit =
+// Run with: sbt 'uiNative/runMain terminus.ui.demo'
+@main def demo(): Unit =
   val program: FullScreen.Program[Unit] =
     FullScreen {
+
+      // Row 1: text style attributes
       Row {
-        Text(20, 5)("Box A")
-        Text(20, 5)("Box B")
+        Text(24, 5, Style(bold = true))(
+          "Bold 💪"
+        )
+        Text(24, 5, Style(italic = true))(
+          "Italic ✨"
+        )
+        Text(24, 5, Style(strikethrough = true))(
+          "Strikethrough ❌"
+        )
       }
-      Text(20, 5)("Box C")
+
+      // Row 2: underline variants and invert
+      Row {
+        Text(24, 5, Style(underline = Underline.Straight))(
+          "Straight underline"
+        )
+        Text(24, 5, Style(underline = Underline.Curly))(
+          "Curly underline"
+        )
+        Text(24, 5, Style(invert = true))(
+          "Inverted 🔄"
+        )
+      }
+
+      // Row 3: colours + wide characters (emoji and CJK)
+      Row {
+        Text(24, 5, Style(fg = Color.Red, bold = true))(
+          "🔴 Red — 红色"
+        )
+        Text(24, 5, Style(fg = Color.Green, bold = true))(
+          "🟢 Green — 緑"
+        )
+        Text(24, 5, Style(fg = Color.Blue, bold = true))(
+          "🔵 Blue — 青色"
+        )
+      }
     }
 
   NativeTerminal.run {

@@ -16,7 +16,6 @@
 
 package terminus.ui
 
-import terminus.effect
 import terminus.effect.AnsiCodes
 import terminus.ui.style.Color
 import terminus.ui.style.Style
@@ -53,18 +52,38 @@ final class Buffer(val width: Int, val height: Int):
         x += 1
       y += 1
 
-  /** Write a string horizontally starting at (x, y). Clips to buffer bounds. */
+  /** Write a string horizontally starting at (x, y).
+    *
+    * Iterates over Unicode code points (not raw Java chars) so that characters
+    * outside the Basic Multilingual Plane — including most emoji — are handled
+    * correctly. Wide characters (display width 2) occupy two buffer cells: the
+    * left cell holds the character and the right cell holds
+    * [[Cell.continuation]] as a sentinel. Zero-width code points (combining
+    * marks, variation selectors, ZWJ) are skipped; full grapheme cluster
+    * composition is not currently supported. Clips to buffer bounds.
+    */
   def putString(x: Int, y: Int, s: String, style: Style): Unit =
+    var col = x
     var i = 0
     while i < s.length do
-      put(x + i, y, Cell(s.charAt(i), style))
-      i += 1
+      val cp = Character.codePointAt(s, i)
+      i += Character.charCount(cp)
+      CharWidth.of(cp) match
+        case 0 => () // zero-width: skip
+        case 1 =>
+          put(col, y, Cell(cp, style))
+          col += 1
+        case _ => // 2
+          put(col, y, Cell(cp, style))
+          put(col + 1, y, Cell.continuation)
+          col += 2
 
   /** Flush the buffer to the terminal.
     *
     * Iterates cells row by row, emitting SGR attribute codes only when style
     * changes, and using absolute cursor positioning at the start of each row.
-    * Emits a full SGR reset before and after rendering.
+    * Continuation cells (right half of wide characters) are skipped. Emits a
+    * full SGR reset before and after rendering.
     */
   def render(using t: Terminal): Unit =
     t.write(AnsiCodes.sgr("0"))
@@ -76,40 +95,42 @@ final class Buffer(val width: Int, val height: Int):
       var x = 0
       while x < width do
         val cell = cells(y * width + x)
-        if cell.style != currentStyle then
-          if cell.style.fg != currentStyle.fg then
-            t.write(fgCode(cell.style.fg))
-          if cell.style.bg != currentStyle.bg then
-            t.write(bgCode(cell.style.bg))
-          if cell.style.bold != currentStyle.bold then
-            t.write(
-              if cell.style.bold then AnsiCodes.format.bold.on
-              else AnsiCodes.format.bold.off
-            )
-          if cell.style.italic != currentStyle.italic then
-            t.write(
-              if cell.style.italic then AnsiCodes.format.italic.on
-              else AnsiCodes.format.italic.off
-            )
-          if cell.style.underline != currentStyle.underline then
-            t.write(underlineCode(cell.style.underline))
-          if cell.style.blink != currentStyle.blink then
-            t.write(
-              if cell.style.blink then AnsiCodes.format.blink.on
-              else AnsiCodes.format.blink.off
-            )
-          if cell.style.invert != currentStyle.invert then
-            t.write(
-              if cell.style.invert then AnsiCodes.format.invert.on
-              else AnsiCodes.format.invert.off
-            )
-          if cell.style.strikethrough != currentStyle.strikethrough then
-            t.write(
-              if cell.style.strikethrough then AnsiCodes.format.strikethrough.on
-              else AnsiCodes.format.strikethrough.off
-            )
-          currentStyle = cell.style
-        t.write(cell.char)
+        if cell.codePoint != 0 then // skip continuation cells
+          if cell.style != currentStyle then
+            if cell.style.fg != currentStyle.fg then
+              t.write(fgCode(cell.style.fg))
+            if cell.style.bg != currentStyle.bg then
+              t.write(bgCode(cell.style.bg))
+            if cell.style.bold != currentStyle.bold then
+              t.write(
+                if cell.style.bold then AnsiCodes.format.bold.on
+                else AnsiCodes.format.bold.off
+              )
+            if cell.style.italic != currentStyle.italic then
+              t.write(
+                if cell.style.italic then AnsiCodes.format.italic.on
+                else AnsiCodes.format.italic.off
+              )
+            if cell.style.underline != currentStyle.underline then
+              t.write(underlineCode(cell.style.underline))
+            if cell.style.blink != currentStyle.blink then
+              t.write(
+                if cell.style.blink then AnsiCodes.format.blink.on
+                else AnsiCodes.format.blink.off
+              )
+            if cell.style.invert != currentStyle.invert then
+              t.write(
+                if cell.style.invert then AnsiCodes.format.invert.on
+                else AnsiCodes.format.invert.off
+              )
+            if cell.style.strikethrough != currentStyle.strikethrough then
+              t.write(
+                if cell.style.strikethrough then
+                  AnsiCodes.format.strikethrough.on
+                else AnsiCodes.format.strikethrough.off
+              )
+            currentStyle = cell.style
+          t.write(new String(Character.toChars(cell.codePoint)))
         x += 1
       y += 1
 

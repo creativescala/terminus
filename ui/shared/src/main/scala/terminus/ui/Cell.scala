@@ -18,7 +18,24 @@ package terminus.ui
 
 import terminus.ui.style.Style
 
-/** A single terminal cell: a character with associated styling. */
-final case class Cell(char: Char, style: Style)
+/** A single terminal cell: a Unicode code point with associated styling.
+  *
+  * The code point is stored as an [[Int]] to accommodate the full Unicode
+  * range, including characters outside the Basic Multilingual Plane (code
+  * points > U+FFFF) such as emoji. During rendering, [[Character.toChars]] is
+  * used to convert back to the one or two [[Char]] values needed by the
+  * terminal.
+  *
+  * Use [[Cell.empty]] for an unstyled space and [[Cell.continuation]] to mark
+  * the right half of a wide (2-cell) character.
+  */
+final case class Cell(codePoint: Int, style: Style)
 object Cell:
-  val empty: Cell = Cell(' ', Style.default)
+  /** An unstyled space cell — the default state of every buffer position. */
+  val empty: Cell = Cell(' '.toInt, Style.default)
+
+  /** Sentinel marking the right half of a wide (2-cell) character. The flush
+    * loop skips these cells; the preceding wide character already occupies both
+    * columns.
+    */
+  val continuation: Cell = Cell(0, Style.default)
