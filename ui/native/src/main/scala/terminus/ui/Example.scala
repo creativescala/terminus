@@ -29,40 +29,45 @@ import terminus.ui.style.Underline
 
       // Row 1: text style attributes
       Row {
-        Text(24, 5, Style(bold = true))(
+        Text(24, 3, Style(bold = true))(
           "Bold 💪"
         )
-        Text(24, 5, Style(italic = true))(
+        Text(24, 3, Style(italic = true))(
           "Italic ✨"
         )
-        Text(24, 5, Style(strikethrough = true))(
+        Text(24, 3, Style(strikethrough = true))(
           "Strikethrough ❌"
         )
       }
 
       // Row 2: underline variants and invert
       Row {
-        Text(24, 5, Style(underline = Underline.Straight))(
+        Text(24, 3, Style(underline = Underline.Straight))(
           "Straight underline"
         )
-        Text(24, 5, Style(underline = Underline.Curly))(
+        Text(24, 3, Style(underline = Underline.Curly))(
           "Curly underline"
         )
-        Text(24, 5, Style(invert = true))(
+        Text(24, 3, Style(invert = true))(
           "Inverted 🔄"
         )
       }
 
-      // Row 3: colours + wide characters (emoji and CJK)
+      // Column nested inside a Row: demonstrates Column layout
       Row {
-        Text(24, 5, Style(fg = Color.Red, bold = true))(
-          "🔴 Red — 红色"
-        )
-        Text(24, 5, Style(fg = Color.Green, bold = true))(
-          "🟢 Green — 緑"
-        )
-        Text(24, 5, Style(fg = Color.Blue, bold = true))(
-          "🔵 Blue — 青色"
+        Column {
+          Text(24, 3, Style(fg = Color.Red, bold = true))(
+            "🔴 Red — 红色"
+          )
+          Text(24, 3, Style(fg = Color.Green, bold = true))(
+            "🟢 Green — 緑"
+          )
+          Text(24, 3, Style(fg = Color.Blue, bold = true))(
+            "🔵 Blue — 青色"
+          )
+        }
+        Text(24, 9, Style(fg = Color.Yellow))(
+          "Column on the left\nhas three coloured\nrows stacked."
         )
       }
     }
