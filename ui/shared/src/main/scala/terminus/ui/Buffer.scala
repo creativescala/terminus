@@ -78,7 +78,7 @@ final class Buffer(val width: Int, val height: Int):
           put(col + 1, y, Cell.continuation)
           col += 2
 
-  /** Flush the buffer to the terminal.
+  /** Flush the entire buffer to the terminal.
     *
     * Iterates cells row by row, emitting SGR attribute codes only when style
     * changes, and using absolute cursor positioning at the start of each row.
@@ -87,7 +87,6 @@ final class Buffer(val width: Int, val height: Int):
     */
   def render(using t: Terminal): Unit =
     t.write(AnsiCodes.sgr("0"))
-
     var currentStyle = Style.default
     var y = 0
     while y < height do
@@ -96,46 +95,82 @@ final class Buffer(val width: Int, val height: Int):
       while x < width do
         val cell = cells(y * width + x)
         if cell.codePoint != 0 then // skip continuation cells
-          if cell.style != currentStyle then
-            if cell.style.fg != currentStyle.fg then
-              t.write(fgCode(cell.style.fg))
-            if cell.style.bg != currentStyle.bg then
-              t.write(bgCode(cell.style.bg))
-            if cell.style.bold != currentStyle.bold then
-              t.write(
-                if cell.style.bold then AnsiCodes.format.bold.on
-                else AnsiCodes.format.bold.off
-              )
-            if cell.style.italic != currentStyle.italic then
-              t.write(
-                if cell.style.italic then AnsiCodes.format.italic.on
-                else AnsiCodes.format.italic.off
-              )
-            if cell.style.underline != currentStyle.underline then
-              t.write(underlineCode(cell.style.underline))
-            if cell.style.blink != currentStyle.blink then
-              t.write(
-                if cell.style.blink then AnsiCodes.format.blink.on
-                else AnsiCodes.format.blink.off
-              )
-            if cell.style.invert != currentStyle.invert then
-              t.write(
-                if cell.style.invert then AnsiCodes.format.invert.on
-                else AnsiCodes.format.invert.off
-              )
-            if cell.style.strikethrough != currentStyle.strikethrough then
-              t.write(
-                if cell.style.strikethrough then
-                  AnsiCodes.format.strikethrough.on
-                else AnsiCodes.format.strikethrough.off
-              )
-            currentStyle = cell.style
+          currentStyle = emitStyle(currentStyle, cell.style)
           t.write(new String(Character.toChars(cell.codePoint)))
         x += 1
       y += 1
-
     t.write(AnsiCodes.sgr("0"))
     t.flush()
+
+  /** Flush only cells that differ from [[previous]] to the terminal.
+    *
+    * Compares this buffer against [[previous]] cell by cell and emits only
+    * changed positions, minimising the number of escape codes written. Cursor
+    * movement is suppressed when changed cells are horizontally adjacent,
+    * avoiding a `cursor.to` call for every single character in a long run of
+    * changes.
+    *
+    * The two buffers must have the same dimensions. [[previous]] is not
+    * modified; callers are responsible for swapping or copying buffers between
+    * frames.
+    */
+  def renderDiff(previous: Buffer)(using t: Terminal): Unit =
+    require(
+      width == previous.width && height == previous.height,
+      s"Buffer dimensions must match for diff render: ${width}x${height} vs ${previous.width}x${previous.height}"
+    )
+    t.write(AnsiCodes.sgr("0"))
+    var currentStyle = Style.default
+    // Track where the terminal cursor currently is (0-based).
+    // (-1, -1) means "unknown / needs explicit move".
+    var cursorX = -1
+    var cursorY = -1
+    var y = 0
+    while y < height do
+      var x = 0
+      while x < width do
+        val curr = cells(y * width + x)
+        val prev = previous.cells(y * width + x)
+        if curr != prev then
+          if curr.codePoint != 0 then // skip continuation cells
+            if !(cursorX == x && cursorY == y) then
+              t.cursor.to(x + 1, y + 1) // 1-based
+            currentStyle = emitStyle(currentStyle, curr.style)
+            t.write(new String(Character.toChars(curr.codePoint)))
+            // Wide chars advance the cursor by 2; narrow by 1
+            val advance = CharWidth.of(curr.codePoint).max(1)
+            cursorX = x + advance
+            cursorY = y
+        x += 1
+      y += 1
+    t.write(AnsiCodes.sgr("0"))
+    t.flush()
+
+  /** Emit SGR codes for any attributes that differ between [[from]] and [[to]],
+    * and return [[to]] as the new current style.
+    */
+  private def emitStyle(from: Style, to: Style)(using t: Terminal): Style =
+    if to != from then
+      if to.fg != from.fg then t.write(fgCode(to.fg))
+      if to.bg != from.bg then t.write(bgCode(to.bg))
+      if to.bold != from.bold then
+        t.write(if to.bold then AnsiCodes.format.bold.on
+        else AnsiCodes.format.bold.off)
+      if to.italic != from.italic then
+        t.write(if to.italic then AnsiCodes.format.italic.on
+        else AnsiCodes.format.italic.off)
+      if to.underline != from.underline then
+        t.write(underlineCode(to.underline))
+      if to.blink != from.blink then
+        t.write(if to.blink then AnsiCodes.format.blink.on
+        else AnsiCodes.format.blink.off)
+      if to.invert != from.invert then
+        t.write(if to.invert then AnsiCodes.format.invert.on
+        else AnsiCodes.format.invert.off)
+      if to.strikethrough != from.strikethrough then
+        t.write(if to.strikethrough then AnsiCodes.format.strikethrough.on
+        else AnsiCodes.format.strikethrough.off)
+    to
 
   private def underlineCode(underline: style.Underline): String =
     underline match
