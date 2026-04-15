@@ -28,6 +28,12 @@ TUIs commonly embed text in a border (e.g. a title or status in the top edge of 
 
 Separators (horizontal/vertical lines *between* children) are structurally different from borders (owned by a single component). Separators are a **rendering policy of the parent container**, not a child component. A `Column` or `Row` with separators owns the decision and knows which join characters to use (┳ ┻ ┣ ┫ etc.) based on position. Children don't need to know about them. Junction resolution between child borders and parent separators is deferred — keep simple initially.
 
+## Block vs inline (deferred)
+
+The current `Text` component conflates a block element (box with border, background fill, padding) and an inline element (styled text content). This means `content: Style` has a `bg` field that can diverge from `ComponentStyle.background`, requiring the user to keep them in sync manually.
+
+The clean resolution: content style `bg = Color.Default` means "transparent — inherit from the component background", matching CSS's default behaviour. An explicit `bg` on a content style is an intentional override (like a highlighted `<span>`). This requires a concept of cell-style transparency/inheritance, which is deferred until inline/span styling is tackled.
+
 ## Implementation order
 
 Rough priority for immediate work:

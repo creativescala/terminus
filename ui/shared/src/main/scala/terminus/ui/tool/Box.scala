@@ -19,40 +19,69 @@ package terminus.ui.tool
 import terminus.ui.Buffer
 import terminus.ui.Cell
 import terminus.ui.Rect
-import terminus.ui.style.Border
-import terminus.ui.style.Style
+import terminus.ui.style.ComponentStyle
 
 object Box:
 
-  /** Draw a bordered box into the buffer at the given bounds. The border
-    * occupies the outermost cells, so the minimum usable width and height is 2.
-    * Out-of-bounds writes are silently clipped by the buffer.
+  /** The content rect inside a box: bounds shrunk by one cell for the border
+    * (if present) and then by [[ComponentStyle.padding]] on each side.
     */
-  def render(bounds: Rect, border: Border, style: Style, buf: Buffer): Unit =
-    val x0 = bounds.x
-    val y0 = bounds.y
-    val x1 = bounds.x + bounds.width - 1 // inclusive right edge
-    val y1 = bounds.y + bounds.height - 1 // inclusive bottom edge
+  def innerRect(bounds: Rect, style: ComponentStyle): Rect =
+    val offset = (if style.border.isDefined then 1 else 0) + style.padding
+    Rect(
+      bounds.x + offset,
+      bounds.y + offset,
+      bounds.width - 2 * offset,
+      bounds.height - 2 * offset
+    )
 
-    // Top row
-    buf.put(x0, y0, Cell(border.topLeft.toInt, style))
-    var x = x0 + 1
-    while x < x1 do
-      buf.put(x, y0, Cell(border.horizontal.toInt, style))
-      x += 1
-    buf.put(x1, y0, Cell(border.topRight.toInt, style))
+  /** Draw a box into the buffer at the given bounds.
+    *
+    * Fills the interior with the background style, then draws the border (if
+    * present) using the border style. The minimum usable size when a border is
+    * present is 2×2. Out-of-bounds writes are silently clipped by the buffer.
+    */
+  def render(bounds: Rect, style: ComponentStyle, buf: Buffer): Unit =
+    val borderOffset = if style.border.isDefined then 1 else 0
 
-    // Sides
-    var y = y0 + 1
-    while y < y1 do
-      buf.put(x0, y, Cell(border.vertical.toInt, style))
-      buf.put(x1, y, Cell(border.vertical.toInt, style))
-      y += 1
+    // Fill interior with background style
+    val fillRect = Rect(
+      bounds.x + borderOffset,
+      bounds.y + borderOffset,
+      bounds.width - 2 * borderOffset,
+      bounds.height - 2 * borderOffset
+    )
+    if fillRect.width > 0 && fillRect.height > 0 then
+      buf.fill(fillRect, Cell(' '.toInt, style.background))
 
-    // Bottom row
-    buf.put(x0, y1, Cell(border.bottomLeft.toInt, style))
-    x = x0 + 1
-    while x < x1 do
-      buf.put(x, y1, Cell(border.horizontal.toInt, style))
-      x += 1
-    buf.put(x1, y1, Cell(border.bottomRight.toInt, style))
+    // Draw border if present
+    style.border.foreach { border =>
+      val x0 = bounds.x
+      val y0 = bounds.y
+      val x1 = bounds.x + bounds.width - 1
+      val y1 = bounds.y + bounds.height - 1
+      val bs = style.borderStyle
+
+      // Top row
+      buf.put(x0, y0, Cell(border.topLeft.toInt, bs))
+      var x = x0 + 1
+      while x < x1 do
+        buf.put(x, y0, Cell(border.horizontal.toInt, bs))
+        x += 1
+      buf.put(x1, y0, Cell(border.topRight.toInt, bs))
+
+      // Sides
+      var y = y0 + 1
+      while y < y1 do
+        buf.put(x0, y, Cell(border.vertical.toInt, bs))
+        buf.put(x1, y, Cell(border.vertical.toInt, bs))
+        y += 1
+
+      // Bottom row
+      buf.put(x0, y1, Cell(border.bottomLeft.toInt, bs))
+      x = x0 + 1
+      while x < x1 do
+        buf.put(x, y1, Cell(border.horizontal.toInt, bs))
+        x += 1
+      buf.put(x1, y1, Cell(border.bottomRight.toInt, bs))
+    }

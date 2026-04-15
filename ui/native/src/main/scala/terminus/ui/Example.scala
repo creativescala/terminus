@@ -19,6 +19,7 @@ package terminus.ui
 import terminus.NativeTerminal
 import terminus.ui.component.Text
 import terminus.ui.style.Color
+import terminus.ui.style.ComponentStyle
 import terminus.ui.style.Style
 import terminus.ui.style.Underline
 
@@ -29,46 +30,61 @@ import terminus.ui.style.Underline
 
       // Row 1: text style attributes
       Row {
-        Text(24, 3, Style(bold = true))(
+        Text(24, 3, content = Style(bold = true))(
           "Bold 💪"
         )
-        Text(24, 3, Style(italic = true))(
+        Text(24, 3, content = Style(italic = true))(
           "Italic ✨"
         )
-        Text(24, 3, Style(strikethrough = true))(
+        Text(24, 3, content = Style(strikethrough = true))(
           "Strikethrough ❌"
         )
       }
 
       // Row 2: underline variants and invert
       Row {
-        Text(24, 3, Style(underline = Underline.Straight))(
+        Text(24, 3, content = Style(underline = Underline.Straight))(
           "Straight underline"
         )
-        Text(24, 3, Style(underline = Underline.Curly))(
+        Text(24, 3, content = Style(underline = Underline.Curly))(
           "Curly underline"
         )
-        Text(24, 3, Style(invert = true))(
+        Text(24, 3, content = Style(invert = true))(
           "Inverted 🔄"
         )
       }
 
-      // Column nested inside a Row: demonstrates Column layout
+      // Row 3: component styling — coloured borders and background fill
       Row {
         Column {
-          Text(24, 3, Style(fg = Color.Red, bold = true))(
-            "🔴 Red — 红色"
-          )
-          Text(24, 3, Style(fg = Color.Green, bold = true))(
-            "🟢 Green — 緑"
-          )
-          Text(24, 3, Style(fg = Color.Blue, bold = true))(
-            "🔵 Blue — 青色"
-          )
+          Text(
+            24,
+            3,
+            box = ComponentStyle(borderStyle = Style(fg = Color.Red)),
+            content = Style(fg = Color.Red, bold = true)
+          )("🔴 Red — 红色")
+          Text(
+            24,
+            3,
+            box = ComponentStyle(borderStyle = Style(fg = Color.Green)),
+            content = Style(fg = Color.Green, bold = true)
+          )("🟢 Green — 緑")
+          Text(
+            24,
+            3,
+            box = ComponentStyle(borderStyle = Style(fg = Color.Blue)),
+            content = Style(fg = Color.Blue, bold = true)
+          )("🔵 Blue — 青色")
         }
-        Text(24, 9, Style(fg = Color.Yellow))(
-          "Column on the left\nhas three coloured\nrows stacked."
-        )
+        Text(
+          24,
+          9,
+          box = ComponentStyle(
+            background = Style(bg = Color.Yellow),
+            borderStyle = Style(fg = Color.BrightBlack)
+          ),
+          content = Style(fg = Color.Black, bg = Color.Yellow)
+        )("Column on the left\nhas coloured\nborders.")
       }
     }
 
