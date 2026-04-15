@@ -22,19 +22,18 @@ class Column() extends ChildContext, Component:
   private val children: mutable.ArrayBuffer[Component] =
     mutable.ArrayBuffer.empty
 
-  private var childrenSize: Size = Size.zero
-
-  def size: Size = childrenSize
+  def size: Size =
+    children.foldLeft(Size.zero)((acc, c) => acc.column(c.size))
 
   def add(component: Component): Unit =
-    childrenSize = childrenSize.column(component.size)
     children += component
 
   def render(bounds: Rect, buf: Buffer): Unit =
     var y = bounds.y
     children.foreach { child =>
-      child.render(Rect(bounds.x, y, child.size.width, child.size.height), buf)
-      y += child.size.height
+      val childSize = child.size
+      child.render(Rect(bounds.x, y, childSize.width, childSize.height), buf)
+      y += childSize.height
     }
 
 object Column:
