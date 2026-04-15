@@ -21,7 +21,7 @@ import terminus.ui.Component
 import terminus.ui.Rect
 import terminus.ui.RenderContext
 import terminus.ui.Size
-import terminus.ui.style.Border
+import terminus.ui.style.ComponentStyle
 import terminus.ui.style.Style
 import terminus.ui.tool.Box
 
@@ -29,17 +29,22 @@ object Text:
   def component(
       width: Int,
       height: Int,
-      content: String,
-      style: Style = Style.default
+      text: String,
+      box: ComponentStyle = ComponentStyle.default,
+      content: Style = Style.default
   ): Component =
     new Component:
       val size: Size = Size(width, height)
 
       def render(bounds: Rect, buf: Buffer): Unit =
-        Box.render(bounds, Border.single, style, buf)
-        buf.putString(bounds.x + 1, bounds.y + 1, content, style)
+        Box.render(bounds, box, buf)
+        val inner = Box.innerRect(bounds, box)
+        buf.putString(inner.x, inner.y, text, content)
 
-  def apply(width: Int, height: Int, style: Style = Style.default)(
-      content: String
-  )(using ctx: RenderContext): Unit =
-    ctx.add(component(width, height, content, style))
+  def apply(
+      width: Int,
+      height: Int,
+      box: ComponentStyle = ComponentStyle.default,
+      content: Style = Style.default
+  )(text: String)(using ctx: RenderContext): Unit =
+    ctx.add(component(width, height, text, box, content))
