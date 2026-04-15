@@ -110,14 +110,18 @@
 <h2 id="implementing-effects" class="section">Implementing Effects</h2>
 <p>We want to support differences across terminals, but where common functionality exists we want to provide it through a common interface. The solution is to describe individual pieces of functionality as separate interfaces. For example, we have a <a class="api" href="https://javadoc.io/doc/org.creativescala/terminus-docs_3/latest/terminus/effect/Writer.html">Writer</a> interface that allows us to write characters to the Terminal, <a class="api" href="https://javadoc.io/doc/org.creativescala/terminus-docs_3/latest/terminus/effect/Color.html">Color</a> for changing foreground and background colors, and so on. These interfaces, and their implementations, are called <em>effects</em> because they actually do things to the terminal.</p>
 <p>A backend specific <code>Terminal</code> type is the union of the interfaces, or effects, that describe the functionality it supports. For example, here is the JVM <code>Terminal</code> type at the time of writing:</p>
-<pre><code class="nohighlight"><span class="keyword">trait</span><span> </span><span class="type-name">Terminal</span><span>
-    </span><span class="keyword">extends</span><span> </span><span class="identifier">effect</span><span>.</span><span class="type-name">Color</span><span>[</span><span class="type-name">Terminal</span><span>],
+<pre><code class="nohighlight"><span class="keyword">type</span><span> </span><span class="type-name">Terminal</span><span> =
+    </span><span class="identifier">effect</span><span>.</span><span class="type-name">AlternateScreenMode</span><span>,
+      </span><span class="identifier">effect</span><span>.</span><span class="type-name">ApplicationMode</span><span>,
+      </span><span class="identifier">effect</span><span>.</span><span class="type-name">Color</span><span>,
       </span><span class="identifier">effect</span><span>.</span><span class="type-name">Cursor</span><span>,
-      </span><span class="identifier">effect</span><span>.</span><span class="type-name">Format</span><span>[</span><span class="type-name">Terminal</span><span>],
+      </span><span class="identifier">effect</span><span>.</span><span class="type-name">Format</span><span>,
+      </span><span class="identifier">effect</span><span>.</span><span class="type-name">Dimensions</span><span>,
       </span><span class="identifier">effect</span><span>.</span><span class="type-name">Erase</span><span>,
-      </span><span class="identifier">effect</span><span>.</span><span class="type-name">AlternateScreenMode</span><span>[</span><span class="type-name">Terminal</span><span>],
-      </span><span class="identifier">effect</span><span>.</span><span class="type-name">ApplicationMode</span><span>[</span><span class="type-name">Terminal</span><span>],
-      </span><span class="identifier">effect</span><span>.</span><span class="type-name">RawMode</span><span>[</span><span class="type-name">Terminal</span><span>],
+      </span><span class="identifier">effect</span><span>.</span><span class="type-name">KeyReader</span><span>,
+      </span><span class="identifier">effect</span><span>.</span><span class="type-name">NonBlockingReader</span><span>,
+      </span><span class="identifier">effect</span><span>.</span><span class="type-name">Peeker</span><span>,
+      </span><span class="identifier">effect</span><span>.</span><span class="type-name">RawMode</span><span>,
       </span><span class="identifier">effect</span><span>.</span><span class="type-name">Reader</span><span>,
       </span><span class="identifier">effect</span><span>.</span><span class="type-name">Writer</span></code></pre>
 <p>As the above suggests, the interfaces defining the functionality live in the package <code>terminus.effect</code>.</p>
@@ -161,29 +165,34 @@
   <li><code>Erase</code> extends <code>Writer</code>, and uses the <code>write</code> method from <code>Writer</code>.</li>
   <li>The methods are name-spaced by putting them inside an object named <code>erase</code>. This is aesthetic choice, leading to method calls like <code>erase.up()</code> and <code>cursor.up()</code> instead of <code>eraseUp()</code> and <code>cursorUp()</code>.</li>
 </ol>
-<p>There is one final kind of effect that is more involved, which is an effect that only applies to some scope. <a class="api" href="https://javadoc.io/doc/org.creativescala/terminus-docs_3/latest/terminus/effect/Format.html">Format</a> is an example, as is <a class="api" href="https://javadoc.io/doc/org.creativescala/terminus-docs_3/latest/terminues/effect/Color.html">Color</a>. These all change the way output is formatted, but only for the <code>Program</code> they take as a parameter. Here&#39;s part of the implementation of <code>Format</code>, which is a bit simpler than <code>Color</code>.</p>
-<pre><code class="nohighlight"><span class="keyword">trait</span><span> </span><span class="type-name">Format</span><span>[+</span><span class="type-name">F</span><span> &lt;: </span><span class="type-name">Writer</span><span>] </span><span class="keyword">extends</span><span> </span><span class="type-name">WithStack</span><span>[</span><span class="type-name">F</span><span>], </span><span class="type-name">WithToggle</span><span>[</span><span class="type-name">F</span><span>] { </span><span class="identifier">self</span><span>: </span><span class="type-name">F</span><span> =&gt;
+<p>There is one final kind of effect that is more involved, which is an effect that only applies to some scope. <a class="api" href="https://javadoc.io/doc/org.creativescala/terminus-docs_3/latest/terminus/effect/Format.html">Format</a> is an example, as is <a class="api" href="https://javadoc.io/doc/org.creativescala/terminus-docs_3/latest/terminus/effect/Color.html">Color</a>. These all change the way output is formatted, but only for the <code>Program</code> they take as a parameter. For example, when we create a program like </p>
+<pre><code class="nohighlight"><span class="type-name">Terminal</span><span>.</span><span class="identifier">invert</span><span>(</span><span class="type-name">Terminal</span><span>.</span><span class="identifier">write</span><span>(</span><span class="string-literal">&quot;Inverted&quot;</span><span>))</span></code></pre>
+<p>we want only the <code>Program</code> inside the call to <code>Terminal.invert</code> (that <code>Program</code> is <code>Terminal.write(&quot;Inverted&quot;)</code>) to be formatted with inverted text. </p>
+<p>Here&#39;s part of the implementation of <code>Format</code>, which is a bit simpler than <code>Color</code>.</p>
+<pre><code class="nohighlight"><span class="keyword">trait</span><span> </span><span class="type-name">Format</span><span> </span><span class="keyword">extends</span><span> </span><span class="type-name">WithStack</span><span>, </span><span class="type-name">WithToggle</span><span> { </span><span class="identifier">self</span><span>: </span><span class="type-name">Writer</span><span> =&gt;
   </span><span class="keyword">object</span><span> </span><span class="identifier">format</span><span> {
     </span><span class="comment">// ...
 </span><span>
     </span><span class="keyword">private</span><span> </span><span class="keyword">val</span><span> </span><span class="identifier">invertToggle</span><span> =
       </span><span class="type-name">Toggle</span><span>(</span><span class="type-name">AnsiCodes</span><span>.</span><span class="identifier">format</span><span>.</span><span class="identifier">invert</span><span>.</span><span class="identifier">on</span><span>, </span><span class="type-name">AnsiCodes</span><span>.</span><span class="identifier">format</span><span>.</span><span class="identifier">invert</span><span>.</span><span class="identifier">off</span><span>)
 
-    </span><span class="keyword">def</span><span> </span><span class="declaration-name">invert</span><span>[</span><span class="type-name">A</span><span>](</span><span class="identifier">f</span><span>: </span><span class="type-name">F</span><span> ?=&gt; </span><span class="type-name">A</span><span>): </span><span class="type-name">A</span><span> =
+    </span><span class="keyword">def</span><span> </span><span class="declaration-name">invert</span><span>[</span><span class="type-name">A</span><span>](</span><span class="identifier">f</span><span>: () =&gt; </span><span class="type-name">A</span><span>): </span><span class="type-name">A</span><span> =
       </span><span class="identifier">withToggle</span><span>(</span><span class="identifier">invertToggle</span><span>)(</span><span class="identifier">f</span><span>)
     
     </span><span class="comment">// ...
 </span><span>  }
 }</span></code></pre>
-<p>When we create a program like </p>
-<pre><code class="nohighlight"><span class="type-name">Terminal</span><span>.</span><span class="identifier">invert</span><span>(</span><span class="type-name">Terminal</span><span>.</span><span class="identifier">write</span><span>(</span><span class="string-literal">&quot;Inverted&quot;</span><span>))</span></code></pre>
-<p>we want only the <code>Program</code> inside the call to <code>Terminal.invert</code> (that <code>Program</code> is <code>Terminal.write(&quot;Inverted&quot;)</code>) to be formatted with inverted text. Inversion is relatively simply, as it is either on or off. This is what the call to <code>withToggle</code> does: it sends the code to turn on inverted text when we enter the block and turns it off when we exit. It also handles nested calls correctly. For more complicated cases, like color, there is also a stack abstraction which reverts to the previous setting when a block exits.</p>
-<p>The types deserve some explanation. We call <code>invert</code> with some <code>Program</code> type. Remember that <code>Program</code> is <code>Terminal ?=&gt; A</code> and <code>Terminal</code> is backend specific. In the <code>Format</code> effect we need to actually carry out the effects within the <code>Program</code>, so we need to pass an instance of <code>Terminal</code> to the <code>Program</code>. Where do we get this instance from? It is <code>this</code>. </p>
-<p>How do we make sure that <code>Terminal</code> is actually of the same type as <code>this</code>? Firstly, in <code>invert</code> the type of a program is <code>F ?=&gt; A</code>, where <code>F</code> is a type parameter of <code>Format</code>. The meaning of <code>F</code> is all the effect types that make up a particular <code>Terminal</code> type. If you look at the definition of the JVM terminal above you will see</p>
-<pre><code class="nohighlight"><span>      </span><span class="identifier">effect</span><span>.</span><span class="type-name">Format</span><span>[</span><span class="type-name">Terminal</span><span>],</span></code></pre>
-<p>so <code>F</code> <em>is</em> <code>Terminal</code>. The <a href="https://docs.scala-lang.org/tour/self-types.html">self type</a> ensures that instances of <code>Format</code> are mixed into the correct type, and hence <code>this</code> is <code>F</code>.</p>
+<p>The types look a bit odd. The <code>invert</code> method doesn&#39;t receive a <code>Program</code>, with type <code>F ?=&gt; A</code>, but a thunk with type <code>() =&gt; A</code>. The reason for this is that it&#39;s a bit tricky to write down the type of <code>F</code> at this point. It&#39;s whatever terminal effects the program <code>f</code> needs, which must also be the same as the type that the particular instance of <code>Format</code> is mixed into. We can define this, using a type parameter on <code>Format</code>, like so:</p>
+<pre><code class="nohighlight"><span class="keyword">trait</span><span> </span><span class="type-name">Format</span><span>[</span><span class="type-name">F</span><span> &lt;: </span><span class="type-name">Writer</span><span>] </span><span class="keyword">extends</span><span> </span><span class="type-name">WithStack</span><span>[</span><span class="type-name">F</span><span>], </span><span class="type-name">WithToggle</span><span>[</span><span class="type-name">F</span><span>] { </span><span class="identifier">self</span><span>: </span><span class="type-name">F</span><span> =&gt;
+  </span><span class="keyword">def</span><span> </span><span class="declaration-name">invert</span><span>[</span><span class="type-name">A</span><span>](</span><span class="identifier">f</span><span>: </span><span class="type-name">F</span><span> ?=&gt; </span><span class="type-name">A</span><span>): </span><span class="type-name">A</span><span> =
+    </span><span class="identifier">withToggle</span><span>(</span><span class="identifier">invertToggle</span><span>)(</span><span class="identifier">f</span><span>(</span><span class="identifier">self</span><span>))
+}</span></code></pre>
+<p>A previous version of Terminus did this. However this ends up causing problems in other parts of the code. The issue is that <code>F</code> ends up a recursive type, which we define like</p>
+<pre><code class="nohighlight"><span class="type-name">Terminal</span><span> </span><span class="keyword">extends</span><span> </span><span class="type-name">Format</span><span>[</span><span class="type-name">Terminal</span><span>]</span></code></pre>
+<p>We can only define recursive types in concrete types like a <code>trait</code> as done above. This in turn means that we cannot write down the types of programs that work across multiple backends, unless we can arrange in advance for all backends to implement some common type. This goes against the idea of different backends implementing only the features they support.</p>
+<p>Our solution is to push the <code>F</code> type, and the application to the <code>Program</code>, into what we call program syntax. What <code>invert</code> receives is a thunk that wraps up the application of <code>Program</code> to <code>F</code>. Let&#39;s look at this &quot;syntax&quot; now.</p>
 
-<h2 id="implementing-programs" class="section">Implementing Programs</h2>
+<h2 id="program-syntax" class="section">Program Syntax</h2>
 <p>Now let&#39;s look at how the <code>Program</code> types are implemented. We&#39;ll start with <a class="api" href="https://javadoc.io/doc/org.creativescala/terminus-docs_3/latest/terminus/Writer.html">Writer</a>, as it is very simple.</p>
 <pre><code class="nohighlight"><span class="comment">/** Interface for writing to a console. */</span><span>
 </span><span class="keyword">trait</span><span> </span><span class="type-name">Writer</span><span> {
@@ -201,21 +210,25 @@
     </span><span class="identifier">effect</span><span> ?=&gt; </span><span class="identifier">effect</span><span>.</span><span class="identifier">flush</span><span>()
 }</span></code></pre>
 <p>Firstly, notice this is the <code>Writer</code> <em>program</em> <strong>not</strong> the <code>Writer</code> effect. They are separate concepts. A <code>Program</code> is just <code>Terminal ?=&gt; A</code>. In the specific case of <code>Writer</code> these programs simply require a <code>Writer</code> effect and then call the appropriate method on that effect.</p>
+<p>These definitions are very simple, and the user could write them themselves. However, it makes life easier if we provide these definitions for them. This is why we call this &quot;program syntax&quot;; we&#39;re providing some syntax to make writing programs easier.</p>
 <p><code>Format</code> is a bit more complex. Here&#39;s the definition, with most of the methods removed.</p>
 <pre><code class="nohighlight"><span class="keyword">trait</span><span> </span><span class="type-name">Format</span><span> {
   </span><span class="keyword">object</span><span> </span><span class="identifier">format</span><span> {
   
     </span><span class="comment">// ...
 </span><span>
-    </span><span class="keyword">def</span><span> </span><span class="declaration-name">invert</span><span>[</span><span class="type-name">F</span><span> &lt;: </span><span class="identifier">effect</span><span>.</span><span class="type-name">Writer</span><span>, </span><span class="type-name">A</span><span>](
+    </span><span class="keyword">def</span><span> </span><span class="declaration-name">invert</span><span>[</span><span class="type-name">F</span><span>, </span><span class="type-name">A</span><span>](
         </span><span class="identifier">f</span><span>: </span><span class="type-name">F</span><span> ?=&gt; </span><span class="type-name">A</span><span>
     ): (</span><span class="type-name">F</span><span> &amp; </span><span class="identifier">effect</span><span>.</span><span class="type-name">Format</span><span>[</span><span class="type-name">F</span><span>]) ?=&gt; </span><span class="type-name">A</span><span> =
-      </span><span class="identifier">effect</span><span> ?=&gt; </span><span class="identifier">effect</span><span>.</span><span class="identifier">format</span><span>.</span><span class="identifier">invert</span><span>(</span><span class="identifier">f</span><span>)
+      </span><span class="identifier">effect</span><span> ?=&gt; </span><span class="identifier">effect</span><span>.</span><span class="identifier">format</span><span>.</span><span class="identifier">invert</span><span>(() =&gt; </span><span class="identifier">f</span><span>(</span><span class="identifier">using</span><span> </span><span class="identifier">effect</span><span>))
 
     </span><span class="comment">// ...
 </span><span>  }
 }</span></code></pre>
-<p><code>invert</code> wraps a <code>Program</code> with another <code>Program</code>. What is the type of the inner program, the method argument <code>f</code>? It is whatever effects it requires to run, with the constraint that these effects much include the <code>Writer</code> effect. This is represented by the type parameter <code>F</code>. The result of calling <code>invert</code> is another program that requires all the effects of the argument <code>f</code> <em>and</em> the <code>Format</code> effect. In this way programs are constructed to require only the effects they need to run. So long as we apply them to a concrete <code>Terminal</code> type that is a super-type of these effects they can be run.</p>
+<p><code>invert</code> wraps a <code>Program</code> with another <code>Program</code>. What is the type of the inner program, the method argument <code>f</code>? It is whatever effects it requires to run, represented by the type parameter <code>F</code>. The result of calling <code>invert</code> is another program that requires all the effects of the argument <code>f</code> <em>and</em> the <code>Format</code> effect. In this way programs are constructed to require only the effects they need to run. So long as we apply them to a concrete <code>Terminal</code> type that is a super-type of these effects they can be run. At the point of use all these types are known and type inference is easy.</p>
+<p>Now the bit that ties into the definition of the <code>Format</code> effect above. Notice in the body of <code>invert</code> we construct the thunk</p>
+<pre><code class="nohighlight"><span>() =&gt; </span><span class="identifier">f</span><span>(</span><span class="identifier">using</span><span> </span><span class="identifier">effect</span><span>)</span></code></pre>
+<p>This applies <code>f</code> to the instance of the effect type <code>F</code>, but by wrapping it in a thunk it is delayed until the <code>invert</code> effect chooses to run it—which is after the inversion escape code has been sent to the terminal. This gives the effect full control over order-of-evaluation, but still keeps type inference simple. Hence the effect types and the program syntax work together to implement a system that is correct, usable, and has simple types.</p>
 
 <h2 id="low-level-code" class="section">Low-level Code</h2>
 <p>All the ANSI escape codes used by Terminus are defined in <code>terminus.effect.AnsiCodes</code>.
@@ -243,7 +256,7 @@ Here&#39;s a simple example.</p>
           <ul class="nav-list">
             <li class="level1 nav-leaf"><a href="#programs-and-effects">Programs and Effects</a></li>
             <li class="level1 nav-leaf"><a href="#implementing-effects">Implementing Effects</a></li>
-            <li class="level1 nav-leaf"><a href="#implementing-programs">Implementing Programs</a></li>
+            <li class="level1 nav-leaf"><a href="#program-syntax">Program Syntax</a></li>
             <li class="level1 nav-leaf"><a href="#low-level-code">Low-level Code</a></li>
           </ul>
         </div>
