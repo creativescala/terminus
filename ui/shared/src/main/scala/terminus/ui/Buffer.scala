@@ -52,7 +52,7 @@ final class Buffer(val width: Int, val height: Int):
         x += 1
       y += 1
 
-  /** Write a string horizontally starting at (x, y).
+  /** Write a string starting at (x, y), wrapping on newline characters.
     *
     * Iterates over Unicode code points (not raw Java chars) so that characters
     * outside the Basic Multilingual Plane — including most emoji — are handled
@@ -60,23 +60,30 @@ final class Buffer(val width: Int, val height: Int):
     * left cell holds the character and the right cell holds
     * [[Cell.continuation]] as a sentinel. Zero-width code points (combining
     * marks, variation selectors, ZWJ) are skipped; full grapheme cluster
-    * composition is not currently supported. Clips to buffer bounds.
+    * composition is not currently supported. Newline characters (`\n`) advance
+    * to the next row and reset the column back to [[x]]. Clips to buffer
+    * bounds.
     */
   def putString(x: Int, y: Int, s: String, style: Style): Unit =
     var col = x
+    var row = y
     var i = 0
     while i < s.length do
       val cp = Character.codePointAt(s, i)
       i += Character.charCount(cp)
-      CharWidth.of(cp) match
-        case 0 => () // zero-width: skip
-        case 1 =>
-          put(col, y, Cell(cp, style))
-          col += 1
-        case _ => // 2
-          put(col, y, Cell(cp, style))
-          put(col + 1, y, Cell.continuation)
-          col += 2
+      if cp == '\n'.toInt then
+        col = x
+        row += 1
+      else
+        CharWidth.of(cp) match
+          case 0 => () // zero-width: skip
+          case 1 =>
+            put(col, row, Cell(cp, style))
+            col += 1
+          case _ => // 2
+            put(col, row, Cell(cp, style))
+            put(col + 1, row, Cell.continuation)
+            col += 2
 
   /** Flush the entire buffer to the terminal.
     *
