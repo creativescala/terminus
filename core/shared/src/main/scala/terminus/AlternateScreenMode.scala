@@ -16,7 +16,7 @@
 
 package terminus
 
-trait AlternateScreenMode {
+trait AlternateScreenMode:
 
   /** Run the given terminal program `f` in alternate screen mode, which means
     * that whatever is displayed by `f` will not been shown when the program
@@ -26,4 +26,3 @@ trait AlternateScreenMode {
       f: F ?=> A
   ): (F & effect.AlternateScreenMode) ?=> A =
     effect ?=> effect.alternateScreen(() => f(using effect))
-}

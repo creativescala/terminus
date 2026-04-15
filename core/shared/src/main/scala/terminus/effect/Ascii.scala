@@ -19,7 +19,7 @@ package terminus.effect
 /** Ascii character codes and Ascii related extension methods. See:
   * https://www.ascii-code.com/
   */
-object Ascii {
+object Ascii:
 
   /** Null character */
   val NUL: Char = '\u0000'
@@ -138,4 +138,3 @@ object Ascii {
       * }}}
       */
     def isPrintableChar: Boolean = char >= 0x20 && char != DEL
-}

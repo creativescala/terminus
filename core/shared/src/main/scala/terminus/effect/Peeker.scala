@@ -21,6 +21,5 @@ import terminus.Timeout
 
 import scala.concurrent.duration.Duration
 
-trait Peeker extends Effect {
+trait Peeker extends Effect:
   def peek(duration: Duration): Timeout | Eof | Char
-}

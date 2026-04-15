@@ -24,18 +24,17 @@ import scala.annotation.tailrec
 class Prompt[
     Terminal <: effect.Color & effect.Cursor & effect.Format & effect.Erase &
       effect.KeyReader & effect.Writer
-](terminal: Color & Cursor & Format & Erase & KeyReader & Writer) {
+](terminal: Color & Cursor & Format & Erase & KeyReader & Writer):
 
   type Program[A] = Terminal ?=> A
 
   type PromptKey = KeyCode.Enter.type | KeyCode.Up.type | KeyCode.Down.type
 
   // Clear the text we've written
-  def clear(): Program[Unit] = {
+  def clear(): Program[Unit] =
     terminal.cursor.move(1, -4)
     terminal.erase.down()
     terminal.cursor.column(1)
-  }
 
   // Write an option the user can choose. The currently selected option is highlighted.
   def writeChoice(description: String, selected: Boolean): Program[Unit] =
@@ -44,33 +43,29 @@ class Prompt[
     else terminal.write(s"  ${description}\r\n")
 
   // Write the UI
-  def write(selected: Int): Program[Unit] = {
+  def write(selected: Int): Program[Unit] =
     terminal.write("How cool is this?\r\n")
     writeChoice("Very cool", selected == 0)
     writeChoice("Way cool", selected == 1)
     writeChoice("So cool", selected == 2)
     terminal.flush()
-  }
 
   @tailrec
-  final def read(): Program[PromptKey] = {
-    terminal.readKey() match {
+  final def read(): Program[PromptKey] =
+    terminal.readKey() match
       case Eof =>
         throw new Exception("Received an EOF")
       case key: Key =>
-        key match {
+        key match
           case Key(_, KeyCode.Enter)           => KeyCode.Enter
           case Key(_, KeyCode.Character('\n')) => KeyCode.Enter
           case Key(_, KeyCode.Up)              => KeyCode.Up
           case Key(_, KeyCode.Down)            => KeyCode.Down
           case other                           => read()
-        }
-    }
-  }
 
-  def loop(idx: Int): Program[Int] = {
+  def loop(idx: Int): Program[Int] =
     write(idx)
-    read() match {
+    read() match
       case KeyCode.Up =>
         clear()
         loop(if idx == 0 then 2 else idx - 1)
@@ -80,6 +75,3 @@ class Prompt[
         loop(if idx == 2 then 0 else idx + 1)
 
       case KeyCode.Enter => idx
-    }
-  }
-}

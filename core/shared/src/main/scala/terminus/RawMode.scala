@@ -16,7 +16,7 @@
 
 package terminus
 
-trait RawMode {
+trait RawMode:
 
   /** Run the given terminal program `f` in raw mode, which means that the
     * program can read user input a character at a time. In canonical mode,
@@ -24,4 +24,3 @@ trait RawMode {
     */
   def raw[F <: effect.Effect, A](f: F ?=> A): (F & effect.RawMode) ?=> A =
     effect ?=> effect.raw(() => f(using effect))
-}

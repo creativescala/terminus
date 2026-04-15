@@ -16,8 +16,8 @@
 
 package terminus
 
-trait Format {
-  object format {
+trait Format:
+  object format:
     def bold[F, A](f: F ?=> A): (F & effect.Format) ?=> A =
       effect ?=> effect.format.bold(() => f(using effect))
 
@@ -31,7 +31,7 @@ trait Format {
     ): (F & effect.Format) ?=> A =
       effect ?=> effect.format.normal(() => f(using effect))
 
-    object underline {
+    object underline:
       def none[F, A](
           f: F ?=> A
       ): (F & effect.Format) ?=> A =
@@ -106,7 +106,6 @@ trait Format {
           f: F ?=> A
       ): (F & effect.Format) ?=> A =
         effect ?=> effect.format.underline.white(() => f(using effect))
-    }
 
     def blink[F, A](
         f: F ?=> A
@@ -127,5 +126,3 @@ trait Format {
         f: F ?=> A
     ): (F & effect.Format) ?=> A =
       effect ?=> effect.format.strikethrough(() => f(using effect))
-  }
-}

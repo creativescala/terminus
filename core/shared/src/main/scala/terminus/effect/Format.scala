@@ -17,8 +17,9 @@
 package terminus.effect
 
 /** Terminal effects that can change character formatting properties. */
-trait Format extends WithStack, WithToggle { self: Writer =>
-  object format {
+trait Format extends WithStack, WithToggle:
+  self: Writer =>
+  object format:
     // Bold and light share this stack
     private val fontWeightStack =
       Stack(AnsiCodes.format.bold.off)
@@ -33,7 +34,7 @@ trait Format extends WithStack, WithToggle { self: Writer =>
     def normal[A](f: () => A): A =
       withStack(fontWeightStack, AnsiCodes.format.bold.off)(f)
 
-    object underline {
+    object underline:
       private val underlineStyleStack = Stack(AnsiCodes.format.underline.off)
 
       def none[A](f: () => A): A =
@@ -84,7 +85,6 @@ trait Format extends WithStack, WithToggle { self: Writer =>
 
       def white[A](f: () => A): A =
         withStack(underlineColorStack, AnsiCodes.format.underline.white)(f)
-    }
 
     private val blinkToggle =
       Toggle(AnsiCodes.format.blink.on, AnsiCodes.format.blink.off)
@@ -111,5 +111,3 @@ trait Format extends WithStack, WithToggle { self: Writer =>
 
     def strikethrough[A](f: () => A): A =
       withToggle(strikethroughToggle)(f)
-  }
-}

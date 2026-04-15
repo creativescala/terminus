@@ -19,6 +19,5 @@ package terminus.effect
 import terminus.Eof
 import terminus.Key
 
-trait KeyReader extends Effect {
+trait KeyReader extends Effect:
   def readKey(): Eof | Key
-}

@@ -16,8 +16,8 @@
 
 package terminus
 
-trait Cursor {
-  object cursor {
+trait Cursor:
+  object cursor:
 
     /** Move cursor to given column. The left-most column is 1, and coordinates
       * increase to the right.
@@ -56,5 +56,3 @@ trait Cursor {
       */
     def left(columns: Int = 1): effect.Cursor ?=> Unit =
       effect ?=> effect.cursor.left(columns)
-  }
-}

@@ -27,17 +27,15 @@ class StringBufferReader(input: String)
     extends Reader,
       NonBlockingReader,
       KeyReader,
-      TerminalKeyReader {
+      TerminalKeyReader:
   private var index: Int = 0
 
   def read(): Eof | Char =
     if index >= input.size then Eof
-    else {
+    else
       val char = input(index)
       index = index + 1
       char
-    }
 
   def read(duration: Duration): Timeout | Eof | Char =
     read()
-}

@@ -24,7 +24,7 @@ final case class Border(
     bottomLeft: Char,
     bottomRight: Char
 )
-object Border {
+object Border:
   val single = Border(
     topLeft = '┌',
     topRight = '┐',
@@ -51,4 +51,3 @@ object Border {
     bottomLeft = '+',
     bottomRight = '+'
   )
-}

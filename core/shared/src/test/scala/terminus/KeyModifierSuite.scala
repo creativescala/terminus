@@ -18,7 +18,7 @@ package terminus
 
 import munit.FunSuite
 
-class KeyModifierSuite extends FunSuite {
+class KeyModifierSuite extends FunSuite:
   test("predicates return true when modifier is present") {
     assert(KeyModifier.Shift.hasShift)
     assert(KeyModifier.Control.hasControl)
@@ -32,4 +32,3 @@ class KeyModifierSuite extends FunSuite {
     assert(KeyModifier.Shift.or(KeyModifier.Control).hasShift)
     assert(KeyModifier.Shift.or(KeyModifier.Control).hasControl)
   }
-}

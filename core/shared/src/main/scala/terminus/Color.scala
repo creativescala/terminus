@@ -16,8 +16,8 @@
 
 package terminus
 
-trait Color {
-  object foreground {
+trait Color:
+  object foreground:
     def default[F, A](
         f: F ?=> A
     ): (F & effect.Color) ?=> A =
@@ -102,9 +102,8 @@ trait Color {
         f: F ?=> A
     ): (F & effect.Color) ?=> A =
       effect ?=> effect.foreground.brightWhite(() => f(using effect))
-  }
 
-  object background {
+  object background:
     def default[F, A](
         f: F ?=> A
     ): (F & effect.Color) ?=> A =
@@ -189,5 +188,3 @@ trait Color {
         f: F ?=> A
     ): (F & effect.Color) ?=> A =
       effect ?=> effect.background.brightWhite(() => f(using effect))
-  }
-}

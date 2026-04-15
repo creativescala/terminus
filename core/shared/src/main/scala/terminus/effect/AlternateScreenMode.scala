@@ -16,11 +16,10 @@
 
 package terminus.effect
 
-trait AlternateScreenMode {
+trait AlternateScreenMode:
 
   /** Run the given terminal program `f` in alternate screen mode, which means
     * that whatever is displayed by `f` will not been shown when the program
     * exits, and similarly key presses will not be saved in the history buffer.
     */
   def alternateScreen[A](f: () => A): A
-}
