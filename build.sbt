@@ -33,8 +33,6 @@ ThisBuild / developers := List(
   tlGitHubDev("noelwelsh", "Noel Welsh")
 )
 
-ThisBuild / sonatypeCredentialHost := xerial.sbt.Sonatype.sonatypeLegacy
-
 lazy val scala3 = "3.3.4"
 
 ThisBuild / crossScalaVersions := List(scala3)
