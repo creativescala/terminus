@@ -14,24 +14,24 @@
  * limitations under the License.
  */
 
-package terminus
+package terminus.ui.style
 
-/** Interface for writing to a console. */
-trait Writer {
-
-  /** Write a character to the console. */
-  def write(char: Char): effect.Writer ?=> Unit =
-    effect ?=> effect.write(char)
-
-  /** Write a string to the console. */
-  def write(string: String): effect.Writer ?=> Unit =
-    effect ?=> effect.write(string)
-
-    /** Write a newline. */
-  val newline: effect.Writer ?=> Unit =
-    write('\n')
-
-  /** Flush the current output, causing it to be shown on the console. */
-  def flush(): effect.Writer ?=> Unit =
-    effect ?=> effect.flush()
-}
+/** An ANSI terminal color, usable as a foreground or background cell color. */
+enum Color:
+  case Default
+  case Black
+  case Red
+  case Green
+  case Yellow
+  case Blue
+  case Magenta
+  case Cyan
+  case White
+  case BrightBlack
+  case BrightRed
+  case BrightGreen
+  case BrightYellow
+  case BrightBlue
+  case BrightMagenta
+  case BrightCyan
+  case BrightWhite

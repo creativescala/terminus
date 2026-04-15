@@ -14,24 +14,14 @@
  * limitations under the License.
  */
 
-package terminus
+package terminus.ui
 
-/** Interface for writing to a console. */
-trait Writer {
+trait RenderContext:
+  def size: Size
+  def add(component: Component): Unit
 
-  /** Write a character to the console. */
-  def write(char: Char): effect.Writer ?=> Unit =
-    effect ?=> effect.write(char)
+trait RootContext extends RenderContext:
+  def render(using Terminal): Unit
 
-  /** Write a string to the console. */
-  def write(string: String): effect.Writer ?=> Unit =
-    effect ?=> effect.write(string)
-
-    /** Write a newline. */
-  val newline: effect.Writer ?=> Unit =
-    write('\n')
-
-  /** Flush the current output, causing it to be shown on the console. */
-  def flush(): effect.Writer ?=> Unit =
-    effect ?=> effect.flush()
-}
+trait ChildContext extends RenderContext:
+  def render(bounds: Rect, buf: Buffer): Unit

@@ -14,24 +14,11 @@
  * limitations under the License.
  */
 
-package terminus
+package terminus.ui
 
-/** Interface for writing to a console. */
-trait Writer {
-
-  /** Write a character to the console. */
-  def write(char: Char): effect.Writer ?=> Unit =
-    effect ?=> effect.write(char)
-
-  /** Write a string to the console. */
-  def write(string: String): effect.Writer ?=> Unit =
-    effect ?=> effect.write(string)
-
-    /** Write a newline. */
-  val newline: effect.Writer ?=> Unit =
-    write('\n')
-
-  /** Flush the current output, causing it to be shown on the console. */
-  def flush(): effect.Writer ?=> Unit =
-    effect ?=> effect.flush()
-}
+/** A component is something that can be rendered to the terminal and
+  * participates in layout.
+  */
+trait Component:
+  def size: Size
+  def render(bounds: Rect, buf: Buffer): Unit

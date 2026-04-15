@@ -72,7 +72,7 @@ lazy val commonSettings = Seq(
   )
 )
 
-lazy val root = tlCrossRootProject.aggregate(core, unidocs)
+lazy val root = tlCrossRootProject.aggregate(core, ui, unidocs)
 
 lazy val core = crossProject(JSPlatform, JVMPlatform, NativePlatform)
   .in(file("core"))
@@ -85,6 +85,14 @@ lazy val core = crossProject(JSPlatform, JVMPlatform, NativePlatform)
   )
   .jvmSettings(libraryDependencies += Dependencies.jline.value)
   .jsSettings(libraryDependencies += Dependencies.scalajsDom.value)
+
+lazy val ui = crossProject(JSPlatform, JVMPlatform, NativePlatform)
+  .in(file("ui"))
+  .settings(
+    name := "terminus-ui",
+    commonSettings
+  )
+  .dependsOn(core)
 
 lazy val docs =
   project
