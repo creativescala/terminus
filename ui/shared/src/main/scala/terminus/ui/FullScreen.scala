@@ -29,20 +29,20 @@ class FullScreen() extends RootContext:
   private val children: mutable.ArrayBuffer[Component] =
     mutable.ArrayBuffer.empty
 
-  private var childrenSize: Size = Size.zero
-
-  def size: Size = childrenSize
+  def size: Size =
+    children.foldLeft(Size.zero)((acc, c) => acc.column(c.size))
 
   def add(component: Component): Unit =
-    childrenSize = childrenSize.column(component.size)
     children += component
 
   def render(using Terminal): Unit =
-    val buf = Buffer(childrenSize.width, childrenSize.height)
+    val currentSize = size
+    val buf = Buffer(currentSize.width, currentSize.height)
     var y = 0
     children.foreach { child =>
-      child.render(Rect(0, y, child.size.width, child.size.height), buf)
-      y += child.size.height
+      val childSize = child.size
+      child.render(Rect(0, y, childSize.width, childSize.height), buf)
+      y += childSize.height
     }
     buf.render
 
