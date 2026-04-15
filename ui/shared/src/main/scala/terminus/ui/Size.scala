@@ -14,24 +14,23 @@
  * limitations under the License.
  */
 
-package terminus
+package terminus.ui
 
-/** Interface for writing to a console. */
-trait Writer {
+/** Represents the size of component in terms of temrinal cells. */
+final case class Size(width: Int, height: Int) {
 
-  /** Write a character to the console. */
-  def write(char: Char): effect.Writer ?=> Unit =
-    effect ?=> effect.write(char)
+  /** Combine two sizes into a row. That is, add together width and take the max
+    * height.
+    */
+  def row(that: Size): Size =
+    Size(this.width + that.width, this.height.max(that.height))
 
-  /** Write a string to the console. */
-  def write(string: String): effect.Writer ?=> Unit =
-    effect ?=> effect.write(string)
-
-    /** Write a newline. */
-  val newline: effect.Writer ?=> Unit =
-    write('\n')
-
-  /** Flush the current output, causing it to be shown on the console. */
-  def flush(): effect.Writer ?=> Unit =
-    effect ?=> effect.flush()
+  /** Combine two sizes into a column. That is, take the max of width and add
+    * together the height.
+    */
+  def column(that: Size): Size =
+    Size(this.width.max(that.width), this.height + that.height)
+}
+object Size {
+  val zero: Size = Size(0, 0)
 }

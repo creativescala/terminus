@@ -14,24 +14,19 @@
  * limitations under the License.
  */
 
-package terminus
+package terminus.ui
 
-/** Interface for writing to a console. */
-trait Writer {
+/** The position and size of a component within the terminal grid.
+  *
+  * Coordinates are 0-based, with (0, 0) at the top-left. x increases to the
+  * right, y increases downward. Conversion to 1-based terminal coordinates
+  * happens only at flush time inside [[Buffer.render]].
+  */
+final case class Rect(x: Int, y: Int, width: Int, height: Int):
+  def size: Size = Size(width, height)
 
-  /** Write a character to the console. */
-  def write(char: Char): effect.Writer ?=> Unit =
-    effect ?=> effect.write(char)
+  /** Exclusive right edge. */
+  def right: Int = x + width
 
-  /** Write a string to the console. */
-  def write(string: String): effect.Writer ?=> Unit =
-    effect ?=> effect.write(string)
-
-    /** Write a newline. */
-  val newline: effect.Writer ?=> Unit =
-    write('\n')
-
-  /** Flush the current output, causing it to be shown on the console. */
-  def flush(): effect.Writer ?=> Unit =
-    effect ?=> effect.flush()
-}
+  /** Exclusive bottom edge. */
+  def bottom: Int = y + height

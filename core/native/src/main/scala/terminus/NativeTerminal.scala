@@ -96,8 +96,10 @@ object NativeTerminal extends Terminal, WithEffect, TerminalKeyReader {
   }
 
   def write(char: Char): Unit = {
-    val _ = libc.stdio.fputc(char, libc.stdio.stdout)
-    ()
+    // Writing wide characters cannot be done with fputc. We either need to add
+    // support for fputwc or we use the method to write a String. Using the
+    // method to write a String is simpler for now.
+    write(char.toString)
   }
 
   def write(string: String): Unit = {

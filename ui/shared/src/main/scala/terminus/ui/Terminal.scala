@@ -14,24 +14,11 @@
  * limitations under the License.
  */
 
-package terminus
+package terminus.ui
 
-/** Interface for writing to a console. */
-trait Writer {
+import terminus.effect
 
-  /** Write a character to the console. */
-  def write(char: Char): effect.Writer ?=> Unit =
-    effect ?=> effect.write(char)
+/** The minimal terminal effects needed by a UI. */
+type Terminal = effect.Cursor & effect.Writer
 
-  /** Write a string to the console. */
-  def write(string: String): effect.Writer ?=> Unit =
-    effect ?=> effect.write(string)
-
-    /** Write a newline. */
-  val newline: effect.Writer ?=> Unit =
-    write('\n')
-
-  /** Flush the current output, causing it to be shown on the console. */
-  def flush(): effect.Writer ?=> Unit =
-    effect ?=> effect.flush()
-}
+object Terminal extends terminus.Cursor, terminus.Writer
