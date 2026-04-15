@@ -35,24 +35,24 @@ object Box:
     val y1 = bounds.y + bounds.height - 1 // inclusive bottom edge
 
     // Top row
-    buf.put(x0, y0, Cell(border.topLeft, style))
+    buf.put(x0, y0, Cell(border.topLeft.toInt, style))
     var x = x0 + 1
     while x < x1 do
-      buf.put(x, y0, Cell(border.horizontal, style))
+      buf.put(x, y0, Cell(border.horizontal.toInt, style))
       x += 1
-    buf.put(x1, y0, Cell(border.topRight, style))
+    buf.put(x1, y0, Cell(border.topRight.toInt, style))
 
     // Sides
     var y = y0 + 1
     while y < y1 do
-      buf.put(x0, y, Cell(border.vertical, style))
-      buf.put(x1, y, Cell(border.vertical, style))
+      buf.put(x0, y, Cell(border.vertical.toInt, style))
+      buf.put(x1, y, Cell(border.vertical.toInt, style))
       y += 1
 
     // Bottom row
-    buf.put(x0, y1, Cell(border.bottomLeft, style))
+    buf.put(x0, y1, Cell(border.bottomLeft.toInt, style))
     x = x0 + 1
     while x < x1 do
-      buf.put(x, y1, Cell(border.horizontal, style))
+      buf.put(x, y1, Cell(border.horizontal.toInt, style))
       x += 1
-    buf.put(x1, y1, Cell(border.bottomRight, style))
+    buf.put(x1, y1, Cell(border.bottomRight.toInt, style))
