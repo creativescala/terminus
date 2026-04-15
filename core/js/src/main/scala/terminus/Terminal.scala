@@ -24,12 +24,12 @@ import scala.concurrent.Future
 import scala.concurrent.Promise
 
 class Terminal(root: HTMLElement, options: XtermJsOptions)
-    extends effect.Color[Terminal],
+    extends effect.Color,
       effect.Cursor,
-      effect.Format[Terminal],
+      effect.Format,
       effect.Erase,
       effect.Dimensions,
-      effect.Writer {
+      effect.Writer:
 
   private val keyBuffer: mutable.ArrayDeque[Promise[String]] =
     new mutable.ArrayDeque[Promise[String]](8)
@@ -42,12 +42,11 @@ class Terminal(root: HTMLElement, options: XtermJsOptions)
   }
 
   /** Block reading a Javascript keycode */
-  def readKey(): Future[String] = {
+  def readKey(): Future[String] =
     val promise = Promise[String]()
     keyBuffer.append(promise)
 
     promise.future
-  }
 
   def flush(): Unit = ()
 
@@ -62,22 +61,18 @@ class Terminal(root: HTMLElement, options: XtermJsOptions)
 
   def setDimensions(dimensions: effect.TerminalDimensions): Unit =
     terminal.resize(dimensions.columns, dimensions.rows)
-}
 type Program[A] = Terminal ?=> A
 
-object Terminal extends Color, Cursor, Format, Erase, Dimensions, Writer {
+object Terminal extends Color, Cursor, Format, Erase, Dimensions, Writer:
   def readKey(): Program[Future[String]] =
     terminal ?=> terminal.readKey()
 
-  def run[A](id: String, cols: Int = 80, rows: Int = 24)(f: Program[A]): A = {
+  def run[A](id: String, cols: Int = 80, rows: Int = 24)(f: Program[A]): A =
     val options = XtermJsOptions(cols, rows)
     run(dom.document.getElementById(id).asInstanceOf[HTMLElement], options)(f)
-  }
 
   def run[A](element: HTMLElement, options: XtermJsOptions)(
       f: Program[A]
-  ): A = {
+  ): A =
     val terminal = Terminal(element, options)
     f(using terminal)
-  }
-}

@@ -21,6 +21,5 @@ import terminus.Timeout
 
 import scala.concurrent.duration.Duration
 
-trait NonBlockingReader extends Effect {
+trait NonBlockingReader extends Effect:
   def read(duration: Duration): Timeout | Eof | Char
-}

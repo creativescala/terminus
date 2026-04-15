@@ -17,7 +17,7 @@
 package terminus
 
 opaque type KeyModifier = Byte
-object KeyModifier {
+object KeyModifier:
   val Shift: KeyModifier = 0x0001
   val Control: KeyModifier = 0x0002
   val Alt: KeyModifier = 0x0004
@@ -33,8 +33,7 @@ object KeyModifier {
   val None: KeyModifier = 0x0000
 
   val ControlShift = Control.or(Shift)
-}
-extension (modifier: KeyModifier) {
+extension (modifier: KeyModifier)
   def and(other: KeyModifier): KeyModifier =
     (modifier & other).toByte
 
@@ -58,4 +57,3 @@ extension (modifier: KeyModifier) {
 
   def hasMeta: Boolean =
     modifier.and(KeyModifier.Meta) != KeyModifier.None
-}

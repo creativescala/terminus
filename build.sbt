@@ -33,8 +33,6 @@ ThisBuild / developers := List(
   tlGitHubDev("noelwelsh", "Noel Welsh")
 )
 
-ThisBuild / sonatypeCredentialHost := xerial.sbt.Sonatype.sonatypeLegacy
-
 lazy val scala3 = "3.3.4"
 
 ThisBuild / crossScalaVersions := List(scala3)
@@ -61,10 +59,25 @@ commands += Command.command("build") { state =>
     state
 }
 
+// Dependencies
+
+val catsCore = Def.setting("org.typelevel" %%% "cats-core" % "2.13.0")
+
+val jline = Def.setting("org.jline" % "jline" % "4.0.12")
+
+val scalajsDom = Def.setting("org.scala-js" %%% "scalajs-dom" % "2.8.1")
+
+val munitVersion = "1.3.0"
+val munit = Def.setting("org.scalameta" %%% "munit" % munitVersion % "test")
+val munitScalaCheck =
+  Def.setting("org.scalameta" %%% "munit-scalacheck" % munitVersion % "test")
+
+// Projects and Settings
+
 lazy val commonSettings = Seq(
   libraryDependencies ++= Seq(
-    Dependencies.munit.value,
-    Dependencies.munitScalaCheck.value
+    munit.value,
+    munitScalaCheck.value
   ),
   startYear := Some(2024),
   licenses := List(
@@ -72,19 +85,25 @@ lazy val commonSettings = Seq(
   )
 )
 
-lazy val root = tlCrossRootProject.aggregate(core, unidocs)
+lazy val root = tlCrossRootProject.aggregate(core, ui, unidocs)
 
 lazy val core = crossProject(JSPlatform, JVMPlatform, NativePlatform)
   .in(file("core"))
   .settings(
     commonSettings,
-    libraryDependencies ++= Seq(
-      Dependencies.catsCore.value
-    ),
+    libraryDependencies ++= Seq(catsCore.value),
     name := "terminus-core"
   )
-  .jvmSettings(libraryDependencies += Dependencies.jline.value)
-  .jsSettings(libraryDependencies += Dependencies.scalajsDom.value)
+  .jvmSettings(libraryDependencies += jline.value)
+  .jsSettings(libraryDependencies += scalajsDom.value)
+
+lazy val ui = crossProject(JSPlatform, JVMPlatform, NativePlatform)
+  .in(file("ui"))
+  .settings(
+    name := "terminus-ui",
+    commonSettings
+  )
+  .dependsOn(core)
 
 lazy val docs =
   project

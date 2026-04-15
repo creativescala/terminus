@@ -16,7 +16,7 @@
 
 package terminus
 
-enum KeyCode {
+enum KeyCode:
   case BackTab
   case Backspace
   case CapsLock
@@ -47,4 +47,3 @@ enum KeyCode {
     * interpret. The entire sequence is contained here for debugging purposes.
     */
   case Unknown(code: String)
-}

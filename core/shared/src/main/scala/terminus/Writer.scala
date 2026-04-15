@@ -17,7 +17,7 @@
 package terminus
 
 /** Interface for writing to a console. */
-trait Writer {
+trait Writer:
 
   /** Write a character to the console. */
   def write(char: Char): effect.Writer ?=> Unit =
@@ -27,7 +27,10 @@ trait Writer {
   def write(string: String): effect.Writer ?=> Unit =
     effect ?=> effect.write(string)
 
+    /** Write a newline. */
+  val newline: effect.Writer ?=> Unit =
+    write('\n')
+
   /** Flush the current output, causing it to be shown on the console. */
   def flush(): effect.Writer ?=> Unit =
     effect ?=> effect.flush()
-}

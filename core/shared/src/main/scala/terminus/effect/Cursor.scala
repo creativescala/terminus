@@ -17,8 +17,8 @@
 package terminus.effect
 
 /** Functionality for manipulating the terminal's cursor. */
-trait Cursor extends Writer {
-  object cursor {
+trait Cursor extends Writer:
+  object cursor:
 
     /** Move cursor to given column. The left-most column is 1, and coordinates
       * increase to the right.
@@ -35,13 +35,12 @@ trait Cursor extends Writer {
     /** Move the cursor position relative to the current position. Coordinates
       * are given in characters / cells.
       */
-    def move(x: Int, y: Int): Unit = {
+    def move(x: Int, y: Int): Unit =
       if x < 0 then write(AnsiCodes.cursor.backward(-x))
       else write(AnsiCodes.cursor.forward(x))
 
       if y < 0 then write(AnsiCodes.cursor.up(-y))
       else write(AnsiCodes.cursor.down(y))
-    }
 
     /** Move the cursor up the given number of rows. The column of the cursor
       * remains unchanged. Defaults to 1 row.
@@ -62,5 +61,3 @@ trait Cursor extends Writer {
       */
     def left(columns: Int = 1): Unit =
       write(AnsiCodes.cursor.backward(columns))
-  }
-}

@@ -17,17 +17,15 @@
 package terminus.effect
 
 /** Utility trait for working with `Stack`. */
-trait WithStack[+F <: Writer] { self: F =>
+trait WithStack:
+  self: Writer =>
 
   /** Use `withStack` to ensure a stack is pushed on before `f` is evaluated,
     * and popped when `f` finishes.
     */
-  protected def withStack[A](stack: Stack, code: String)(f: F ?=> A): A = {
+  protected def withStack[A](stack: Stack, code: String)(f: () => A): A =
     stack.push(code, self)
-    try {
-      f(using this)
-    } finally {
+    try
+      f()
+    finally
       stack.pop(self)
-    }
-  }
-}

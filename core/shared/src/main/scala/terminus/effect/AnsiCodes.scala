@@ -24,7 +24,7 @@ package terminus.effect
   *   - https://invisible-island.net/xterm/ctlseqs/ctlseqs.html
   *   - https://ghostty.org/docs/vt
   */
-object AnsiCodes {
+object AnsiCodes:
   import Ascii.*
 
   /** The Control Sequencer Introducer code, which starts many escape codes. It
@@ -36,9 +36,8 @@ object AnsiCodes {
     * by zero or more arguments. The arguments will printed semi-colon separated
     * before the terminator.
     */
-  def csi(terminator: String, args: String*): String = {
+  def csi(terminator: String, args: String*): String =
     s"$csiCode${args.mkString(";")}$terminator"
-  }
 
   /** Create a Select Graphic Rendition code, which is a form of CSI code that
     * controls graphics effects.
@@ -47,7 +46,7 @@ object AnsiCodes {
     csi("m", n)
 
   /** Codes for manipulating the cursor */
-  object cursor {
+  object cursor:
 
     /** Restore the previously saved cursor state, or reset it to default values
       * if no state has been saved.
@@ -61,26 +60,22 @@ object AnsiCodes {
     val save: String =
       s"${ESC}7"
 
-    object style {
+    object style:
       val default = s"${ESC}0 q"
 
-      object block {
+      object block:
         val blink = s"${ESC}1 q"
         val steady = s"${ESC}2 q"
-      }
 
-      object underline {
+      object underline:
         val blink = s"${ESC}3 q"
         val steady = s"${ESC}4 q"
-      }
 
-      object bar {
+      object bar:
         val blink = s"${ESC}5 q"
         val steady = s"${ESC}6 q"
-      }
-    }
 
-    object down {
+    object down:
 
       /** Move down the given number of lines and to the beginning of the line.
         */
@@ -90,9 +85,8 @@ object AnsiCodes {
       /** Move down the given number of lines. */
       def apply(n: Int): String =
         csi("B", n.toString)
-    }
 
-    object up {
+    object up:
 
       /** Move up the given number of lines and to the beginning of the line.
         */
@@ -102,7 +96,6 @@ object AnsiCodes {
       /** Move up the given number of lines. */
       def apply(n: Int): String =
         csi("A", n.toString)
-    }
 
     /** Move the given number of characters to the right. */
     def forward(n: Int): String =
@@ -123,17 +116,17 @@ object AnsiCodes {
       */
     def to(x: Int, y: Int): String =
       csi("H", y.toString, x.toString)
-  }
 
-  object format {
-    object bold {
+  object format:
+    object bold:
       val on: String = sgr("1")
       val off: String = sgr("22")
-    }
-    object light {
+    object italic:
+      val on: String = sgr("3")
+      val off: String = sgr("23")
+    object light:
       val on: String = sgr("2")
       val off: String = sgr("22")
-    }
 
     /** The support for underlines follows the Kitty extension defined at
       * https://sw.kovidgoyal.net/kitty/underlines/
@@ -141,7 +134,7 @@ object AnsiCodes {
       * Off and straight are backwards compatible, but older terminals might not
       * support the others.
       */
-    object underline {
+    object underline:
       val off: String = sgr("24") // Backwards compatible variant
       val straight: String = sgr("4") // Backwards compatible variant
       val double: String = sgr("4:2")
@@ -159,30 +152,24 @@ object AnsiCodes {
       val magenta: String = sgr("55")
       val cyan: String = sgr("56")
       val white: String = sgr("57")
-    }
 
-    object blink {
+    object blink:
       val on: String = sgr("5")
       val off: String = sgr("25")
-    }
 
-    object invert {
+    object invert:
       val on: String = sgr("7")
       val off: String = sgr("27")
-    }
 
-    object invisible {
+    object invisible:
       val on: String = sgr("8")
       val off: String = sgr("28")
-    }
 
-    object strikethrough {
+    object strikethrough:
       val on: String = sgr("9")
       val off: String = sgr("29")
-    }
-  }
 
-  object erase {
+  object erase:
 
     /** Erase the entire screen and move the cursor to the top-left. */
     val screen: String = csi("J", "2")
@@ -195,30 +182,26 @@ object AnsiCodes {
 
     /** Erase the current line. */
     val line: String = csi("K", "2")
-  }
 
-  object mode {
+  object mode:
 
     /** Application mode, which seems to only change the codes sent by some
       * keys. See https://www.vt100.net/docs/vt510-rm/DECCKM
       */
-    object application {
+    object application:
       val on: String = csi("?1h")
       val off: String = csi("?1l")
-    }
 
     /** Alternate screen mode, which means content will not be shown when the
       * program exits and key presses will not be saved to the history buffer.
       * See https://invisible-island.net/xterm/ctlseqs/ctlseqs.html and search
       * for "alternate screen"
       */
-    object alternateScreen {
+    object alternateScreen:
       val on: String = csi("?1049h")
       val off: String = csi("?11049l")
-    }
-  }
 
-  object scroll {
+  object scroll:
 
     /** Scroll the display up the given number of rows. Defaults to 1 row. */
     def up(lines: Int = 1): String =
@@ -227,10 +210,9 @@ object AnsiCodes {
     /** Scroll the display down the given number of rows. Defaults to 1 row. */
     def down(lines: Int = 1): String =
       csi("T", lines.toString)
-  }
 
   /** Set foreground color. */
-  object foreground {
+  object foreground:
     val default: String = sgr("39")
     val black: String = sgr("30")
     val red: String = sgr("31")
@@ -248,10 +230,9 @@ object AnsiCodes {
     val brightMagenta: String = sgr("95")
     val brightCyan: String = sgr("96")
     val brightWhite: String = sgr("97")
-  }
 
   /** Set background color. */
-  object background {
+  object background:
     val default: String = sgr("49")
     val black: String = sgr("40")
     val red: String = sgr("41")
@@ -269,5 +250,3 @@ object AnsiCodes {
     val brightMagenta: String = sgr("105")
     val brightCyan: String = sgr("106")
     val brightWhite: String = sgr("107")
-  }
-}

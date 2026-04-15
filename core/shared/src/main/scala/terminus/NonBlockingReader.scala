@@ -18,8 +18,7 @@ package terminus
 
 import scala.concurrent.duration.Duration
 
-trait NonBlockingReader {
+trait NonBlockingReader:
   def read(duration: Duration): effect.NonBlockingReader ?=> Timeout | Eof |
     Char =
     effect ?=> effect.read(duration)
-}

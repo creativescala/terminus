@@ -27,7 +27,7 @@ import cats.Show
   * as constants on the companion object.
   */
 final case class Key(modifiers: KeyModifier, code: KeyCode)
-object Key {
+object Key:
 
   /** Construct a Key from an unmodified Char */
   def apply(char: Char): Key =
@@ -196,7 +196,7 @@ object Key {
   val controlShiftPageUp = Key(KeyModifier.ControlShift, KeyCode.PageUp)
   val controlShiftPageDown = Key(KeyModifier.ControlShift, KeyCode.PageDown)
 
-  given Show[Key] = (key: Key) => {
+  given Show[Key] = (key: Key) =>
     val modifiersStr = List(
       if key.modifiers.hasControl then Some("Control-") else None,
       if key.modifiers.hasShift then Some("Shift-") else None,
@@ -206,7 +206,7 @@ object Key {
       if key.modifiers.hasMeta then Some("Meta-") else None
     ).flatten.mkString
 
-    val codeStr = key.code match {
+    val codeStr = key.code match
       case KeyCode.Character(' ')  => "Space"
       case KeyCode.Character('\t') => "Tab"
       case KeyCode.Character('\n') => "Newline"
@@ -214,8 +214,5 @@ object Key {
       case KeyCode.F(value)        => s"F$value"
       case KeyCode.Unknown(code)   => s"Unknown($code)"
       case other                   => other.toString
-    }
 
     modifiersStr + codeStr
-  }
-}

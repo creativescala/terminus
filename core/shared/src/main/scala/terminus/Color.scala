@@ -16,178 +16,175 @@
 
 package terminus
 
-trait Color {
-  object foreground {
-    def default[F <: effect.Writer, A](
+trait Color:
+  object foreground:
+    def default[F, A](
         f: F ?=> A
-    ): (F & effect.Color[F]) ?=> A =
-      effect ?=> effect.foreground.default(f)
+    ): (F & effect.Color) ?=> A =
+      effect ?=> effect.foreground.default(() => f(using effect))
 
-    def black[F <: effect.Writer, A](
+    def black[F, A](
         f: F ?=> A
-    ): (F & effect.Color[F]) ?=> A =
-      effect ?=> effect.foreground.black(f)
+    ): (F & effect.Color) ?=> A =
+      effect ?=> effect.foreground.black(() => f(using effect))
 
-    def red[F <: effect.Writer, A](
+    def red[F, A](
         f: F ?=> A
-    ): (F & effect.Color[F]) ?=> A =
-      effect ?=> effect.foreground.red(f)
+    ): (F & effect.Color) ?=> A =
+      effect ?=> effect.foreground.red(() => f(using effect))
 
-    def green[F <: effect.Writer, A](
+    def green[F, A](
         f: F ?=> A
-    ): (F & effect.Color[F]) ?=> A =
-      effect ?=> effect.foreground.green(f)
+    ): (F & effect.Color) ?=> A =
+      effect ?=> effect.foreground.green(() => f(using effect))
 
-    def yellow[F <: effect.Writer, A](
+    def yellow[F, A](
         f: F ?=> A
-    ): (F & effect.Color[F]) ?=> A =
-      effect ?=> effect.foreground.yellow(f)
+    ): (F & effect.Color) ?=> A =
+      effect ?=> effect.foreground.yellow(() => f(using effect))
 
-    def blue[F <: effect.Writer, A](
+    def blue[F, A](
         f: F ?=> A
-    ): (F & effect.Color[F]) ?=> A =
-      effect ?=> effect.foreground.blue(f)
+    ): (F & effect.Color) ?=> A =
+      effect ?=> effect.foreground.blue(() => f(using effect))
 
-    def magenta[F <: effect.Writer, A](
+    def magenta[F, A](
         f: F ?=> A
-    ): (F & effect.Color[F]) ?=> A =
-      effect ?=> effect.foreground.magenta(f)
+    ): (F & effect.Color) ?=> A =
+      effect ?=> effect.foreground.magenta(() => f(using effect))
 
-    def cyan[F <: effect.Writer, A](
+    def cyan[F, A](
         f: F ?=> A
-    ): (F & effect.Color[F]) ?=> A =
-      effect ?=> effect.foreground.cyan(f)
+    ): (F & effect.Color) ?=> A =
+      effect ?=> effect.foreground.cyan(() => f(using effect))
 
-    def white[F <: effect.Writer, A](
+    def white[F, A](
         f: F ?=> A
-    ): (F & effect.Color[F]) ?=> A =
-      effect ?=> effect.foreground.white(f)
+    ): (F & effect.Color) ?=> A =
+      effect ?=> effect.foreground.white(() => f(using effect))
 
-    def brightBlack[F <: effect.Writer, A](
+    def brightBlack[F, A](
         f: F ?=> A
-    ): (F & effect.Color[F]) ?=> A =
-      effect ?=> effect.foreground.brightBlack(f)
+    ): (F & effect.Color) ?=> A =
+      effect ?=> effect.foreground.brightBlack(() => f(using effect))
 
-    def brightRed[F <: effect.Writer, A](
+    def brightRed[F, A](
         f: F ?=> A
-    ): (F & effect.Color[F]) ?=> A =
-      effect ?=> effect.foreground.brightRed(f)
+    ): (F & effect.Color) ?=> A =
+      effect ?=> effect.foreground.brightRed(() => f(using effect))
 
-    def brightGreen[F <: effect.Writer, A](
+    def brightGreen[F, A](
         f: F ?=> A
-    ): (F & effect.Color[F]) ?=> A =
-      effect ?=> effect.foreground.brightGreen(f)
+    ): (F & effect.Color) ?=> A =
+      effect ?=> effect.foreground.brightGreen(() => f(using effect))
 
-    def brightYellow[F <: effect.Writer, A](
+    def brightYellow[F, A](
         f: F ?=> A
-    ): (F & effect.Color[F]) ?=> A =
-      effect ?=> effect.foreground.brightYellow(f)
+    ): (F & effect.Color) ?=> A =
+      effect ?=> effect.foreground.brightYellow(() => f(using effect))
 
-    def brightBlue[F <: effect.Writer, A](
+    def brightBlue[F, A](
         f: F ?=> A
-    ): (F & effect.Color[F]) ?=> A =
-      effect ?=> effect.foreground.brightBlue(f)
+    ): (F & effect.Color) ?=> A =
+      effect ?=> effect.foreground.brightBlue(() => f(using effect))
 
-    def brightMagenta[F <: effect.Writer, A](
+    def brightMagenta[F, A](
         f: F ?=> A
-    ): (F & effect.Color[F]) ?=> A =
-      effect ?=> effect.foreground.brightMagenta(f)
+    ): (F & effect.Color) ?=> A =
+      effect ?=> effect.foreground.brightMagenta(() => f(using effect))
 
-    def brightCyan[F <: effect.Writer, A](
+    def brightCyan[F, A](
         f: F ?=> A
-    ): (F & effect.Color[F]) ?=> A =
-      effect ?=> effect.foreground.brightCyan(f)
+    ): (F & effect.Color) ?=> A =
+      effect ?=> effect.foreground.brightCyan(() => f(using effect))
 
-    def brightWhite[F <: effect.Writer, A](
+    def brightWhite[F, A](
         f: F ?=> A
-    ): (F & effect.Color[F]) ?=> A =
-      effect ?=> effect.foreground.brightWhite(f)
-  }
+    ): (F & effect.Color) ?=> A =
+      effect ?=> effect.foreground.brightWhite(() => f(using effect))
 
-  object background {
-    def default[F <: effect.Writer, A](
+  object background:
+    def default[F, A](
         f: F ?=> A
-    ): (F & effect.Color[F]) ?=> A =
-      effect ?=> effect.background.default(f)
+    ): (F & effect.Color) ?=> A =
+      effect ?=> effect.background.default(() => f(using effect))
 
-    def black[F <: effect.Writer, A](
+    def black[F, A](
         f: F ?=> A
-    ): (F & effect.Color[F]) ?=> A =
-      effect ?=> effect.background.black(f)
+    ): (F & effect.Color) ?=> A =
+      effect ?=> effect.background.black(() => f(using effect))
 
-    def red[F <: effect.Writer, A](
+    def red[F, A](
         f: F ?=> A
-    ): (F & effect.Color[F]) ?=> A =
-      effect ?=> effect.background.red(f)
+    ): (F & effect.Color) ?=> A =
+      effect ?=> effect.background.red(() => f(using effect))
 
-    def green[F <: effect.Writer, A](
+    def green[F, A](
         f: F ?=> A
-    ): (F & effect.Color[F]) ?=> A =
-      effect ?=> effect.background.green(f)
+    ): (F & effect.Color) ?=> A =
+      effect ?=> effect.background.green(() => f(using effect))
 
-    def yellow[F <: effect.Writer, A](
+    def yellow[F, A](
         f: F ?=> A
-    ): (F & effect.Color[F]) ?=> A =
-      effect ?=> effect.background.yellow(f)
+    ): (F & effect.Color) ?=> A =
+      effect ?=> effect.background.yellow(() => f(using effect))
 
-    def blue[F <: effect.Writer, A](
+    def blue[F, A](
         f: F ?=> A
-    ): (F & effect.Color[F]) ?=> A =
-      effect ?=> effect.background.blue(f)
+    ): (F & effect.Color) ?=> A =
+      effect ?=> effect.background.blue(() => f(using effect))
 
-    def magenta[F <: effect.Writer, A](
+    def magenta[F, A](
         f: F ?=> A
-    ): (F & effect.Color[F]) ?=> A =
-      effect ?=> effect.background.magenta(f)
+    ): (F & effect.Color) ?=> A =
+      effect ?=> effect.background.magenta(() => f(using effect))
 
-    def cyan[F <: effect.Writer, A](
+    def cyan[F, A](
         f: F ?=> A
-    ): (F & effect.Color[F]) ?=> A =
-      effect ?=> effect.background.cyan(f)
+    ): (F & effect.Color) ?=> A =
+      effect ?=> effect.background.cyan(() => f(using effect))
 
-    def white[F <: effect.Writer, A](
+    def white[F, A](
         f: F ?=> A
-    ): (F & effect.Color[F]) ?=> A =
-      effect ?=> effect.background.white(f)
+    ): (F & effect.Color) ?=> A =
+      effect ?=> effect.background.white(() => f(using effect))
 
-    def brightBlack[F <: effect.Writer, A](
+    def brightBlack[F, A](
         f: F ?=> A
-    ): (F & effect.Color[F]) ?=> A =
-      effect ?=> effect.background.brightBlack(f)
+    ): (F & effect.Color) ?=> A =
+      effect ?=> effect.background.brightBlack(() => f(using effect))
 
-    def brightRed[F <: effect.Writer, A](
+    def brightRed[F, A](
         f: F ?=> A
-    ): (F & effect.Color[F]) ?=> A =
-      effect ?=> effect.background.brightRed(f)
+    ): (F & effect.Color) ?=> A =
+      effect ?=> effect.background.brightRed(() => f(using effect))
 
-    def brightGreen[F <: effect.Writer, A](
+    def brightGreen[F, A](
         f: F ?=> A
-    ): (F & effect.Color[F]) ?=> A =
-      effect ?=> effect.background.brightGreen(f)
+    ): (F & effect.Color) ?=> A =
+      effect ?=> effect.background.brightGreen(() => f(using effect))
 
-    def brightYellow[F <: effect.Writer, A](
+    def brightYellow[F, A](
         f: F ?=> A
-    ): (F & effect.Color[F]) ?=> A =
-      effect ?=> effect.background.brightYellow(f)
+    ): (F & effect.Color) ?=> A =
+      effect ?=> effect.background.brightYellow(() => f(using effect))
 
-    def brightBlue[F <: effect.Writer, A](
+    def brightBlue[F, A](
         f: F ?=> A
-    ): (F & effect.Color[F]) ?=> A =
-      effect ?=> effect.background.brightBlue(f)
+    ): (F & effect.Color) ?=> A =
+      effect ?=> effect.background.brightBlue(() => f(using effect))
 
-    def brightMagenta[F <: effect.Writer, A](
+    def brightMagenta[F, A](
         f: F ?=> A
-    ): (F & effect.Color[F]) ?=> A =
-      effect ?=> effect.background.brightMagenta(f)
+    ): (F & effect.Color) ?=> A =
+      effect ?=> effect.background.brightMagenta(() => f(using effect))
 
-    def brightCyan[F <: effect.Writer, A](
+    def brightCyan[F, A](
         f: F ?=> A
-    ): (F & effect.Color[F]) ?=> A =
-      effect ?=> effect.background.brightCyan(f)
+    ): (F & effect.Color) ?=> A =
+      effect ?=> effect.background.brightCyan(() => f(using effect))
 
-    def brightWhite[F <: effect.Writer, A](
+    def brightWhite[F, A](
         f: F ?=> A
-    ): (F & effect.Color[F]) ?=> A =
-      effect ?=> effect.background.brightWhite(f)
-  }
-}
+    ): (F & effect.Color) ?=> A =
+      effect ?=> effect.background.brightWhite(() => f(using effect))

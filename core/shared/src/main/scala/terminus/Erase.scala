@@ -16,9 +16,9 @@
 
 package terminus
 
-trait Erase {
+trait Erase:
 
-  object erase {
+  object erase:
 
     /** Erase the entire screen and move the cursor to the top-left. */
     def screen(): effect.Erase ?=> Unit =
@@ -35,5 +35,3 @@ trait Erase {
     /** Erase the current line. */
     def line(): effect.Erase ?=> Unit =
       effect ?=> effect.erase.line()
-  }
-}

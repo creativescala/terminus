@@ -19,7 +19,7 @@ package terminus.effect
 import munit.FunSuite
 import terminus.Key
 
-class TerminalKeyReaderSuite extends FunSuite {
+class TerminalKeyReaderSuite extends FunSuite:
   test("The expected key is generated given the input") {
     // The following list is taken from Textual, with some sequences edited out
     //   https://github.com/Textualize/textual/blob/main/src/textual/_ansi_sequences.py
@@ -387,4 +387,3 @@ class TerminalKeyReaderSuite extends FunSuite {
       assertEquals(StringBufferReader(input).readKey(), key, s"Input is $input")
     }
   }
-}

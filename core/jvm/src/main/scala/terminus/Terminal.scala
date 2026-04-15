@@ -17,17 +17,17 @@
 package terminus
 
 trait Terminal
-    extends effect.AlternateScreenMode[Terminal],
-      effect.ApplicationMode[Terminal],
-      effect.Color[Terminal],
+    extends effect.AlternateScreenMode,
+      effect.ApplicationMode,
+      effect.Color,
       effect.Cursor,
-      effect.Format[Terminal],
+      effect.Format,
       effect.Dimensions,
       effect.Erase,
       effect.KeyReader,
       effect.NonBlockingReader,
       effect.Peeker,
-      effect.RawMode[Terminal],
+      effect.RawMode,
       effect.Reader,
       effect.Writer
 type Program[A] = Terminal ?=> A
@@ -45,6 +45,5 @@ object Terminal
       Peeker,
       RawMode,
       Reader,
-      Writer {
+      Writer:
   export JLineTerminal.*
-}

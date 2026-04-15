@@ -24,15 +24,12 @@ import scala.concurrent.duration.Duration
 import scala.scalanative.libc
 import scala.scalanative.meta.LinktimeInfo
 import scala.scalanative.posix
-import scala.scalanative.unsigned.UInt
+import scala.scalanative.unsigned.*
 
 import scalanative.unsafe.*
 
 /** A Terminal implementation for Scala Native. */
-object NativeTerminal
-    extends Terminal,
-      WithEffect[Terminal],
-      TerminalKeyReader {
+object NativeTerminal extends Terminal, WithEffect, TerminalKeyReader:
 
   private given termiosAccess: TermiosAccess[?] =
     if LinktimeInfo.isMac then clongTermiosAccess
@@ -51,29 +48,27 @@ object NativeTerminal
 
   private val termios = Termios(using termiosAccess)
 
-  def run[A](f: Program[A]): A = {
+  def run[A](f: Program[A]): A =
     val result = f(using this)
 
     result
-  }
 
-  def read(): Eof | Char = {
+  def read(): Eof | Char =
     val buf: Ptr[Byte] = stackalloc[Byte]()
     val count =
       posix.unistd.read(posix.unistd.STDIN_FILENO, buf, UInt.valueOf(1))
     if count == 0 then Eof
     else (!buf).toChar
-  }
 
-  def read(duration: Duration): Timeout | Eof | Char = {
+  def read(duration: Duration): Timeout | Eof | Char =
     Zone {
       val origAttrs = termios.getAttributes()
       val attrs = termios.getAttributes()
-      try {
-        attrs.setSpecialCharacter(posix.termios.VMIN, 0)
+      try
+        attrs.setSpecialCharacter(posix.termios.VMIN, 0.toUByte)
         attrs.setSpecialCharacter(
           posix.termios.VTIME,
-          (duration.toMillis / 100).toByte
+          (duration.toMillis / 100).toUByte
         )
         termios.setAttributes(attrs)
 
@@ -83,54 +78,42 @@ object NativeTerminal
 
         if count == 0 then Timeout
         else if count == -1 then Eof
-        else {
-          (!buf).toChar
-        }
+        else (!buf).toChar
 
-      } finally {
-        termios.setAttributes(origAttrs)
-      }
+      finally termios.setAttributes(origAttrs)
     }
-  }
 
-  def flush(): Unit = {
+  def flush(): Unit =
     val _ = libc.stdio.fflush(libc.stdio.stdin)
     ()
-  }
 
-  def write(char: Char): Unit = {
-    val _ = libc.stdio.fputc(char, libc.stdio.stdout)
-    ()
-  }
+  def write(char: Char): Unit =
+    // Writing wide characters cannot be done with fputc. We either need to add
+    // support for fputwc or we use the method to write a String. Using the
+    // method to write a String is simpler for now.
+    write(char.toString)
 
-  def write(string: String): Unit = {
+  def write(string: String): Unit =
     // print(string)
     Zone {
       val _ = libc.stdio.fputs(toCString(string), libc.stdio.stdout)
       ()
     }
-  }
 
-  def application[A](f: (terminus.Terminal) ?=> A): A = {
+  def application[A](f: () => A): A =
     withEffect(AnsiCodes.mode.application.on, AnsiCodes.mode.application.off)(f)
-  }
 
-  def alternateScreen[A](f: (terminus.Terminal) ?=> A): A = {
+  def alternateScreen[A](f: () => A): A =
     withEffect(
       AnsiCodes.mode.alternateScreen.on,
       AnsiCodes.mode.alternateScreen.off
     )(f)
-  }
 
-  def raw[A](f: Terminal ?=> A): A = {
+  def raw[A](f: () => A): A =
     Zone {
       val origAttrs = termios.getAttributes()
-      try {
+      try
         termios.setRawMode()
-        f(using this)
-      } finally {
-        termios.setAttributes(origAttrs)
-      }
+        f()
+      finally termios.setAttributes(origAttrs)
     }
-  }
-}

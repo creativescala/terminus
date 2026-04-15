@@ -19,11 +19,11 @@ package terminus
 import scala.collection.mutable
 
 final class StringBuilderTerminal()
-    extends effect.Color[StringBuilderTerminal],
+    extends effect.Color,
       effect.Cursor,
-      effect.Format[StringBuilderTerminal],
+      effect.Format,
       effect.Erase,
-      effect.Writer {
+      effect.Writer:
 
   private val builder = mutable.StringBuilder()
 
@@ -39,19 +39,15 @@ final class StringBuilderTerminal()
   /** Get the value accumulated in the internal string builder, clearing the
     * buffer in the process.
     */
-  def result(): String = {
+  def result(): String =
     val s = builder.result()
     builder.clear()
     s
-  }
-}
-object StringBuilderTerminal {
+object StringBuilderTerminal:
   type Program[A] = StringBuilderTerminal ?=> A
 
-  def run[A](f: Program[A]): String = {
+  def run[A](f: Program[A]): String =
     val terminal = StringBuilderTerminal()
     val _ = f(using terminal)
 
     terminal.result()
-  }
-}

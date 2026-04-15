@@ -37,7 +37,7 @@ import scala.scalanative.unsafe.Zone
   *   The termios structure type a Termios instance uses. See [[TermiosStruct]]
   *   for more details
   */
-class Termios[T](using accessor: TermiosAccess[T]) {
+class Termios[T](using accessor: TermiosAccess[T]):
 
   /** Allocates a new termios structure defined by [[this.T]], in the given
     * [[Zone]] and copies the current terminal settings into it, returning a
@@ -61,4 +61,3 @@ class Termios[T](using accessor: TermiosAccess[T]) {
       attrs.removeLocalFlags(posix.termios.ECHO | posix.termios.ICANON)
       accessor.set(attrs)
     }
-}

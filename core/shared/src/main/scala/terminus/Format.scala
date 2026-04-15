@@ -16,116 +16,113 @@
 
 package terminus
 
-trait Format {
-  object format {
-    def bold[F <: effect.Writer, A](f: F ?=> A): (F & effect.Format[F]) ?=> A =
-      effect ?=> effect.format.bold(f)
+trait Format:
+  object format:
+    def bold[F, A](f: F ?=> A): (F & effect.Format) ?=> A =
+      effect ?=> effect.format.bold(() => f(using effect))
 
-    def light[F <: effect.Writer, A](
+    def light[F, A](
         f: F ?=> A
-    ): (F & effect.Format[F]) ?=> A =
-      effect ?=> effect.format.light(f)
+    ): (F & effect.Format) ?=> A =
+      effect ?=> effect.format.light(() => f(using effect))
 
-    def normal[F <: effect.Writer, A](
+    def normal[F, A](
         f: F ?=> A
-    ): (F & effect.Format[F]) ?=> A =
-      effect ?=> effect.format.normal(f)
+    ): (F & effect.Format) ?=> A =
+      effect ?=> effect.format.normal(() => f(using effect))
 
-    object underline {
-      def none[F <: effect.Writer, A](
+    object underline:
+      def none[F, A](
           f: F ?=> A
-      ): (F & effect.Format[F]) ?=> A =
-        effect ?=> effect.format.underline.none(f)
+      ): (F & effect.Format) ?=> A =
+        effect ?=> effect.format.underline.none(() => f(using effect))
 
-      def straight[F <: effect.Writer, A](
+      def straight[F, A](
           f: F ?=> A
-      ): (F & effect.Format[F]) ?=> A =
-        effect ?=> effect.format.underline.straight(f)
+      ): (F & effect.Format) ?=> A =
+        effect ?=> effect.format.underline.straight(() => f(using effect))
 
-      def double[F <: effect.Writer, A](
+      def double[F, A](
           f: F ?=> A
-      ): (F & effect.Format[F]) ?=> A =
-        effect ?=> effect.format.underline.double(f)
+      ): (F & effect.Format) ?=> A =
+        effect ?=> effect.format.underline.double(() => f(using effect))
 
-      def curly[F <: effect.Writer, A](
+      def curly[F, A](
           f: F ?=> A
-      ): (F & effect.Format[F]) ?=> A =
-        effect ?=> effect.format.underline.curly(f)
+      ): (F & effect.Format) ?=> A =
+        effect ?=> effect.format.underline.curly(() => f(using effect))
 
-      def dotted[F <: effect.Writer, A](
+      def dotted[F, A](
           f: F ?=> A
-      ): (F & effect.Format[F]) ?=> A =
-        effect ?=> effect.format.underline.dotted(f)
+      ): (F & effect.Format) ?=> A =
+        effect ?=> effect.format.underline.dotted(() => f(using effect))
 
-      def dashed[F <: effect.Writer, A](
+      def dashed[F, A](
           f: F ?=> A
-      ): (F & effect.Format[F]) ?=> A =
-        effect ?=> effect.format.underline.dashed(f)
+      ): (F & effect.Format) ?=> A =
+        effect ?=> effect.format.underline.dashed(() => f(using effect))
 
-      def default[F <: effect.Writer, A](
+      def default[F, A](
           f: F ?=> A
-      ): (F & effect.Format[F]) ?=> A =
-        effect ?=> effect.format.underline.default(f)
+      ): (F & effect.Format) ?=> A =
+        effect ?=> effect.format.underline.default(() => f(using effect))
 
-      def black[F <: effect.Writer, A](
+      def black[F, A](
           f: F ?=> A
-      ): (F & effect.Format[F]) ?=> A =
-        effect ?=> effect.format.underline.black(f)
+      ): (F & effect.Format) ?=> A =
+        effect ?=> effect.format.underline.black(() => f(using effect))
 
-      def red[F <: effect.Writer, A](
+      def red[F, A](
           f: F ?=> A
-      ): (F & effect.Format[F]) ?=> A =
-        effect ?=> effect.format.underline.red(f)
+      ): (F & effect.Format) ?=> A =
+        effect ?=> effect.format.underline.red(() => f(using effect))
 
-      def green[F <: effect.Writer, A](
+      def green[F, A](
           f: F ?=> A
-      ): (F & effect.Format[F]) ?=> A =
-        effect ?=> effect.format.underline.green(f)
+      ): (F & effect.Format) ?=> A =
+        effect ?=> effect.format.underline.green(() => f(using effect))
 
-      def yellow[F <: effect.Writer, A](
+      def yellow[F, A](
           f: F ?=> A
-      ): (F & effect.Format[F]) ?=> A =
-        effect ?=> effect.format.underline.yellow(f)
+      ): (F & effect.Format) ?=> A =
+        effect ?=> effect.format.underline.yellow(() => f(using effect))
 
-      def blue[F <: effect.Writer, A](
+      def blue[F, A](
           f: F ?=> A
-      ): (F & effect.Format[F]) ?=> A =
-        effect ?=> effect.format.underline.blue(f)
+      ): (F & effect.Format) ?=> A =
+        effect ?=> effect.format.underline.blue(() => f(using effect))
 
-      def magenta[F <: effect.Writer, A](
+      def magenta[F, A](
           f: F ?=> A
-      ): (F & effect.Format[F]) ?=> A =
-        effect ?=> effect.format.underline.magenta(f)
+      ): (F & effect.Format) ?=> A =
+        effect ?=> effect.format.underline.magenta(() => f(using effect))
 
-      def cyan[F <: effect.Writer, A](
+      def cyan[F, A](
           f: F ?=> A
-      ): (F & effect.Format[F]) ?=> A =
-        effect ?=> effect.format.underline.cyan(f)
+      ): (F & effect.Format) ?=> A =
+        effect ?=> effect.format.underline.cyan(() => f(using effect))
 
-      def white[F <: effect.Writer, A](
+      def white[F, A](
           f: F ?=> A
-      ): (F & effect.Format[F]) ?=> A =
-        effect ?=> effect.format.underline.white(f)
-    }
+      ): (F & effect.Format) ?=> A =
+        effect ?=> effect.format.underline.white(() => f(using effect))
 
-    def blink[F <: effect.Writer, A](
+    def blink[F, A](
         f: F ?=> A
-    ): (F & effect.Format[F]) ?=> A =
-      effect ?=> effect.format.blink(f)
+    ): (F & effect.Format) ?=> A =
+      effect ?=> effect.format.blink(() => f(using effect))
 
-    def invert[F <: effect.Writer, A](
+    def invert[F, A](
         f: F ?=> A
-    ): (F & effect.Format[F]) ?=> A =
-      effect ?=> effect.format.invert(f)
+    ): (F & effect.Format) ?=> A =
+      effect ?=> effect.format.invert(() => f(using effect))
 
-    def invisible[F <: effect.Writer, A](
+    def invisible[F, A](
         f: F ?=> A
-    ): (F & effect.Format[F]) ?=> A =
-      effect ?=> effect.format.invisible(f)
+    ): (F & effect.Format) ?=> A =
+      effect ?=> effect.format.invisible(() => f(using effect))
 
-    def strikethrough[F <: effect.Writer, A](
+    def strikethrough[F, A](
         f: F ?=> A
-    ): (F & effect.Format[F]) ?=> A =
-      effect ?=> effect.format.strikethrough(f)
-  }
-}
+    ): (F & effect.Format) ?=> A =
+      effect ?=> effect.format.strikethrough(() => f(using effect))

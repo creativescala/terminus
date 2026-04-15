@@ -25,29 +25,26 @@ import terminus.effect.TerminalKeyReader
 
 import scala.concurrent.duration.Duration
 
-class JLineTerminal(terminal: JTerminal) extends Terminal, TerminalKeyReader {
+class JLineTerminal(terminal: JTerminal) extends Terminal, TerminalKeyReader:
   private val reader = terminal.reader()
   private val writer = terminal.writer()
 
   def peek(duration: Duration): Timeout | Eof | Char =
-    reader.peek(duration.toMillis) match {
+    reader.peek(duration.toMillis) match
       case -2   => Timeout
       case -1   => Eof
       case char => char.toChar
-    }
 
   def read(duration: Duration): Timeout | Eof | Char =
-    reader.read(duration.toMillis) match {
+    reader.read(duration.toMillis) match
       case -2   => Timeout
       case -1   => Eof
       case char => char.toChar
-    }
 
   def read(): Eof | Char =
-    reader.read() match {
+    reader.read() match
       case -1   => Eof
       case char => char.toChar
-    }
 
   def flush(): Unit = writer.flush()
 
@@ -55,46 +52,37 @@ class JLineTerminal(terminal: JTerminal) extends Terminal, TerminalKeyReader {
 
   def write(string: String): Unit = writer.write(string)
 
-  def raw[A](f: Terminal ?=> A): A = {
+  def raw[A](f: () => A): A =
     val attrs = terminal.enterRawMode()
-    try {
-      val result = f(using this)
+    try
+      val result = f()
       result
-    } finally {
-      terminal.setAttributes(attrs)
-    }
-  }
+    finally terminal.setAttributes(attrs)
 
-  def getDimensions: effect.TerminalDimensions = {
+  def getDimensions: effect.TerminalDimensions =
     val size = terminal.getSize
     TerminalDimensions(size.getColumns, size.getRows)
-  }
 
   def setDimensions(dimensions: TerminalDimensions): Unit =
     terminal.setSize(Size(dimensions.columns, dimensions.rows))
 
-  def application[A](f: Terminal ?=> A): A = {
-    try {
+  def application[A](f: () => A): A =
+    try
       terminal.puts(Capability.keypad_xmit)
-      val result = f(using this)
+      val result = f()
       result
-    } finally {
+    finally
       val _ = terminal.puts(Capability.keypad_local)
-    }
-  }
 
-  def alternateScreen[A](f: Terminal ?=> A): A = {
-    try {
+  def alternateScreen[A](f: () => A): A =
+    try
       terminal.puts(Capability.enter_ca_mode)
-      val result = f(using this)
+      val result = f()
       result
-    } finally {
+    finally
       val _ = terminal.puts(Capability.exit_ca_mode)
-    }
-  }
 
   def close(): Unit = terminal.close()
-}
 object JLineTerminal
     extends Color,
       Cursor,
@@ -105,16 +93,14 @@ object JLineTerminal
       ApplicationMode,
       RawMode,
       Reader,
-      Writer {
+      Writer:
   def apply: JLineTerminal = new JLineTerminal(
     TerminalBuilder.builder().build()
   )
 
-  def run[A](f: Program[A]): A = {
+  def run[A](f: Program[A]): A =
     val terminal = Terminal.apply
     val result = f(using terminal)
 
     terminal.close()
     result
-  }
-}
