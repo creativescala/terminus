@@ -121,6 +121,9 @@ object AnsiCodes:
     object bold:
       val on: String = sgr("1")
       val off: String = sgr("22")
+    object italic:
+      val on: String = sgr("3")
+      val off: String = sgr("23")
     object light:
       val on: String = sgr("2")
       val off: String = sgr("22")

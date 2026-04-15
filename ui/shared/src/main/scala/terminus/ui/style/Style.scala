@@ -20,7 +20,12 @@ package terminus.ui.style
 final case class Style(
     fg: Color = Color.Default,
     bg: Color = Color.Default,
-    bold: Boolean = false
+    bold: Boolean = false,
+    italic: Boolean = false,
+    underline: Underline = Underline.None,
+    invert: Boolean = false,
+    strikethrough: Boolean = false,
+    blink: Boolean = false
 )
 object Style:
   val default: Style = Style()

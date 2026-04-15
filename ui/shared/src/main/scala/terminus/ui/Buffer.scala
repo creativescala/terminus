@@ -86,6 +86,28 @@ final class Buffer(val width: Int, val height: Int):
               if cell.style.bold then AnsiCodes.format.bold.on
               else AnsiCodes.format.bold.off
             )
+          if cell.style.italic != currentStyle.italic then
+            t.write(
+              if cell.style.italic then AnsiCodes.format.italic.on
+              else AnsiCodes.format.italic.off
+            )
+          if cell.style.underline != currentStyle.underline then
+            t.write(underlineCode(cell.style.underline))
+          if cell.style.blink != currentStyle.blink then
+            t.write(
+              if cell.style.blink then AnsiCodes.format.blink.on
+              else AnsiCodes.format.blink.off
+            )
+          if cell.style.invert != currentStyle.invert then
+            t.write(
+              if cell.style.invert then AnsiCodes.format.invert.on
+              else AnsiCodes.format.invert.off
+            )
+          if cell.style.strikethrough != currentStyle.strikethrough then
+            t.write(
+              if cell.style.strikethrough then AnsiCodes.format.strikethrough.on
+              else AnsiCodes.format.strikethrough.off
+            )
           currentStyle = cell.style
         t.write(cell.char)
         x += 1
@@ -93,6 +115,15 @@ final class Buffer(val width: Int, val height: Int):
 
     t.write(AnsiCodes.sgr("0"))
     t.flush()
+
+  private def underlineCode(underline: style.Underline): String =
+    underline match
+      case style.Underline.None     => AnsiCodes.format.underline.off
+      case style.Underline.Straight => AnsiCodes.format.underline.straight
+      case style.Underline.Double   => AnsiCodes.format.underline.double
+      case style.Underline.Curly    => AnsiCodes.format.underline.curly
+      case style.Underline.Dotted   => AnsiCodes.format.underline.dotted
+      case style.Underline.Dashed   => AnsiCodes.format.underline.dashed
 
   private def fgCode(color: Color): String =
     color match
