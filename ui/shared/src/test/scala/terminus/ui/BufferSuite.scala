@@ -194,3 +194,46 @@ class BufferSuite extends FunSuite:
       capture(curr.renderDiff(prev))
     }
   }
+
+  // ---------------------------------------------------------------------------
+  // putString — newline handling
+  // ---------------------------------------------------------------------------
+
+  /** Render the whole buffer and return the captured output. */
+  def renderFull(buf: Buffer): String =
+    capture(buf.render)
+
+  test("putString writes a simple string on one row") {
+    val buf = Buffer(3, 1)
+    buf.putString(0, 0, "ABC", Style.default)
+    val out = renderFull(buf)
+    assertEquals(out, reset + moveTo(1, 1) + "A" + "B" + "C" + reset)
+  }
+
+  test("putString newline advances to next row and resets column") {
+    val buf = Buffer(3, 2)
+    buf.putString(0, 0, "AB\nCD", Style.default)
+    // Row 1: "AB", Row 2: "CD"
+    val out = renderFull(buf)
+    assertEquals(
+      out,
+      reset + moveTo(1, 1) + "A" + "B" + " " + moveTo(
+        1,
+        2
+      ) + "C" + "D" + " " + reset
+    )
+  }
+
+  test("putString respects starting x when resetting after newline") {
+    val buf = Buffer(4, 2)
+    buf.putString(1, 0, "AB\nCD", Style.default)
+    // Starts at col 1; after newline resets to col 1 on row 2
+    val out = renderFull(buf)
+    assertEquals(
+      out,
+      reset + moveTo(1, 1) + " " + "A" + "B" + " " + moveTo(
+        1,
+        2
+      ) + " " + "C" + "D" + " " + reset
+    )
+  }
