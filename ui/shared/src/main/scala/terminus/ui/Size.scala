@@ -17,7 +17,7 @@
 package terminus.ui
 
 /** Represents the size of component in terms of temrinal cells. */
-final case class Size(width: Int, height: Int) {
+final case class Size(width: Int, height: Int):
 
   /** Combine two sizes into a row. That is, add together width and take the max
     * height.
@@ -30,7 +30,5 @@ final case class Size(width: Int, height: Int) {
     */
   def column(that: Size): Size =
     Size(this.width.max(that.width), this.height + that.height)
-}
-object Size {
+object Size:
   val zero: Size = Size(0, 0)
-}

@@ -19,7 +19,7 @@ package terminus.effect
 import munit.FunSuite
 import terminus.StringBuilderTerminal
 
-class CursorSuite extends FunSuite {
+class CursorSuite extends FunSuite:
 
   test("cursor.left moves cursor left by default 1 column") {
     val terminal = new StringBuilderTerminal()
@@ -64,4 +64,3 @@ class CursorSuite extends FunSuite {
     val left = terminal.result()
     assertEquals(left, s"${Ascii.ESC}[1D")
   }
-}

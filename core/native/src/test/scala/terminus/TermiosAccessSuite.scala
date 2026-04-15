@@ -24,7 +24,7 @@ import scala.scalanative.unsafe.Ptr
 import scala.scalanative.unsafe.Zone
 import scala.scalanative.unsigned.*
 
-class CLongTermiosAccessSuite extends FunSuite {
+class CLongTermiosAccessSuite extends FunSuite:
   val termios = clongTermiosAccess
 
   def testSettingSpecialCharacter(
@@ -32,18 +32,17 @@ class CLongTermiosAccessSuite extends FunSuite {
       idx: CInt,
       value: UByte,
       name: String
-  )(using Zone): Unit = {
+  )(using Zone): Unit =
     attrs.setSpecialCharacter(idx, value)
     termios.set(attrs)
     val updated = termios.get
     val read = updated.getSpecialCharacter(idx)
     assertEquals(read, value, name)
-  }
 
   test("Test reading special characters returns set value") {
     Zone {
       val orig = termios.get
-      try {
+      try
         val attrs = termios.get
 
         List(
@@ -64,9 +63,6 @@ class CLongTermiosAccessSuite extends FunSuite {
           testSettingSpecialCharacter(attrs, idx, 3.toUByte, name)
           testSettingSpecialCharacter(attrs, idx, 4.toUByte, name)
         }
-      } finally {
-        termios.set(orig)
-      }
+      finally termios.set(orig)
     }
   }
-}

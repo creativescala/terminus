@@ -16,7 +16,7 @@
 
 package terminus
 
-trait KeyReader {
+trait KeyReader:
 
   /** Read a [[Key]] from the terminal.
     *
@@ -27,4 +27,3 @@ trait KeyReader {
     */
   def readKey(): effect.KeyReader ?=> Eof | Key =
     effect ?=> effect.readKey()
-}

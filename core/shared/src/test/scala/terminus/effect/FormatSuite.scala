@@ -19,7 +19,7 @@ package terminus.effect
 import munit.FunSuite
 import terminus.StringBuilderTerminal
 
-class FormatSuite extends FunSuite {
+class FormatSuite extends FunSuite:
   test("Bold and light stack in nested scopes") {
     val result =
       StringBuilderTerminal.run { t ?=>
@@ -51,4 +51,3 @@ class FormatSuite extends FunSuite {
       s"${AnsiCodes.format.blink.on}Blink Blink Blink ${AnsiCodes.format.blink.off}"
     )
   }
-}

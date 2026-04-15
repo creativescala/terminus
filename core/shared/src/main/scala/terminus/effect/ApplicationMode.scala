@@ -16,12 +16,10 @@
 
 package terminus.effect
 
-trait ApplicationMode {
+trait ApplicationMode:
 
   /** Run the given terminal program `f` in application mode, which changes the
     * input sent to the program when arrow keys are pressed. See
     * https://invisible-island.net/xterm/xterm.faq.html#xterm_arrows
     */
   def application[A](f: () => A): A
-
-}

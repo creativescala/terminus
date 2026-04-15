@@ -18,7 +18,7 @@ package terminus.effect
 
 import munit.FunSuite
 
-class AnsiCodesSuite extends FunSuite {
+class AnsiCodesSuite extends FunSuite:
   test("csi is the correct code") {
     assertEquals(AnsiCodes.csiCode, "[")
   }
@@ -34,4 +34,3 @@ class AnsiCodesSuite extends FunSuite {
   test("csi strings with multiple arguments are correctly constructed") {
     assertEquals(AnsiCodes.csi("m", "4", "1"), "[4;1m")
   }
-}

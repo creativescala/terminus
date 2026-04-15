@@ -33,7 +33,7 @@ import scala.scalanative.unsafe.CStruct7
   * @see
   *   [[https://github.com/scala-native/scala-native/issues/4143 Scala Native termios linux issue]]
   */
-object TermiosStruct {
+object TermiosStruct:
   // Custom flag types using CInt
   private type linux_tcflag_t = CInt
   private type linux_speed_t = CInt
@@ -53,4 +53,3 @@ object TermiosStruct {
     * CLong sized bitflags
     */
   type clong_flags = posix.termios.termios
-}

@@ -28,30 +28,23 @@ import scala.collection.mutable
   * @param `reset`:
   *   The escape code to emit when there are no elements left on the stack.
   */
-final case class Stack(reset: String) {
+final case class Stack(reset: String):
   private val stack: mutable.Stack[String] = mutable.Stack()
 
   def push(code: String, writer: Writer): Unit =
-    stack.headOption match {
+    stack.headOption match
       case None =>
         stack.push(code)
         writer.write(code)
 
       case Some(value) =>
-        if value == code then {
-          stack.push(code)
-        } else {
+        if value == code then stack.push(code)
+        else
           stack.push(code)
           writer.write(code)
-        }
-    }
 
-  def pop(writer: Writer): Unit = {
+  def pop(writer: Writer): Unit =
     stack.pop()
-    stack.headOption match {
+    stack.headOption match
       case None        => writer.write(reset)
       case Some(value) => writer.write(value)
-    }
-  }
-
-}

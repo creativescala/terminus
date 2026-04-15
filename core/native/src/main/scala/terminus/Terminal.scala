@@ -42,12 +42,10 @@ object Terminal
       Peeker,
       RawMode,
       Reader,
-      Writer {
+      Writer:
 
-  def run[A](f: Program[A]): A = {
+  def run[A](f: Program[A]): A =
     val terminal = NativeTerminal
     val result = f(using terminal)
 
     result
-  }
-}

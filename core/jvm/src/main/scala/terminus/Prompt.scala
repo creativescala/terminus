@@ -18,7 +18,7 @@ package terminus
 
 import terminus.example.Prompt
 
-@main def prompt(): Unit = {
+@main def prompt(): Unit =
   val idx =
     Terminal.run(
       Terminal.raw {
@@ -27,4 +27,3 @@ import terminus.example.Prompt
     )
 
   println(s"Selected $idx")
-}

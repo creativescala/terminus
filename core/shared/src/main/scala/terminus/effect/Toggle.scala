@@ -30,18 +30,15 @@ package terminus.effect
   * @param `reset`:
   *   The escape code to emit when exiting a block.
   */
-final class Toggle(set: String, reset: String) {
+final class Toggle(set: String, reset: String):
   private var count: Int = 0
 
   /** Toggle on the effect, indicating we're entering a block. */
-  def on(writer: Writer): Unit = {
+  def on(writer: Writer): Unit =
     if count == 0 then writer.write(set)
     count = count + 1
-  }
 
   /** Toggle off the effect, indicating we're exiting a block. */
-  def off(writer: Writer): Unit = {
+  def off(writer: Writer): Unit =
     if count == 1 then writer.write(reset)
     count = count - 1
-  }
-}

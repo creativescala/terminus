@@ -30,7 +30,7 @@ import scala.concurrent.duration.*
   * being pressed and another key before we decide they are separate key
   * presses.
   */
-trait TerminalKeyReader(timeout: Duration = 100.millis) extends KeyReader {
+trait TerminalKeyReader(timeout: Duration = 100.millis) extends KeyReader:
   self: NonBlockingReader & Reader =>
 
   // Some references on parsing terminal codes:
@@ -40,26 +40,22 @@ trait TerminalKeyReader(timeout: Duration = 100.millis) extends KeyReader {
     val input = read()
 
     input match
-      case Eof => Eof
+      case Eof     => Eof
       case c: Char =>
         KeyMappings.default.get(c) match
-          case None         => Key(c)
-          case Some(k: Key) => k
+          case None                  => Key(c)
+          case Some(k: Key)          => k
           case Some(ks: KeySequence) =>
-            read(timeout) match {
+            read(timeout) match
               case Eof     => ks.root
               case Timeout => ks.root
               case cx      => readKeySequence(s"$c$cx", ks)
-            }
 
   @tailrec
-  private def readKeySequence(acc: String, sequence: KeySequence): Eof | Key = {
+  private def readKeySequence(acc: String, sequence: KeySequence): Eof | Key =
     if sequence.sequences.contains(acc) then sequence.sequences(acc)
     else if sequence.subSequences.contains(acc) then
-      read() match {
+      read() match
         case Eof     => Eof
         case c: Char => readKeySequence(acc + c.toString, sequence)
-      }
     else Key.unknown(acc)
-  }
-}

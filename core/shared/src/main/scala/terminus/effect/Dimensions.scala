@@ -19,9 +19,8 @@ package terminus.effect
 //import org.jline.terminal.Size
 
 /** Functionalities related to the dimensions of the terminal */
-trait Dimensions extends Effect {
+trait Dimensions extends Effect:
   def getDimensions: TerminalDimensions
   def setDimensions(dimensions: TerminalDimensions): Unit
-}
 
 final case class TerminalDimensions(columns: Int, rows: Int)

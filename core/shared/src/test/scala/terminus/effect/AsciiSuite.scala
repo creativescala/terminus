@@ -18,7 +18,7 @@ package terminus.effect
 
 import munit.FunSuite
 
-class AsciiSuite extends FunSuite {
+class AsciiSuite extends FunSuite:
   import Ascii.*
 
   test("String escape characters match their Ascii characters") {
@@ -118,4 +118,3 @@ class AsciiSuite extends FunSuite {
     assertEquals(US.isPrintableChar, false)
     assertEquals(DEL.isControlChar, false)
   }
-}

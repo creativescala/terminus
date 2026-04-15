@@ -19,11 +19,9 @@ package terminus
 import scala.scalajs.js
 
 @js.native
-trait XtermJsOptions extends js.Object {
+trait XtermJsOptions extends js.Object:
   val cols: Int = js.native
   val rows: Int = js.native
-}
-object XtermJsOptions {
+object XtermJsOptions:
   def apply(cols: Int = 80, rows: Int = 24): XtermJsOptions =
     js.Dynamic.literal(cols = cols, rows = rows).asInstanceOf[XtermJsOptions]
-}

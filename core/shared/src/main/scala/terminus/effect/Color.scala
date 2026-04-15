@@ -16,8 +16,9 @@
 
 package terminus.effect
 
-trait Color extends WithStack { self: Writer =>
-  object foreground {
+trait Color extends WithStack:
+  self: Writer =>
+  object foreground:
     private val foregroundStack: Stack = Stack(AnsiCodes.foreground.default)
 
     def default[A](f: () => A): A =
@@ -69,9 +70,8 @@ trait Color extends WithStack { self: Writer =>
 
     def brightWhite[A](f: () => A): A =
       withStack(foregroundStack, AnsiCodes.foreground.brightWhite)(f)
-  }
 
-  object background {
+  object background:
     private val backgroundStack: Stack = Stack(AnsiCodes.background.default)
 
     def default[A](f: () => A): A =
@@ -124,5 +124,3 @@ trait Color extends WithStack { self: Writer =>
 
     def brightWhite[A](f: () => A): A =
       withStack(backgroundStack, AnsiCodes.background.brightWhite)(f)
-  }
-}

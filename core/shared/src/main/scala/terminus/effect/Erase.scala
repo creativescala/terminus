@@ -17,8 +17,8 @@
 package terminus.effect
 
 /** Functionality for clearing contents on the terminal. */
-trait Erase extends Writer {
-  object erase {
+trait Erase extends Writer:
+  object erase:
 
     /** Erase the entire screen and move the cursor to the top-left. */
     def screen(): Unit =
@@ -35,5 +35,3 @@ trait Erase extends Writer {
     /** Erase the current line. */
     def line(): Unit =
       write(AnsiCodes.erase.line)
-  }
-}

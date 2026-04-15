@@ -16,7 +16,7 @@
 
 package terminus
 
-trait ApplicationMode {
+trait ApplicationMode:
 
   /** Run the given terminal program `f` in application mode, which changes the
     * input sent to the program when arrow keys are pressed. See
@@ -26,4 +26,3 @@ trait ApplicationMode {
       f: F ?=> A
   ): (F & effect.ApplicationMode) ?=> A =
     effect ?=> effect.application(() => f(using effect))
-}

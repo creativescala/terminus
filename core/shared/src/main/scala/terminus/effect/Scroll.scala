@@ -17,8 +17,8 @@
 package terminus.effect
 
 /** Functionality for scrolling the terminal. */
-trait Scroll extends Writer {
-  object scroll {
+trait Scroll extends Writer:
+  object scroll:
 
     /** Scroll the display up the given number of rows. Defaults to 1 row. */
     def up(lines: Int = 1): Unit =
@@ -27,6 +27,3 @@ trait Scroll extends Writer {
     /** Scroll the display down the given number of rows. Defaults to 1 row. */
     def down(lines: Int = 1): Unit =
       write(AnsiCodes.scroll.down(lines))
-  }
-
-}

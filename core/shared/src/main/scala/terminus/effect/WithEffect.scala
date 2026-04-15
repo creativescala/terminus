@@ -16,18 +16,15 @@
 
 package terminus.effect
 
-trait WithEffect { self: Writer =>
-  protected def withEffect[A](on: String, off: String)(f: () => A): A = {
+trait WithEffect:
+  self: Writer =>
+  protected def withEffect[A](on: String, off: String)(f: () => A): A =
     write(on)
-    try {
+    try
       f()
-    } finally {
+    finally
       write(off)
-    }
-  }
 
-  protected def withEffect[A](on: String)(f: () => A): A = {
+  protected def withEffect[A](on: String)(f: () => A): A =
     write(on)
     f()
-  }
-}

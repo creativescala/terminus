@@ -24,15 +24,14 @@ import scala.scalajs.js
 import scala.scalajs.js.annotation.JSGlobal
 
 @js.native
-trait XtermKeyEvent extends js.Object {
+trait XtermKeyEvent extends js.Object:
   val key: String = js.native
   val domEvent: KeyboardEvent = js.native
-}
 
 @js.native
 @JSGlobal("Terminal")
 /** Minimal definition of the Terminal type from xterm.js */
-class XtermJsTerminal(@unused options: XtermJsOptions) extends js.Object {
+class XtermJsTerminal(@unused options: XtermJsOptions) extends js.Object:
   val onKey: js.Function1[js.Function1[XtermKeyEvent, Unit], Unit] = js.native
   def open(element: dom.HTMLElement): Unit = js.native
   def write(data: String): Unit = js.native
@@ -41,4 +40,3 @@ class XtermJsTerminal(@unused options: XtermJsOptions) extends js.Object {
   def cols: Int = js.native
   def rows: Int = js.native
   def resize(cols: Int, rows: Int): Unit = js.native
-}

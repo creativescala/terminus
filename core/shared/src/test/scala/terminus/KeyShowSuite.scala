@@ -19,7 +19,7 @@ package terminus
 import cats.syntax.show.*
 import munit.FunSuite
 
-class KeyShowSuite extends FunSuite {
+class KeyShowSuite extends FunSuite:
   test("Show[Key] produces the expected string representation") {
     val testCases = Map[Key, String](
       // Basic character keys
@@ -91,4 +91,3 @@ class KeyShowSuite extends FunSuite {
       )
     }
   }
-}

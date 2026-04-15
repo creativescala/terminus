@@ -18,7 +18,6 @@ package terminus
 
 import scala.concurrent.duration.Duration
 
-trait Peeker {
+trait Peeker:
   def peek(duration: Duration): effect.Peeker ?=> Timeout | Eof | Char =
     effect ?=> effect.peek(duration)
-}

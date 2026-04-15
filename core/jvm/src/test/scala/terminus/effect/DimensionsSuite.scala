@@ -19,7 +19,7 @@ package terminus.effect
 import munit.FunSuite
 import terminus.JLineTerminal
 
-class DimensionsSuite extends FunSuite {
+class DimensionsSuite extends FunSuite:
 
   test("Should set and get the dimensions of the current terminal size") {
 
@@ -32,4 +32,3 @@ class DimensionsSuite extends FunSuite {
 
     assertEquals(outputDimensions, userInputDimensions)
   }
-}

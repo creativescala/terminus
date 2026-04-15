@@ -45,6 +45,5 @@ object Terminal
       Peeker,
       RawMode,
       Reader,
-      Writer {
+      Writer:
   export JLineTerminal.*
-}
