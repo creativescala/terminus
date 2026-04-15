@@ -16,14 +16,18 @@ We want to support differences across terminals, but where common functionality 
 A backend specific `Terminal` type is the union of the interfaces, or effects, that describe the functionality it supports. For example, here is the JVM `Terminal` type at the time of writing:
 
 ```scala
-trait Terminal
-    extends effect.Color[Terminal],
+type Terminal =
+    effect.AlternateScreenMode,
+      effect.ApplicationMode,
+      effect.Color,
       effect.Cursor,
-      effect.Format[Terminal],
+      effect.Format,
+      effect.Dimensions,
       effect.Erase,
-      effect.AlternateScreenMode[Terminal],
-      effect.ApplicationMode[Terminal],
-      effect.RawMode[Terminal],
+      effect.KeyReader,
+      effect.NonBlockingReader,
+      effect.Peeker,
+      effect.RawMode,
       effect.Reader,
       effect.Writer
 ```
@@ -78,17 +82,25 @@ There are a few things to note:
 1. `Erase` extends `Writer`, and uses the `write` method from `Writer`.
 2. The methods are name-spaced by putting them inside an object named `erase`. This is aesthetic choice, leading to method calls like `erase.up()` and `cursor.up()` instead of `eraseUp()` and `cursorUp()`.
 
-There is one final kind of effect that is more involved, which is an effect that only applies to some scope. @:api(terminus.effect.Format) is an example, as is @:api(terminues.effect.Color). These all change the way output is formatted, but only for the `Program` they take as a parameter. Here's part of the implementation of `Format`, which is a bit simpler than `Color`.
+There is one final kind of effect that is more involved, which is an effect that only applies to some scope. @:api(terminus.effect.Format) is an example, as is @:api(terminus.effect.Color). These all change the way output is formatted, but only for the `Program` they take as a parameter. For example, when we create a program like 
 
 ```scala
-trait Format[+F <: Writer] extends WithStack[F], WithToggle[F] { self: F =>
+Terminal.invert(Terminal.write("Inverted"))
+```
+
+we want only the `Program` inside the call to `Terminal.invert` (that `Program` is `Terminal.write("Inverted")`) to be formatted with inverted text. 
+
+Here's part of the implementation of `Format`, which is a bit simpler than `Color`.
+
+```scala
+trait Format extends WithStack, WithToggle { self: Writer =>
   object format {
     // ...
 
     private val invertToggle =
       Toggle(AnsiCodes.format.invert.on, AnsiCodes.format.invert.off)
 
-    def invert[A](f: F ?=> A): A =
+    def invert[A](f: () => A): A =
       withToggle(invertToggle)(f)
     
     // ...
@@ -96,26 +108,27 @@ trait Format[+F <: Writer] extends WithStack[F], WithToggle[F] { self: F =>
 }
 ```
 
-When we create a program like 
+The types look a bit odd. The `invert` method doesn't receive a `Program`, with type `F ?=> A`, but a thunk with type `() => A`. The reason for this is that it's a bit tricky to write down the type of `F` at this point. It's whatever terminal effects the program `f` needs, which must also be the same as the type that the particular instance of `Format` is mixed into. We can define this, using a type parameter on `Format`, like so:
 
 ```scala
-Terminal.invert(Terminal.write("Inverted"))
+trait Format[F <: Writer] extends WithStack[F], WithToggle[F] { self: F =>
+  def invert[A](f: F ?=> A): A =
+    withToggle(invertToggle)(f(self))
+}
 ```
 
-we want only the `Program` inside the call to `Terminal.invert` (that `Program` is `Terminal.write("Inverted")`) to be formatted with inverted text. Inversion is relatively simply, as it is either on or off. This is what the call to `withToggle` does: it sends the code to turn on inverted text when we enter the block and turns it off when we exit. It also handles nested calls correctly. For more complicated cases, like color, there is also a stack abstraction which reverts to the previous setting when a block exits.
-
-The types deserve some explanation. We call `invert` with some `Program` type. Remember that `Program` is `Terminal ?=> A` and `Terminal` is backend specific. In the `Format` effect we need to actually carry out the effects within the `Program`, so we need to pass an instance of `Terminal` to the `Program`. Where do we get this instance from? It is `this`. 
-
-How do we make sure that `Terminal` is actually of the same type as `this`? Firstly, in `invert` the type of a program is `F ?=> A`, where `F` is a type parameter of `Format`. The meaning of `F` is all the effect types that make up a particular `Terminal` type. If you look at the definition of the JVM terminal above you will see
+A previous version of Terminus did this. However this ends up causing problems in other parts of the code. The issue is that `F` ends up a recursive type, which we define like
 
 ```scala
-      effect.Format[Terminal],
+Terminal extends Format[Terminal]
 ```
 
-so `F` *is* `Terminal`. The [self type](https://docs.scala-lang.org/tour/self-types.html) ensures that instances of `Format` are mixed into the correct type, and hence `this` is `F`.
+We can only define recursive types in concrete types like a `trait` as done above. This in turn means that we cannot write down the types of programs that work across multiple backends, unless we can arrange in advance for all backends to implement some common type. This goes against the idea of different backends implementing only the features they support.
+
+Our solution is to push the `F` type, and the application to the `Program`, into what we call program syntax. What `invert` receives is a thunk that wraps up the application of `Program` to `F`. Let's look at this "syntax" now.
 
 
-## Implementing Programs
+## Program Syntax
 
 Now let's look at how the `Program` types are implemented. We'll start with @:api(terminus.Writer), as it is very simple.
 
@@ -139,6 +152,8 @@ trait Writer {
 
 Firstly, notice this is the `Writer` *program* **not** the `Writer` effect. They are separate concepts. A `Program` is just `Terminal ?=> A`. In the specific case of `Writer` these programs simply require a `Writer` effect and then call the appropriate method on that effect.
 
+These definitions are very simple, and the user could write them themselves. However, it makes life easier if we provide these definitions for them. This is why we call this "program syntax"; we're providing some syntax to make writing programs easier.
+
 `Format` is a bit more complex. Here's the definition, with most of the methods removed.
 
 ```scala
@@ -147,17 +162,25 @@ trait Format {
   
     // ...
 
-    def invert[F <: effect.Writer, A](
+    def invert[F, A](
         f: F ?=> A
     ): (F & effect.Format[F]) ?=> A =
-      effect ?=> effect.format.invert(f)
+      effect ?=> effect.format.invert(() => f(using effect))
 
     // ...
   }
 }
 ```
 
-`invert` wraps a `Program` with another `Program`. What is the type of the inner program, the method argument `f`? It is whatever effects it requires to run, with the constraint that these effects much include the `Writer` effect. This is represented by the type parameter `F`. The result of calling `invert` is another program that requires all the effects of the argument `f` *and* the `Format` effect. In this way programs are constructed to require only the effects they need to run. So long as we apply them to a concrete `Terminal` type that is a super-type of these effects they can be run.
+`invert` wraps a `Program` with another `Program`. What is the type of the inner program, the method argument `f`? It is whatever effects it requires to run, represented by the type parameter `F`. The result of calling `invert` is another program that requires all the effects of the argument `f` *and* the `Format` effect. In this way programs are constructed to require only the effects they need to run. So long as we apply them to a concrete `Terminal` type that is a super-type of these effects they can be run. At the point of use all these types are known and type inference is easy.
+
+Now the bit that ties into the definition of the `Format` effect above. Notice in the body of `invert` we construct the thunk
+
+```scala
+() => f(using effect)
+```
+
+This applies `f` to the instance of the effect type `F`, but by wrapping it in a thunk it is delayed until the `invert` effect chooses to run it—which is after the inversion escape code has been sent to the terminal. This gives the effect full control over order-of-evaluation, but still keeps type inference simple. Hence the effect types and the program syntax work together to implement a system that is correct, usable, and has simple types.
 
 
 ## Low-level Code

@@ -19,6 +19,7 @@ package terminus
 import scala.scalanative.posix
 import scala.scalanative.unsafe.CInt
 import scala.scalanative.unsafe.CStruct7
+import scala.scalanative.unsafe.CUnsignedLong
 
 /** Type aliases for the two possible termios structures, one with CInt bitflags
   * and one with CLong bitflags. CLong types are the default in scala-native,
@@ -44,7 +45,7 @@ object TermiosStruct {
     linux_tcflag_t, /* c_oflag - output flags  */
     linux_tcflag_t, /* c_cflag - control flags */
     linux_tcflag_t, /* c_lflag - local flags   */
-    posix.termios.c_cc, /* cc_t c_cc[NCCS] - control chars */
+    posix.termios.cc_t_arr, /* cc_t c_cc[NCCS] - control chars */
     linux_speed_t, /* c_ispeed - input speed   */
     linux_speed_t /* c_ospeed - output speed  */
   ]

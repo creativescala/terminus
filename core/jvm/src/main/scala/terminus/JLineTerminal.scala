@@ -55,10 +55,10 @@ class JLineTerminal(terminal: JTerminal) extends Terminal, TerminalKeyReader {
 
   def write(string: String): Unit = writer.write(string)
 
-  def raw[A](f: Terminal ?=> A): A = {
+  def raw[A](f: () => A): A = {
     val attrs = terminal.enterRawMode()
     try {
-      val result = f(using this)
+      val result = f()
       result
     } finally {
       terminal.setAttributes(attrs)
@@ -73,20 +73,20 @@ class JLineTerminal(terminal: JTerminal) extends Terminal, TerminalKeyReader {
   def setDimensions(dimensions: TerminalDimensions): Unit =
     terminal.setSize(Size(dimensions.columns, dimensions.rows))
 
-  def application[A](f: Terminal ?=> A): A = {
+  def application[A](f: () => A): A = {
     try {
       terminal.puts(Capability.keypad_xmit)
-      val result = f(using this)
+      val result = f()
       result
     } finally {
       val _ = terminal.puts(Capability.keypad_local)
     }
   }
 
-  def alternateScreen[A](f: Terminal ?=> A): A = {
+  def alternateScreen[A](f: () => A): A = {
     try {
       terminal.puts(Capability.enter_ca_mode)
-      val result = f(using this)
+      val result = f()
       result
     } finally {
       val _ = terminal.puts(Capability.exit_ca_mode)

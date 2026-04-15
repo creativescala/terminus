@@ -22,6 +22,6 @@ trait RawMode {
     * program can read user input a character at a time. In canonical mode,
     * which is the default, user input is only available a line at a time.
     */
-  def raw[F <: effect.Effect, A](f: F ?=> A): (F & effect.RawMode[F]) ?=> A =
-    effect ?=> effect.raw(f)
+  def raw[F <: effect.Effect, A](f: F ?=> A): (F & effect.RawMode) ?=> A =
+    effect ?=> effect.raw(() => f(using effect))
 }

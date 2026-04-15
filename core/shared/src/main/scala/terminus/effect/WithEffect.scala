@@ -16,18 +16,18 @@
 
 package terminus.effect
 
-trait WithEffect[+F <: Writer] { self: F =>
-  protected def withEffect[A](on: String, off: String)(f: F ?=> A): A = {
+trait WithEffect { self: Writer =>
+  protected def withEffect[A](on: String, off: String)(f: () => A): A = {
     write(on)
     try {
-      f(using this)
+      f()
     } finally {
       write(off)
     }
   }
 
-  protected def withEffect[A](on: String)(f: F ?=> A): A = {
+  protected def withEffect[A](on: String)(f: () => A): A = {
     write(on)
-    f(using this)
+    f()
   }
 }

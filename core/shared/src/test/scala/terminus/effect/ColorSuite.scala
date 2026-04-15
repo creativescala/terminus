@@ -25,9 +25,9 @@ class ColorSuite extends FunSuite {
   ) {
     val result =
       StringBuilderTerminal.run { t ?=>
-        t.foreground.blue {
+        t.foreground.blue { () =>
           t.write("Blue ")
-          t.foreground.red { t.write("Red ") }
+          t.foreground.red { () => t.write("Red ") }
           t.write("Blue ")
         }
       }

@@ -24,15 +24,12 @@ import scala.concurrent.duration.Duration
 import scala.scalanative.libc
 import scala.scalanative.meta.LinktimeInfo
 import scala.scalanative.posix
-import scala.scalanative.unsigned.UInt
+import scala.scalanative.unsigned.*
 
 import scalanative.unsafe.*
 
 /** A Terminal implementation for Scala Native. */
-object NativeTerminal
-    extends Terminal,
-      WithEffect[Terminal],
-      TerminalKeyReader {
+object NativeTerminal extends Terminal, WithEffect, TerminalKeyReader {
 
   private given termiosAccess: TermiosAccess[?] =
     if LinktimeInfo.isMac then clongTermiosAccess
@@ -70,10 +67,10 @@ object NativeTerminal
       val origAttrs = termios.getAttributes()
       val attrs = termios.getAttributes()
       try {
-        attrs.setSpecialCharacter(posix.termios.VMIN, 0)
+        attrs.setSpecialCharacter(posix.termios.VMIN, 0.toUByte)
         attrs.setSpecialCharacter(
           posix.termios.VTIME,
-          (duration.toMillis / 100).toByte
+          (duration.toMillis / 100).toUByte
         )
         termios.setAttributes(attrs)
 
@@ -111,23 +108,23 @@ object NativeTerminal
     }
   }
 
-  def application[A](f: (terminus.Terminal) ?=> A): A = {
+  def application[A](f: () => A): A = {
     withEffect(AnsiCodes.mode.application.on, AnsiCodes.mode.application.off)(f)
   }
 
-  def alternateScreen[A](f: (terminus.Terminal) ?=> A): A = {
+  def alternateScreen[A](f: () => A): A = {
     withEffect(
       AnsiCodes.mode.alternateScreen.on,
       AnsiCodes.mode.alternateScreen.off
     )(f)
   }
 
-  def raw[A](f: Terminal ?=> A): A = {
+  def raw[A](f: () => A): A = {
     Zone {
       val origAttrs = termios.getAttributes()
       try {
         termios.setRawMode()
-        f(using this)
+        f()
       } finally {
         termios.setAttributes(origAttrs)
       }

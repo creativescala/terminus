@@ -17,91 +17,91 @@
 package terminus.effect
 
 /** Terminal effects that can change character formatting properties. */
-trait Format[+F <: Writer] extends WithStack[F], WithToggle[F] { self: F =>
+trait Format extends WithStack, WithToggle { self: Writer =>
   object format {
     // Bold and light share this stack
     private val fontWeightStack =
       Stack(AnsiCodes.format.bold.off)
 
-    def bold[A](f: F ?=> A): A =
+    def bold[A](f: () => A): A =
       withStack(fontWeightStack, AnsiCodes.format.bold.on)(f)
 
-    def light[A](f: F ?=> A): A =
+    def light[A](f: () => A): A =
       withStack(fontWeightStack, AnsiCodes.format.light.on)(f)
 
     /** Normal weight text, neither bold nor light. */
-    def normal[A](f: F ?=> A): A =
+    def normal[A](f: () => A): A =
       withStack(fontWeightStack, AnsiCodes.format.bold.off)(f)
 
     object underline {
       private val underlineStyleStack = Stack(AnsiCodes.format.underline.off)
 
-      def none[A](f: F ?=> A): A =
+      def none[A](f: () => A): A =
         withStack(underlineStyleStack, AnsiCodes.format.underline.off)(f)
 
-      def straight[A](f: F ?=> A): A =
+      def straight[A](f: () => A): A =
         withStack(underlineStyleStack, AnsiCodes.format.underline.straight)(f)
 
-      def double[A](f: F ?=> A): A =
+      def double[A](f: () => A): A =
         withStack(underlineStyleStack, AnsiCodes.format.underline.double)(f)
 
-      def curly[A](f: F ?=> A): A =
+      def curly[A](f: () => A): A =
         withStack(underlineStyleStack, AnsiCodes.format.underline.curly)(f)
 
-      def dotted[A](f: F ?=> A): A =
+      def dotted[A](f: () => A): A =
         withStack(underlineStyleStack, AnsiCodes.format.underline.dotted)(f)
 
-      def dashed[A](f: F ?=> A): A =
+      def dashed[A](f: () => A): A =
         withStack(underlineStyleStack, AnsiCodes.format.underline.dashed)(f)
 
       private val underlineColorStack = Stack(
         AnsiCodes.format.underline.default
       )
 
-      def default[A](f: F ?=> A): A =
+      def default[A](f: () => A): A =
         withStack(underlineColorStack, AnsiCodes.format.underline.default)(f)
 
-      def black[A](f: F ?=> A): A =
+      def black[A](f: () => A): A =
         withStack(underlineColorStack, AnsiCodes.format.underline.black)(f)
 
-      def red[A](f: F ?=> A): A =
+      def red[A](f: () => A): A =
         withStack(underlineColorStack, AnsiCodes.format.underline.red)(f)
 
-      def green[A](f: F ?=> A): A =
+      def green[A](f: () => A): A =
         withStack(underlineColorStack, AnsiCodes.format.underline.green)(f)
 
-      def yellow[A](f: F ?=> A): A =
+      def yellow[A](f: () => A): A =
         withStack(underlineColorStack, AnsiCodes.format.underline.yellow)(f)
 
-      def blue[A](f: F ?=> A): A =
+      def blue[A](f: () => A): A =
         withStack(underlineColorStack, AnsiCodes.format.underline.blue)(f)
 
-      def magenta[A](f: F ?=> A): A =
+      def magenta[A](f: () => A): A =
         withStack(underlineColorStack, AnsiCodes.format.underline.magenta)(f)
 
-      def cyan[A](f: F ?=> A): A =
+      def cyan[A](f: () => A): A =
         withStack(underlineColorStack, AnsiCodes.format.underline.cyan)(f)
 
-      def white[A](f: F ?=> A): A =
+      def white[A](f: () => A): A =
         withStack(underlineColorStack, AnsiCodes.format.underline.white)(f)
     }
 
     private val blinkToggle =
       Toggle(AnsiCodes.format.blink.on, AnsiCodes.format.blink.off)
 
-    def blink[A](f: F ?=> A): A =
+    def blink[A](f: () => A): A =
       withToggle(blinkToggle)(f)
 
     private val invertToggle =
       Toggle(AnsiCodes.format.invert.on, AnsiCodes.format.invert.off)
 
-    def invert[A](f: F ?=> A): A =
+    def invert[A](f: () => A): A =
       withToggle(invertToggle)(f)
 
     private val invisibleToggle =
       Toggle(AnsiCodes.format.invisible.on, AnsiCodes.format.invisible.off)
 
-    def invisible[A](f: F ?=> A): A =
+    def invisible[A](f: () => A): A =
       withToggle(invisibleToggle)(f)
 
     private val strikethroughToggle = Toggle(
@@ -109,7 +109,7 @@ trait Format[+F <: Writer] extends WithStack[F], WithToggle[F] { self: F =>
       AnsiCodes.format.strikethrough.off
     )
 
-    def strikethrough[A](f: F ?=> A): A =
+    def strikethrough[A](f: () => A): A =
       withToggle(strikethroughToggle)(f)
   }
 }

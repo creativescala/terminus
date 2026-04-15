@@ -14,13 +14,3 @@
  * limitations under the License.
  */
 
-package terminus.effect
-
-trait RawMode {
-
-  /** Run the given terminal program `f` in raw mode, which means that the
-    * program can read user input a character at a time. In canonical mode,
-    * which is the default, user input is only available a line at a time.
-    */
-  def raw[A](f: () => A): A
-}

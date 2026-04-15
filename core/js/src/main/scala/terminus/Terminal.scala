@@ -24,9 +24,9 @@ import scala.concurrent.Future
 import scala.concurrent.Promise
 
 class Terminal(root: HTMLElement, options: XtermJsOptions)
-    extends effect.Color[Terminal],
+    extends effect.Color,
       effect.Cursor,
-      effect.Format[Terminal],
+      effect.Format,
       effect.Erase,
       effect.Dimensions,
       effect.Writer {

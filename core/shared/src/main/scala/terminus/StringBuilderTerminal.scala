@@ -19,9 +19,9 @@ package terminus
 import scala.collection.mutable
 
 final class StringBuilderTerminal()
-    extends effect.Color[StringBuilderTerminal],
+    extends effect.Color,
       effect.Cursor,
-      effect.Format[StringBuilderTerminal],
+      effect.Format,
       effect.Erase,
       effect.Writer {
 

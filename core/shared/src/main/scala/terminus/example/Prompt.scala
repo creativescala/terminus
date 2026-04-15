@@ -22,8 +22,8 @@ import terminus.effect
 import scala.annotation.tailrec
 
 class Prompt[
-    Terminal <: effect.Color[Terminal] & effect.Cursor &
-      effect.Format[Terminal] & effect.Erase & effect.KeyReader & effect.Writer
+    Terminal <: effect.Color & effect.Cursor & effect.Format & effect.Erase &
+      effect.KeyReader & effect.Writer
 ](terminal: Color & Cursor & Format & Erase & KeyReader & Writer) {
 
   type Program[A] = Terminal ?=> A
@@ -59,10 +59,11 @@ class Prompt[
         throw new Exception("Received an EOF")
       case key: Key =>
         key match {
-          case Key(_, KeyCode.Enter) => KeyCode.Enter
-          case Key(_, KeyCode.Up)    => KeyCode.Up
-          case Key(_, KeyCode.Down)  => KeyCode.Down
-          case other                 => read()
+          case Key(_, KeyCode.Enter)           => KeyCode.Enter
+          case Key(_, KeyCode.Character('\n')) => KeyCode.Enter
+          case Key(_, KeyCode.Up)              => KeyCode.Up
+          case Key(_, KeyCode.Down)            => KeyCode.Down
+          case other                           => read()
         }
     }
   }

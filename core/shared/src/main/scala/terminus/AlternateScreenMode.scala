@@ -24,6 +24,6 @@ trait AlternateScreenMode {
     */
   def alternateScreen[F <: effect.Effect, A](
       f: F ?=> A
-  ): (F & effect.AlternateScreenMode[F]) ?=> A =
-    effect ?=> effect.alternateScreen(f)
+  ): (F & effect.AlternateScreenMode) ?=> A =
+    effect ?=> effect.alternateScreen(() => f(using effect))
 }
