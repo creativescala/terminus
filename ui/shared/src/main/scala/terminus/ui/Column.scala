@@ -38,9 +38,10 @@ class Column() extends ChildContext, Component:
 
 object Column:
   def apply[A](
-      f: RenderContext ?=> A
-  )(using parent: RenderContext): A =
+      f: AppContent[A]
+  )(using parent: AppContext): A =
     val column = new Column()
-    val result = f(using column)
+    given AppContext = AppContext.child(parent, column)
+    val result = f
     parent.add(column)
     result

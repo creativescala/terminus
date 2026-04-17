@@ -38,9 +38,10 @@ class Row() extends ChildContext, Component:
 
 object Row:
   def apply[A](
-      f: RenderContext ?=> A
-  )(using parent: RenderContext): A =
+      f: AppContent[A]
+  )(using parent: AppContext): A =
     val row = new Row()
-    val result = f(using row)
+    given AppContext = AppContext.child(parent, row)
+    val result = f
     parent.add(row)
     result
