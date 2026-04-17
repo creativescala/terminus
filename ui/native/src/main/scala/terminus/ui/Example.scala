@@ -102,12 +102,12 @@ import terminus.ui.style.Underline
 
       ctx.onKey(Key.up) { count.update(_ + 1) }
       ctx.onKey(Key.down) { count.update(_ - 1) }
-      ctx.onKey(Key.escape) { ctx.stop() }
+      ctx.onKey(Key('q')) { ctx.stop() }
       ctx.onKey(Key.controlC) { ctx.stop() }
 
       Column {
         Text(40, 3)(
-          s"Count: ${count.get}  (↑/↓ to change, Esc to quit)"
+          s"Count: ${count.get}  (↑/↓ to change, q to quit)"
         )
         Text(40, 3)(
           if count.get > 0 then "Positive"
