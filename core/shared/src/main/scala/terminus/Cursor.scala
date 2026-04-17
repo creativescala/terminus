@@ -19,6 +19,19 @@ package terminus
 trait Cursor:
   object cursor:
 
+    /** Run the given program `f` with the cursor hidden, restoring cursor
+      * visibility when `f` completes.
+      */
+    def hidden[F, A](f: F ?=> A): (F & effect.Cursor) ?=> A =
+      effect ?=> effect.cursor.hidden(() => f(using effect))
+
+    /** Run the given program `f` with the cursor visible, hiding the cursor
+      * again when `f` completes. Useful to show the cursor within a [[hidden]]
+      * block.
+      */
+    def visible[F, A](f: F ?=> A): (F & effect.Cursor) ?=> A =
+      effect ?=> effect.cursor.visible(() => f(using effect))
+
     /** Move cursor to given column. The left-most column is 1, and coordinates
       * increase to the right.
       */
