@@ -20,6 +20,23 @@ package terminus.effect
 trait Cursor extends Writer:
   object cursor:
 
+    /** Run the given program `f` with the cursor hidden, restoring cursor
+      * visibility when `f` completes.
+      */
+    def hidden[A](f: () => A): A =
+      write(AnsiCodes.cursor.hide)
+      try f()
+      finally write(AnsiCodes.cursor.show)
+
+    /** Run the given program `f` with the cursor visible, hiding the cursor
+      * again when `f` completes. Useful to show the cursor within a [[hidden]]
+      * block.
+      */
+    def visible[A](f: () => A): A =
+      write(AnsiCodes.cursor.show)
+      try f()
+      finally write(AnsiCodes.cursor.hide)
+
     /** Move cursor to given column. The left-most column is 1, and coordinates
       * increase to the right.
       */

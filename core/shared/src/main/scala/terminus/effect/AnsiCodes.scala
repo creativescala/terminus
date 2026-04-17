@@ -60,6 +60,12 @@ object AnsiCodes:
     val save: String =
       s"${ESC}7"
 
+    /** Hide the cursor. */
+    val hide: String = csi("?25l")
+
+    /** Show the cursor. */
+    val show: String = csi("?25h")
+
     object style:
       val default = s"${ESC}0 q"
 
