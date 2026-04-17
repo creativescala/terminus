@@ -19,6 +19,9 @@ package terminus.ui
 import terminus.AlternateScreenMode
 import terminus.Cursor
 import terminus.Erase
+import terminus.Key
+import terminus.KeyReader
+import terminus.RawMode
 import terminus.Writer
 import terminus.effect
 
@@ -35,7 +38,7 @@ class FullScreen() extends RootContext:
   def add(component: Component): Unit =
     children += component
 
-  def render(using Terminal): Unit =
+  private[ui] def toBuffer(): Buffer =
     val currentSize = size
     val buf = Buffer(currentSize.width, currentSize.height)
     var y = 0
@@ -44,18 +47,91 @@ class FullScreen() extends RootContext:
       child.render(Rect(0, y, childSize.width, childSize.height), buf)
       y += childSize.height
     }
-    buf.render
+    buf
+
+  def render(using Terminal): Unit =
+    toBuffer().render
 
 object FullScreen:
   type Terminal = effect.AlternateScreenMode & effect.Erase &
     terminus.ui.Terminal
   type Program[A] = FullScreen.Terminal ?=> A
 
-  object Terminal extends AlternateScreenMode, Cursor, Erase, Writer
+  type InteractiveTerminal =
+    FullScreen.Terminal & effect.KeyReader & effect.RawMode
+  type InteractiveProgram[A] = InteractiveTerminal ?=> A
 
-  def apply[A](f: RenderContext ?=> A): FullScreen.Program[A] =
+  object Terminal extends AlternateScreenMode, Cursor, Erase, Writer
+  object InteractiveTerminal
+      extends AlternateScreenMode,
+        Cursor,
+        Erase,
+        KeyReader,
+        RawMode,
+        Writer
+
+  def apply[A](f: AppContent[A]): FullScreen.Program[A] =
     val fullScreen = new FullScreen()
-    val result = f(using fullScreen)
+    given AppContext = noopAppContext(fullScreen)
+    val result = f
     FullScreen.Terminal.erase.screen()
     fullScreen.render
     result
+
+  /** Run an interactive event loop.
+    *
+    * `f` is called once to build the component tree and register event
+    * handlers. The tree is then rendered, and the loop blocks on key input,
+    * dispatching to registered handlers and re-rendering whenever a signal
+    * changes. The loop exits when [[EventContext.stop]] is called or stdin
+    * reaches EOF.
+    */
+  def run(f: AppContent[Unit]): InteractiveProgram[Unit] = t ?=>
+    val ec = new EventContextImpl()
+    val fullScreen = new FullScreen()
+
+    given AppContext = new AppContext:
+      private[ui] def invalidate(): Unit = ec.scheduleRerender()
+      def createSignal[A](initial: A): Signal[A] = ec.createSignal(initial)
+      def onKey(key: Key)(handler: => Unit): Unit = ec.onKey(key)(handler)
+      def stop(): Unit = ec.stop()
+      def size: Size = fullScreen.size
+      def add(component: Component): Unit = fullScreen.add(component)
+
+    f // build component tree and register handlers
+
+    InteractiveTerminal.raw {
+      InteractiveTerminal.erase.screen()
+
+      var prevBuffer: Option[Buffer] = None
+
+      def renderFrame(): Unit =
+        val buf = fullScreen.toBuffer()
+        prevBuffer match
+          case None    => buf.render
+          case Some(p) => buf.renderDiff(p)
+        prevBuffer = Some(buf)
+        ec.clearRerender()
+
+      renderFrame()
+
+      while ec.running do
+        InteractiveTerminal.readKey() match
+          case terminus.Eof => ec.stop()
+          case key: Key     =>
+            ec.dispatch(key)
+            if ec.needsRerender then renderFrame()
+    }
+
+  /** A no-op AppContext for non-interactive (single-render) use. */
+  private def noopAppContext(fullScreen: FullScreen): AppContext =
+    new AppContext:
+      private[ui] def invalidate(): Unit = ()
+      def createSignal[A](initial: A): Signal[A] = new Signal[A]:
+        private var value = initial
+        def get: A = value
+        def set(a: A): Unit = value = a
+      def onKey(key: Key)(handler: => Unit): Unit = ()
+      def stop(): Unit = ()
+      def size: Size = fullScreen.size
+      def add(component: Component): Unit = fullScreen.add(component)

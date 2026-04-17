@@ -29,7 +29,7 @@ object Text:
   def component(
       width: Int,
       height: Int,
-      text: String,
+      text: => String,
       box: ComponentStyle = ComponentStyle.default,
       content: Style = Style.default
   ): Component =
@@ -46,5 +46,5 @@ object Text:
       height: Int,
       box: ComponentStyle = ComponentStyle.default,
       content: Style = Style.default
-  )(text: String)(using ctx: RenderContext): Unit =
+  )(text: => String)(using ctx: RenderContext): Unit =
     ctx.add(component(width, height, text, box, content))

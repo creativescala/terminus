@@ -16,6 +16,7 @@
 
 package terminus.ui
 
+import terminus.Key
 import terminus.NativeTerminal
 import terminus.ui.component.Text
 import terminus.ui.style.Color
@@ -92,3 +93,28 @@ import terminus.ui.style.Underline
     program
     Terminal.newline
   }
+
+// Run with: sbt 'uiNative/runMain terminus.ui.interactiveDemo'
+@main def interactiveDemo(): Unit =
+  val program: FullScreen.InteractiveProgram[Unit] =
+    FullScreen.run { ctx ?=>
+      val count = ctx.createSignal(0)
+
+      ctx.onKey(Key.up) { count.update(_ + 1) }
+      ctx.onKey(Key.down) { count.update(_ - 1) }
+      ctx.onKey(Key.escape) { ctx.stop() }
+      ctx.onKey(Key.controlC) { ctx.stop() }
+
+      Column {
+        Text(40, 3)(
+          s"Count: ${count.get}  (↑/↓ to change, Esc to quit)"
+        )
+        Text(40, 3)(
+          if count.get > 0 then "Positive"
+          else if count.get < 0 then "Negative"
+          else "Zero"
+        )
+      }
+    }
+
+  NativeTerminal.run(program)

@@ -84,7 +84,7 @@ object NativeTerminal extends Terminal, WithEffect, TerminalKeyReader:
     }
 
   def flush(): Unit =
-    val _ = libc.stdio.fflush(libc.stdio.stdin)
+    val _ = libc.stdio.fflush(libc.stdio.stdout)
     ()
 
   def write(char: Char): Unit =
