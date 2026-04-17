@@ -46,17 +46,20 @@ Rather than FRP's higher-order style (`signal.map(v => ...)`) the reactive conte
 
 ```scala
 trait ReadSignal[A]:
-  def get(using ComponentContext): A  // tracked: registers a dependency
-  def peek: A                         // untracked: for use in event handlers
+  def get: A
 
 trait Signal[A] extends ReadSignal[A]:
   def set(a: A): Unit
-  def update(f: A => A): Unit = set(f(peek))
+  def update(f: A => A): Unit = set(f(get))
 ```
 
 Signals are created and owned by an `EventContext`. Their lifetime matches the context's lifetime — useful for screen-level resource management.
 
-### Component content type aliases
+Currently `get` has no tracking: any signal change triggers a full-frame re-render regardless of which components read that signal. The intended future API is `get(using ComponentContext)` (tracked) and `peek: A` (untracked, for use in event handlers), which would enable subtree re-rendering.
+
+### `AppContext` and content type aliases
+
+`AppContext` is a trait combining `ComponentContext`, `EventContext`, and `RenderContext`. It is the single context type passed through the component tree. Layout components (Row, Column) use `AppContext.child(parent, rc)` to produce a child context that delegates signal creation and event registration to the parent but uses a new `RenderContext` for sub-layout.
 
 To avoid verbose context function types at every call site:
 
@@ -64,9 +67,8 @@ To avoid verbose context function types at every call site:
 // Content of a leaf component (e.g. Text): can read signals, no sub-layout
 type LeafContent[A] = ComponentContext ?=> A
 
-// Body of a layout component (e.g. Row, Column): can read signals,
-// register handlers, and create sub-components
-type AppContent[A] = ComponentContext & EventContext & RenderContext ?=> A
+// Body of a layout component (e.g. Row, Column): full reactive + layout context
+type AppContent[A] = AppContext ?=> A
 ```
 
 ### Component trait
@@ -110,8 +112,16 @@ The interactive event loop additionally requires `effect.KeyReader & effect.RawM
 
 ## Deferred work
 
-- **Subtree re-rendering**: `ComponentContext` currently triggers a full-frame re-render. To support subtree re-rendering, `ComponentContext` needs to capture the component's bounds and buffer reference so it can re-render only the affected region.
-- **Focus model**: event dispatch to the focused component is not yet implemented. Current thinking: global handlers intercept first, then focused component's handlers.
+- **Focus model**: the most immediate missing piece. Event dispatch currently only uses global handlers registered via `AppContext.onKey`. A focused component should receive key events first; global handlers intercept only what the focused component doesn't consume. Focus will need to be a signal (so components can react to focus changes) and the event loop needs to track the currently focused component.
+
+- **Dynamic layout**: component sizes are currently fixed at construction time (e.g. `Text(width, height)`). The layout pass runs once during setup, so components cannot resize in response to signal changes. Dynamic layout requires either re-running the setup phase on resize, or a proper two-pass layout system (measure → arrange) that runs each frame.
+
+- **More components**: at minimum, a text input / field component is needed for interactive use.
+
+- **Subtree re-rendering**: `ComponentContext` currently triggers a full-frame re-render. To support subtree re-rendering, `ComponentContext` needs to capture the component's bounds and buffer reference so it can re-render only the affected region. Depends on signal tracking (`get(using ComponentContext)`) being implemented first.
+
 - **Derived signals**: `ReadSignal.map` is deferred. Manual handler functions updating signals are sufficient for now.
-- **Resize handling**: terminal resize events are not yet handled.
+
+- **Resize handling**: terminal resize events (`SIGWINCH`) are not yet handled. Dynamic layout is a prerequisite for this to be useful.
+
 - **`effect.Dimensions` on Scala Native**: requires Posix `ioctl` — may be better to contribute upstream than implement in Terminus.
