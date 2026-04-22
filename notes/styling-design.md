@@ -6,7 +6,7 @@ Three distinct levels:
 
 - **Cell-level `Style`** — color, bold, italic, underline, etc. Used everywhere, passed directly to `Buffer.putString` / `Buffer.put`. Already implemented.
 - **Component-level style** — padding, border, background fill. Parameters on the component itself, not on `Style`.
-- **Parent-context style** — gutters, alignment modes. Expressed through a more specific `RenderContext` subtype, only accessible when the parent provides it (compile-time enforcement).
+- **Parent-context style** — gutters, alignment modes. Expressed through a more specific `LayoutContext` subtype, only accessible when the parent provides it (compile-time enforcement).
 
 ## No cascade
 
@@ -18,7 +18,7 @@ Content → padding → border → margin is a good foundation. Well understood,
 
 ## Component-specific styles
 
-Different components may have style properties that don't apply universally. Example: `Columns`/`Grid` could expose gutter width to children via a typed `RenderContext` subtype. A child that tries to specify a gutter in a plain `Column` context would be a compile error — unlike CSS where unknown properties silently do nothing.
+Different components may have style properties that don't apply universally. Example: `Columns`/`Grid` could expose gutter width to children via a typed `LayoutContext` subtype. A child that tries to specify a gutter in a plain `Column` context would be a compile error — unlike CSS where unknown properties silently do nothing.
 
 ## Labelled borders
 
@@ -41,4 +41,4 @@ Rough priority for immediate work:
 2. Separate box-border style from content style in `Text`
 3. Padding
 4. Separators (later, as a parent container feature)
-5. Alignment / gutter (later, tied to dynamic layout and typed `RenderContext`)
+5. Alignment / gutter (later, tied to dynamic layout and typed `LayoutContext`)

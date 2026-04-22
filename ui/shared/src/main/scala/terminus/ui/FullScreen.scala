@@ -133,7 +133,8 @@ object FullScreen:
       private[ui] def invalidate(): Unit = ()
       def createSignal[A](initial: A): Signal[A] = new Signal[A]:
         private var value = initial
-        def get: A = value
+        def get(using RenderContext): A = value
+        def peek: A = value
         def set(a: A): Unit = value = a
       def onKey(key: Key)(handler: => Unit): Unit = ()
       def registerFocusable(): FocusId = FocusId(0)

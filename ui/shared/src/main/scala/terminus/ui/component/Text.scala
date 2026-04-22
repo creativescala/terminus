@@ -18,8 +18,8 @@ package terminus.ui.component
 
 import terminus.ui.Buffer
 import terminus.ui.Component
+import terminus.ui.LayoutContext
 import terminus.ui.Rect
-import terminus.ui.RenderContext
 import terminus.ui.Size
 import terminus.ui.style.ComponentStyle
 import terminus.ui.style.Style
@@ -46,5 +46,5 @@ object Text:
       height: Int,
       box: ComponentStyle = ComponentStyle.default,
       content: Style = Style.default
-  )(text: => String)(using ctx: RenderContext): Unit =
+  )(text: => String)(using ctx: LayoutContext): Unit =
     ctx.add(component(width, height, text, box, content))

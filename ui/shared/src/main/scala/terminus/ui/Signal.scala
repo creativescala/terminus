@@ -21,7 +21,23 @@ package terminus.ui
   * Passed to components that only need to observe a value, not change it.
   */
 trait ReadSignal[A]:
-  def get: A
+  /** Read the signal's current value, registering the enclosing component as a
+    * subscriber. Must be called in render scope (inside a component content
+    * lambda) where a [[RenderContext]] is available.
+    *
+    * The [[RenderContext]] parameter is unused in the current full-frame
+    * re-render implementation; it is here to enforce the render-scope
+    * constraint at the type level and will drive targeted re-rendering once
+    * dependency tracking is fully implemented.
+    */
+  def get(using RenderContext): A
+
+  /** Read the signal's current value without registering a dependency.
+    *
+    * Use in event handlers and other setup-scope code where no
+    * [[RenderContext]] is in scope. Does not trigger re-render on its own.
+    */
+  def peek: A
 
 /** A readable and writable reactive value owned by an [[EventContext]].
   *
@@ -30,13 +46,14 @@ trait ReadSignal[A]:
   */
 trait Signal[A] extends ReadSignal[A]:
   def set(a: A): Unit
-  def update(f: A => A): Unit = set(f(get))
+  def update(f: A => A): Unit = set(f(peek))
 
 private[ui] final class SignalImpl[A](
     private var value: A,
     private val ec: EventContextImpl
 ) extends Signal[A]:
-  def get: A = value
+  def get(using RenderContext): A = value
+  def peek: A = value
 
   def set(a: A): Unit =
     value = a

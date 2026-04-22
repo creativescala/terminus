@@ -25,7 +25,7 @@ Our approach follows the Jetpack Compose model but makes the implicit capabiliti
 
 The circular dependency between components is broken by **signals**: shared reactive values that components reference indirectly. Neither component holds a reference to the other; both hold a reference to the same `Signal`. This is the "events as values" solution.
 
-Rather than FRP's higher-order style (`signal.map(v => ...)`) the reactive context is a capability. Reading a signal inside a component body — `signal.get` — implicitly registers the component as a subscriber via the `ComponentContext` in scope. This is the "events as capabilities" solution: first-order code, no explicit subscription plumbing.
+Rather than FRP's higher-order style (`signal.map(v => ...)`) the reactive context is a capability. Reading a signal inside a component body — `signal.get` — implicitly registers the component as a subscriber via the `RenderContext` in scope. This is the "events as capabilities" solution: first-order code, no explicit subscription plumbing.
 
 ## Key types
 
@@ -38,9 +38,9 @@ Rather than FRP's higher-order style (`signal.map(v => ...)`) the reactive conte
 
 ### Capabilities
 
-- **`RenderContext`** — layout effect. Components add children to it; the call stack implicitly encodes the layout tree. `RootContext` flushes to terminal; `ChildContext` renders into a buffer region.
+- **`LayoutContext`** — layout effect. Components add children to it; the call stack implicitly encodes the layout tree. `RootContext` flushes to terminal; `ChildContext` renders into a buffer region.
 - **`EventContext`** — the reactive runtime. Owns signals (their lifetime is tied to the context), registers key handlers, and schedules re-renders when signals change.
-- **`ComponentContext`** — the reactive scope for a single component during render. `Signal.get` uses it to register the component as a subscriber. When the signal changes, `invalidate()` is called on all subscribers, triggering a re-render.
+- **`RenderContext`** — the reactive scope for a single component during render. `Signal.get` uses it to register the component as a subscriber. When the signal changes, `invalidate()` is called on all subscribers, triggering a re-render.
 
 ### Signals
 
@@ -55,17 +55,17 @@ trait Signal[A] extends ReadSignal[A]:
 
 Signals are created and owned by an `EventContext`. Their lifetime matches the context's lifetime — useful for screen-level resource management.
 
-Currently `get` has no tracking: any signal change triggers a full-frame re-render regardless of which components read that signal. The intended future API is `get(using ComponentContext)` (tracked) and `peek: A` (untracked, for use in event handlers), which would enable subtree re-rendering.
+Currently `get` has no tracking: any signal change triggers a full-frame re-render regardless of which components read that signal. The intended future API is `get(using RenderContext)` (tracked) and `peek: A` (untracked, for use in event handlers), which would enable subtree re-rendering.
 
 ### `AppContext` and content type aliases
 
-`AppContext` is a trait combining `ComponentContext`, `EventContext`, and `RenderContext`. It is the single context type passed through the component tree. Layout components (Row, Column) use `AppContext.child(parent, rc)` to produce a child context that delegates signal creation and event registration to the parent but uses a new `RenderContext` for sub-layout.
+`AppContext` is a trait combining `RenderContext`, `EventContext`, and `LayoutContext`. It is the single context type passed through the component tree. Layout components (Row, Column) use `AppContext.child(parent, rc)` to produce a child context that delegates signal creation and event registration to the parent but uses a new `LayoutContext` for sub-layout.
 
 To avoid verbose context function types at every call site:
 
 ```scala
 // Content of a leaf component (e.g. Text): can read signals, no sub-layout
-type LeafContent[A] = ComponentContext ?=> A
+type LeafContent[A] = RenderContext ?=> A
 
 // Body of a layout component (e.g. Row, Column): full reactive + layout context
 type AppContent[A] = AppContext ?=> A
@@ -90,9 +90,9 @@ Two-phase: layout pass (size accumulation via `add`) then render pass (writing t
 ## Lifecycle
 
 1. **Setup** (runs once): the app function is called with `AppContext` in scope. Signals are created, key handlers registered, and the component tree built.
-2. **Render** (runs on signal change): the component tree's render methods are called. Leaf components evaluate their `LeafContent` closures with a fresh `ComponentContext`, which re-registers signal dependencies and returns the current value.
+2. **Render** (runs on signal change): the component tree's render methods are called. Leaf components evaluate their `LeafContent` closures with a fresh `RenderContext`, which re-registers signal dependencies and returns the current value.
 3. **Event dispatch**: the event loop reads a key, dispatches to registered handlers. Handlers inside a `FocusScope` are gated on focus; global handlers always fire.
-4. **Invalidation and re-render**: `Signal.set` calls `scheduleRerender()`. Currently this triggers a full-frame re-render; later, subtree re-rendering will be possible once bounds are captured in the `ComponentContext`.
+4. **Invalidation and re-render**: `Signal.set` calls `scheduleRerender()`. Currently this triggers a full-frame re-render; later, subtree re-rendering will be possible once bounds are captured in the `RenderContext`.
 
 ### Setup scope vs render scope
 
@@ -102,7 +102,7 @@ This distinction is the most important thing to understand about the programming
 
 **Render scope** is a leaf component's content lambda — the `=> String` passed to `Text`, for example. This code runs on *every render pass*. Reactive values read here return their current value each frame. This is where signal reads and `isFocused` checks belong.
 
-The current API does not enforce this distinction at the type level — both scopes receive an `AppContext` / `ComponentContext`, so nothing stops you from reading a signal in setup scope and getting a stale value. This is expected to resolve naturally when dependency tracking is added: `signal.get` will require a `ComponentContext` in scope, which is only available inside content lambdas, making the setup/render boundary compile-time enforced.
+The current API does not enforce this distinction at the type level — both scopes receive an `AppContext` / `RenderContext`, so nothing stops you from reading a signal in setup scope and getting a stale value. This is expected to resolve naturally when dependency tracking is added: `signal.get` will require a `RenderContext` in scope, which is only available inside content lambdas, making the setup/render boundary compile-time enforced.
 
 ## Effect layer
 
@@ -128,7 +128,7 @@ The interactive event loop additionally requires `effect.KeyReader & effect.RawM
 
 - **More components**: at minimum, a text input / field component is needed for interactive use.
 
-- **Subtree re-rendering**: `ComponentContext` currently triggers a full-frame re-render. To support subtree re-rendering, `ComponentContext` needs to capture the component's bounds and buffer reference so it can re-render only the affected region. Depends on signal tracking (`get(using ComponentContext)`) being implemented first.
+- **Subtree re-rendering**: `RenderContext` currently triggers a full-frame re-render. To support subtree re-rendering, `RenderContext` needs to capture the component's bounds and buffer reference so it can re-render only the affected region. Depends on signal tracking (`get(using RenderContext)`) being implemented first.
 
 - **Derived signals**: `ReadSignal.map` is deferred. Manual handler functions updating signals are sufficient for now.
 
