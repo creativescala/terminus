@@ -27,12 +27,20 @@ import terminus.Key
   * Layout components create a child AppContext that forwards ComponentContext
   * and EventContext from the parent while substituting their own RenderContext.
   */
-trait AppContext extends ComponentContext, EventContext, RenderContext
+trait AppContext extends ComponentContext, EventContext, RenderContext:
+  /** Returns true if this context is inside a focused [[FocusScope]], or if it
+    * is not inside any [[FocusScope]] at all (global scope is always active).
+    *
+    * Components use this during rendering to adjust their appearance (e.g.
+    * highlight a border) when they have focus.
+    */
+  def isFocused: Boolean = true
 
 /** Content of a leaf component (e.g. Text).
   *
   * The [[ComponentContext]] in scope enables signal reads to register the
-  * component as a subscriber for future subtree re-render support.
+  * component as a subscriber, so that signal changes can trigger a targeted
+  * re-render.
   */
 type LeafContent[A] = ComponentContext ?=> A
 
@@ -56,6 +64,9 @@ object AppContext:
       private[ui] def invalidate(): Unit = parent.invalidate()
       def createSignal[A](initial: A): Signal[A] = parent.createSignal(initial)
       def onKey(key: Key)(handler: => Unit): Unit = parent.onKey(key)(handler)
+      def registerFocusable(): FocusId = parent.registerFocusable()
+      private[ui] def focusedId: Option[FocusId] = parent.focusedId
       def stop(): Unit = parent.stop()
       def size: Size = rc.size
       def add(component: Component): Unit = rc.add(component)
+      override def isFocused: Boolean = parent.isFocused

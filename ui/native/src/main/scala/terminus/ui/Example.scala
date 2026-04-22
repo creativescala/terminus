@@ -98,22 +98,32 @@ import terminus.ui.style.Underline
 @main def interactiveDemo(): Unit =
   val program: FullScreen.InteractiveProgram[Unit] =
     FullScreen.run { ctx ?=>
-      val count = ctx.createSignal(0)
+      val countA = ctx.createSignal(0)
+      val countB = ctx.createSignal(0)
 
-      ctx.onKey(Key.up) { count.update(_ + 1) }
-      ctx.onKey(Key.down) { count.update(_ - 1) }
       ctx.onKey(Key('q')) { ctx.stop() }
       ctx.onKey(Key.controlC) { ctx.stop() }
 
       Column {
-        Text(40, 3)(
-          s"Count: ${count.get}  (↑/↓ to change, q to quit)"
-        )
-        Text(40, 3)(
-          if count.get > 0 then "Positive"
-          else if count.get < 0 then "Negative"
-          else "Zero"
-        )
+        Text(50, 3)("Tab to switch focus, ↑/↓ to change, q to quit")
+
+        FocusScope { ctx ?=>
+          ctx.onKey(Key.up) { countA.update(_ + 1) }
+          ctx.onKey(Key.down) { countA.update(_ - 1) }
+          Text(50, 3) {
+            val focused = ctx.isFocused
+            s"${if focused then "▶ " else "  "}Counter A: ${countA.get}"
+          }
+        }
+
+        FocusScope { ctx ?=>
+          ctx.onKey(Key.up) { countB.update(_ + 1) }
+          ctx.onKey(Key.down) { countB.update(_ - 1) }
+          Text(50, 3) {
+            val focused = ctx.isFocused
+            s"${if focused then "▶ " else "  "}Counter B: ${countB.get}"
+          }
+        }
       }
     }
 

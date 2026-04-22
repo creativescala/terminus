@@ -89,10 +89,20 @@ Two-phase: layout pass (size accumulation via `add`) then render pass (writing t
 
 ## Lifecycle
 
-1. **Setup** (runs once): the app function is called with `EventContext` and `RenderContext` in scope. Signals are created, key handlers registered, and the component tree built.
+1. **Setup** (runs once): the app function is called with `AppContext` in scope. Signals are created, key handlers registered, and the component tree built.
 2. **Render** (runs on signal change): the component tree's render methods are called. Leaf components evaluate their `LeafContent` closures with a fresh `ComponentContext`, which re-registers signal dependencies and returns the current value.
-3. **Event dispatch**: the event loop reads a key, dispatches to registered handlers (global handlers first, then focused component — focus model TBD). Handlers update signals via `set` or `update`.
-4. **Invalidation and re-render**: `Signal.set` calls `invalidate()` on all subscribed `ComponentContext`s. Initially this triggers a full-frame re-render; later, subtree re-rendering will be possible once bounds are captured in the `ComponentContext`.
+3. **Event dispatch**: the event loop reads a key, dispatches to registered handlers. Handlers inside a `FocusScope` are gated on focus; global handlers always fire.
+4. **Invalidation and re-render**: `Signal.set` calls `scheduleRerender()`. Currently this triggers a full-frame re-render; later, subtree re-rendering will be possible once bounds are captured in the `ComponentContext`.
+
+### Setup scope vs render scope
+
+This distinction is the most important thing to understand about the programming model, and currently the most error-prone.
+
+**Setup scope** is the `AppContent` body. Code here runs *once* when the screen is first built. It is the right place for: creating signals, registering key handlers, and building the component tree. Reactive values read here (e.g. `signal.get`, `ctx.isFocused`) capture a single value and do not update.
+
+**Render scope** is a leaf component's content lambda — the `=> String` passed to `Text`, for example. This code runs on *every render pass*. Reactive values read here return their current value each frame. This is where signal reads and `isFocused` checks belong.
+
+The current API does not enforce this distinction at the type level — both scopes receive an `AppContext` / `ComponentContext`, so nothing stops you from reading a signal in setup scope and getting a stale value. This is expected to resolve naturally when dependency tracking is added: `signal.get` will require a `ComponentContext` in scope, which is only available inside content lambdas, making the setup/render boundary compile-time enforced.
 
 ## Effect layer
 
@@ -112,7 +122,7 @@ The interactive event loop additionally requires `effect.KeyReader & effect.RawM
 
 ## Deferred work
 
-- **Focus model**: the most immediate missing piece. Event dispatch currently only uses global handlers registered via `AppContext.onKey`. A focused component should receive key events first; global handlers intercept only what the focused component doesn't consume. Focus will need to be a signal (so components can react to focus changes) and the event loop needs to track the currently focused component.
+- **Focus ergonomics**: basic focus is implemented via `FocusScope` and `isFocused`. The remaining rough edge is that `isFocused` must be read inside a leaf content lambda (render scope) — reading it in the `FocusScope` body (setup scope) captures a stale value. This will resolve when dependency tracking enforces the setup/render boundary at the type level.
 
 - **Dynamic layout**: component sizes are currently fixed at construction time (e.g. `Text(width, height)`). The layout pass runs once during setup, so components cannot resize in response to signal changes. Dynamic layout requires either re-running the setup phase on resize, or a proper two-pass layout system (measure → arrange) that runs each frame.
 
