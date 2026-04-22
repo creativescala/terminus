@@ -33,6 +33,18 @@ trait EventContext:
   def createSignal[A](initial: A): Signal[A]
   def onKey(key: Key)(handler: => Unit): Unit
 
+  /** Register a new focusable scope and return its [[FocusId]].
+    *
+    * Scopes are registered in call order, which determines the Tab traversal
+    * order. The first registered scope receives focus initially.
+    */
+  def registerFocusable(): FocusId
+
+  /** The [[FocusId]] of the currently focused scope, or [[None]] if no
+    * focusable scopes have been registered.
+    */
+  private[ui] def focusedId: Option[FocusId]
+
   /** Stop the event loop, causing [[FullScreen.run]] to return. */
   def stop(): Unit
 
@@ -41,6 +53,15 @@ private[ui] final class EventContextImpl extends EventContext:
   private var _running: Boolean = true
   private val keyHandlers: mutable.Map[Key, mutable.ListBuffer[() => Unit]] =
     mutable.Map.empty
+
+  private var _nextFocusId: Int = 0
+  private val _focusables: mutable.ListBuffer[FocusId] =
+    mutable.ListBuffer.empty
+  private var _focusedId: Option[FocusId] = None
+
+  // Wire Tab cycling at construction time so it is always available.
+  onKey(Key.tab) { advanceFocus() }
+  onKey(Key.backTab) { retreatFocus() }
 
   private[ui] def needsRerender: Boolean = _needsRerender
   private[ui] def running: Boolean = _running
@@ -55,7 +76,39 @@ private[ui] final class EventContextImpl extends EventContext:
       handler
     )
 
+  def registerFocusable(): FocusId =
+    val id = FocusId(_nextFocusId)
+    _nextFocusId += 1
+    _focusables += id
+    if _focusedId.isEmpty then _focusedId = Some(id)
+    id
+
+  private[ui] def focusedId: Option[FocusId] = _focusedId
+
   def stop(): Unit = _running = false
+
+  private def advanceFocus(): Unit =
+    if _focusables.size > 1 then
+      _focusedId match
+        case None =>
+          _focusedId = _focusables.headOption
+          scheduleRerender()
+        case Some(current) =>
+          val next = (_focusables.indexOf(current) + 1) % _focusables.size
+          _focusedId = Some(_focusables(next))
+          scheduleRerender()
+
+  private def retreatFocus(): Unit =
+    if _focusables.size > 1 then
+      _focusedId match
+        case None =>
+          _focusedId = _focusables.lastOption
+          scheduleRerender()
+        case Some(current) =>
+          val idx = _focusables.indexOf(current)
+          val prev = (idx - 1 + _focusables.size) % _focusables.size
+          _focusedId = Some(_focusables(prev))
+          scheduleRerender()
 
   private[ui] def dispatch(key: Key): Unit =
     keyHandlers.get(key).foreach(_.foreach(_.apply()))
