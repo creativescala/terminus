@@ -18,21 +18,35 @@ package terminus
 
 import munit.FunSuite
 
+import scala.scalanative.meta.LinktimeInfo
 import scala.scalanative.posix
 import scala.scalanative.unsafe.CInt
 import scala.scalanative.unsafe.Ptr
 import scala.scalanative.unsafe.Zone
 import scala.scalanative.unsigned.*
 
-class CLongTermiosAccessSuite extends FunSuite:
-  val termios = clongTermiosAccess
+class TermiosAccessSuite extends FunSuite:
+  private given termios: TermiosAccess[?] =
+    if LinktimeInfo.isMac then clongTermiosAccess
+    else if LinktimeInfo.isLinux then cintTermiosAccess
+    else
+      sys.error(
+        s"""Your platform, {LinktimeInfo.target.os}, is not currently supported by Terminus on Scala Native.
+           |
+           |You can use a different backend, such as the JVM, which is likely to support your platform. You can
+           |also open an issue at
+           |
+           |   https://github.com/creativescala/terminus/issues
+           |
+           |to get support added for your platform.""".stripMargin
+      )
 
-  def testSettingSpecialCharacter(
-      attrs: Ptr[TermiosStruct.clong_flags],
+  def testSettingSpecialCharacter[T](
+      attrs: Ptr[T],
       idx: CInt,
       value: UByte,
       name: String
-  )(using Zone): Unit =
+  )(using termios: TermiosAccess[T], zone: Zone): Unit =
     attrs.setSpecialCharacter(idx, value)
     termios.set(attrs)
     val updated = termios.get
@@ -46,22 +60,21 @@ class CLongTermiosAccessSuite extends FunSuite:
         val attrs = termios.get
 
         List(
-          (posix.termios.VEOF, "VEOF"),
-          (posix.termios.VEOL, "VEOL"),
-          (posix.termios.VERASE, "VERASE"),
-          (posix.termios.VINTR, "VINTR"),
-          (posix.termios.VKILL, "VKILL"),
-          (posix.termios.VMIN, "VMIN"),
-          (posix.termios.VQUIT, "VQUIT"),
-          (posix.termios.VSTART, "VSTART"),
-          (posix.termios.VSTOP, "VSTOP"),
-          (posix.termios.VSUSP, "VSUSP"),
-          (posix.termios.VTIME, "VTIME")
-        ).foreach { (idx, name) =>
-          testSettingSpecialCharacter(attrs, idx, 1.toUByte, name)
-          testSettingSpecialCharacter(attrs, idx, 2.toUByte, name)
-          testSettingSpecialCharacter(attrs, idx, 3.toUByte, name)
-          testSettingSpecialCharacter(attrs, idx, 4.toUByte, name)
+          (posix.termios.VEOF, "VEOF", Seq(0)),
+          (posix.termios.VEOL, "VEOL", Seq(1, 2)),
+          (posix.termios.VERASE, "VERASE", Seq(1, 2, 3, 4)),
+          (posix.termios.VINTR, "VINTR", Seq(1, 2, 3, 4)),
+          (posix.termios.VKILL, "VKILL", Seq(1, 2, 3, 4)),
+          (posix.termios.VMIN, "VMIN", Seq(0, 1, 2)),
+          (posix.termios.VQUIT, "VQUIT", Seq(1, 2, 3, 4)),
+          (posix.termios.VSTART, "VSTART", Seq(1, 2, 3, 4)),
+          (posix.termios.VSTOP, "VSTOP", Seq(1, 2, 3, 4)),
+          (posix.termios.VSUSP, "VSUSP", Seq(1, 2, 3, 4)),
+          (posix.termios.VTIME, "VTIME", Seq(1, 2, 3, 4))
+        ).foreach { (idx, name, values) =>
+          values.foreach { v =>
+            testSettingSpecialCharacter(attrs, idx, v.toUByte, name)
+          }
         }
       finally termios.set(orig)
     }
