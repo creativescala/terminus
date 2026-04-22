@@ -16,15 +16,12 @@
 
 package terminus.ui
 
-/** Reactive scope for a component render pass.
-  *
-  * Signal reads inside a component's content use the ComponentContext in scope
-  * to register the component as a subscriber, so that signal changes can
-  * trigger a targeted re-render.
-  *
-  * For the initial full-frame re-render implementation this is a stub; the full
-  * dependency-tracking mechanism will be wired in when subtree re-render is
-  * implemented.
-  */
-trait ComponentContext:
-  private[ui] def invalidate(): Unit
+trait LayoutContext:
+  def size: Size
+  def add(component: Component): Unit
+
+trait RootContext extends LayoutContext:
+  def render(using Terminal): Unit
+
+trait ChildContext extends LayoutContext:
+  def render(bounds: Rect, buf: Buffer): Unit
