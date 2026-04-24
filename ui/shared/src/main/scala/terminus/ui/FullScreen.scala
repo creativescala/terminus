@@ -58,7 +58,8 @@ object FullScreen:
   type Program[A] = FullScreen.Terminal ?=> A
 
   type InteractiveTerminal =
-    FullScreen.Terminal & effect.KeyReader & effect.RawMode
+    FullScreen.Terminal & effect.AlternateScreenMode & effect.KeyReader &
+      effect.RawMode
   type InteractiveProgram[A] = InteractiveTerminal ?=> A
 
   object Terminal extends AlternateScreenMode, Cursor, Erase, Writer
@@ -104,26 +105,37 @@ object FullScreen:
 
     InteractiveTerminal.cursor.hidden {
       InteractiveTerminal.raw {
-        InteractiveTerminal.erase.screen()
+        InteractiveTerminal.alternateScreen {
+          InteractiveTerminal.erase.screen()
 
-        var prevBuffer: Option[Buffer] = None
+          var prevBuffer: Option[Buffer] = None
 
-        def renderFrame(): Unit =
-          val buf = fullScreen.toBuffer()
-          prevBuffer match
-            case None    => buf.render
-            case Some(p) => buf.renderDiff(p)
-          prevBuffer = Some(buf)
-          ec.clearRerender()
+          def renderFrame(): Unit =
+            val buf = fullScreen.toBuffer()
+            prevBuffer match
+              case None    => buf.render
+              case Some(p) =>
+                // If components have resized between frames we cannot diff.
+                // We also clear the screen in this case, as the older content
+                // may take up more space than the new content and we must
+                // ensure it is cleared.
+                if buf.width == p.width && buf.height == p.height then
+                  buf.renderDiff(p)
+                else
+                  InteractiveTerminal.erase.screen()
+                  buf.render
+            prevBuffer = Some(buf)
+            ec.clearRerender()
 
-        renderFrame()
+          renderFrame()
 
-        while ec.running do
-          InteractiveTerminal.readKey() match
-            case terminus.Eof => ec.stop()
-            case key: Key     =>
-              ec.dispatch(key)
-              if ec.needsRerender then renderFrame()
+          while ec.running do
+            InteractiveTerminal.readKey() match
+              case terminus.Eof => ec.stop()
+              case key: Key     =>
+                ec.dispatch(key)
+                if ec.needsRerender then renderFrame()
+        }
       }
     }
 
