@@ -20,6 +20,7 @@ import terminus.ui.Buffer
 import terminus.ui.Component
 import terminus.ui.LayoutContext
 import terminus.ui.Rect
+import terminus.ui.RenderContext
 import terminus.ui.Size
 import terminus.ui.style.ComponentStyle
 import terminus.ui.style.Style
@@ -31,6 +32,9 @@ object Text:
     * When `height` is 0 (the default) the height is computed from the content:
     * the number of `\n`-separated lines plus any border/padding overhead.
     * Pass an explicit positive `height` to fix the size regardless of content.
+    *
+    * If `box.focused` is set, that style is used in place of `box` whenever the
+    * component is inside a focused [[terminus.ui.FocusScope]].
     */
   def component(
       width: Int,
@@ -38,18 +42,23 @@ object Text:
       text: => String,
       box: ComponentStyle = ComponentStyle.default,
       content: Style = Style.default
-  ): Component =
+  )(using rc: RenderContext): Component =
     new Component:
+      private def activeBox: ComponentStyle =
+        if rc.isFocused then box.focused.getOrElse(box) else box
+
       def size: Size =
+        val ab = activeBox
         if height > 0 then Size(width, height)
         else
-          val offset = (if box.border.isDefined then 1 else 0) + box.padding
+          val offset = (if ab.border.isDefined then 1 else 0) + ab.padding
           val lineCount = text.split('\n').length.max(1)
           Size(width, lineCount + 2 * offset)
 
       def render(bounds: Rect, buf: Buffer): Unit =
-        Box.render(bounds, box, buf)
-        val inner = Box.innerRect(bounds, box)
+        val ab = activeBox
+        Box.render(bounds, ab, buf)
+        val inner = Box.innerRect(bounds, ab)
         buf.putString(inner.x, inner.y, text, content)
 
   def apply(
@@ -57,5 +66,5 @@ object Text:
       height: Int = 0,
       box: ComponentStyle = ComponentStyle.default,
       content: Style = Style.default
-  )(text: => String)(using ctx: LayoutContext): Unit =
-    ctx.add(component(width, height, text, box, content))
+  )(text: => String)(using lc: LayoutContext, rc: RenderContext): Unit =
+    lc.add(component(width, height, text, box, content))
