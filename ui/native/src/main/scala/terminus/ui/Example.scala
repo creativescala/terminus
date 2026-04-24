@@ -98,7 +98,8 @@ import terminus.ui.style.Underline
 @main def interactiveDemo(): Unit =
   val focusableBox = ComponentStyle(
     borderStyle = Style(fg = Color.BrightBlack),
-    focused = Some(ComponentStyle(borderStyle = Style(fg = Color.White, bold = true)))
+    focused =
+      Some(ComponentStyle(borderStyle = Style(fg = Color.White, bold = true)))
   )
 
   val program: FullScreen.InteractiveProgram[Unit] =
@@ -110,7 +111,9 @@ import terminus.ui.style.Underline
       ctx.onKey(Key.controlC) { ctx.stop() }
 
       Column {
-        Text(50, box = ComponentStyle.none)("Tab to switch focus, ↑/↓ to change, q to quit")
+        Text(50, box = ComponentStyle.none)(
+          "Tab to switch focus, ↑/↓ to change, q to quit"
+        )
 
         FocusScope { ctx ?=>
           ctx.onKey(Key.up) { countA.update(_ + 1) }
@@ -119,8 +122,8 @@ import terminus.ui.style.Underline
             val count = countA.get
             val footer =
               if count == 0 then ""
-              else if count < 0 then "\n  Negative"
-              else "\n  Positive"
+              else if count < 0 then "\nNegative"
+              else "\nPositive"
             s"Counter A: ${count}${footer}"
           }
         }
@@ -132,8 +135,8 @@ import terminus.ui.style.Underline
             val count = countB.get
             val footer =
               if count == 0 then ""
-              else if count < 0 then "\n  Negative"
-              else "\n  Positive"
+              else if count < 0 then "\nNegative"
+              else "\nPositive"
             s"Counter B: ${count}${footer}"
           }
         }
