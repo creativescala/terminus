@@ -30,8 +30,8 @@ object Text:
   /** Create a Text component.
     *
     * When `height` is 0 (the default) the height is computed from the content:
-    * the number of `\n`-separated lines plus any border/padding overhead.
-    * Pass an explicit positive `height` to fix the size regardless of content.
+    * the number of `\n`-separated lines plus any border/padding overhead. Pass
+    * an explicit positive `height` to fix the size regardless of content.
     *
     * If `box.focused` is set, that style is used in place of `box` whenever the
     * component is inside a focused [[terminus.ui.FocusScope]].
