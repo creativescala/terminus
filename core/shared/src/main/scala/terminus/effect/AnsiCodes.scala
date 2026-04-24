@@ -205,7 +205,7 @@ object AnsiCodes:
       */
     object alternateScreen:
       val on: String = csi("?1049h")
-      val off: String = csi("?11049l")
+      val off: String = csi("?1049l")
 
   object scroll:
 
