@@ -96,6 +96,11 @@ import terminus.ui.style.Underline
 
 // Run with: sbt 'uiNative/runMain terminus.ui.interactiveDemo'
 @main def interactiveDemo(): Unit =
+  val focusableBox = ComponentStyle(
+    borderStyle = Style(fg = Color.BrightBlack),
+    focused = Some(ComponentStyle(borderStyle = Style(fg = Color.White, bold = true)))
+  )
+
   val program: FullScreen.InteractiveProgram[Unit] =
     FullScreen.run { ctx ?=>
       val countA = ctx.createSignal(0)
@@ -105,33 +110,31 @@ import terminus.ui.style.Underline
       ctx.onKey(Key.controlC) { ctx.stop() }
 
       Column {
-        Text(50)("Tab to switch focus, ↑/↓ to change, q to quit")
+        Text(50, box = ComponentStyle.none)("Tab to switch focus, ↑/↓ to change, q to quit")
 
         FocusScope { ctx ?=>
           ctx.onKey(Key.up) { countA.update(_ + 1) }
           ctx.onKey(Key.down) { countA.update(_ - 1) }
-          Text(50) {
-            val focused = ctx.isFocused
+          Text(50, box = focusableBox) {
             val count = countA.get
             val footer =
               if count == 0 then ""
               else if count < 0 then "\n  Negative"
               else "\n  Positive"
-            s"""${if focused then "▶ " else "  "}Counter A: ${count}${footer}"""
+            s"Counter A: ${count}${footer}"
           }
         }
 
         FocusScope { ctx ?=>
           ctx.onKey(Key.up) { countB.update(_ + 1) }
           ctx.onKey(Key.down) { countB.update(_ - 1) }
-          Text(50) {
-            val focused = ctx.isFocused
+          Text(50, box = focusableBox) {
             val count = countB.get
             val footer =
               if count == 0 then ""
               else if count < 0 then "\n  Negative"
               else "\n  Positive"
-            s"${if focused then "▶ " else "  "}Counter B: ${count}${footer}"
+            s"Counter B: ${count}${footer}"
           }
         }
       }

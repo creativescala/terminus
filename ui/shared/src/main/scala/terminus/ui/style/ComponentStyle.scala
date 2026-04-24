@@ -35,7 +35,8 @@ final case class ComponentStyle(
     border: Option[Border] = Some(Border.single),
     borderStyle: Style = Style.default,
     background: Style = Style.default,
-    padding: Int = 0
+    padding: Int = 0,
+    focused: Option[ComponentStyle] = None
 )
 object ComponentStyle:
   val default: ComponentStyle = ComponentStyle()
