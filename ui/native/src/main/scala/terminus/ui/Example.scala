@@ -105,23 +105,33 @@ import terminus.ui.style.Underline
       ctx.onKey(Key.controlC) { ctx.stop() }
 
       Column {
-        Text(50, 3)("Tab to switch focus, ↑/↓ to change, q to quit")
+        Text(50)("Tab to switch focus, ↑/↓ to change, q to quit")
 
         FocusScope { ctx ?=>
           ctx.onKey(Key.up) { countA.update(_ + 1) }
           ctx.onKey(Key.down) { countA.update(_ - 1) }
-          Text(50, 3) {
+          Text(50) {
             val focused = ctx.isFocused
-            s"${if focused then "▶ " else "  "}Counter A: ${countA.get}"
+            val count = countA.get
+            val footer =
+              if count == 0 then ""
+              else if count < 0 then "\n  Negative"
+              else "\n  Positive"
+            s"""${if focused then "▶ " else "  "}Counter A: ${count}${footer}"""
           }
         }
 
         FocusScope { ctx ?=>
           ctx.onKey(Key.up) { countB.update(_ + 1) }
           ctx.onKey(Key.down) { countB.update(_ - 1) }
-          Text(50, 3) {
+          Text(50) {
             val focused = ctx.isFocused
-            s"${if focused then "▶ " else "  "}Counter B: ${countB.get}"
+            val count = countB.get
+            val footer =
+              if count == 0 then ""
+              else if count < 0 then "\n  Negative"
+              else "\n  Positive"
+            s"${if focused then "▶ " else "  "}Counter B: ${count}${footer}"
           }
         }
       }
