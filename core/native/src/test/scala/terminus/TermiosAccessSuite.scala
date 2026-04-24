@@ -54,13 +54,17 @@ class TermiosAccessSuite extends FunSuite:
     assertEquals(read, value, name)
 
   test("Test reading special characters returns set value") {
+    assume(
+      posix.unistd.isatty(posix.unistd.STDIN_FILENO) != 0,
+      "requires a TTY — skipped when stdin is a pipe (e.g. CI)"
+    )
     Zone {
       val orig = termios.get
       try
         val attrs = termios.get
 
         List(
-          (posix.termios.VEOF, "VEOF", Seq(0)),
+          (posix.termios.VEOF, "VEOF", Seq(0, 1, 4)),
           (posix.termios.VEOL, "VEOL", Seq(1, 2)),
           (posix.termios.VERASE, "VERASE", Seq(1, 2, 3, 4)),
           (posix.termios.VINTR, "VINTR", Seq(1, 2, 3, 4)),
