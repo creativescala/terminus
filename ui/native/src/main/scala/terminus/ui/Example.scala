@@ -19,6 +19,7 @@ package terminus.ui
 import terminus.Key
 import terminus.NativeTerminal
 import terminus.ui.component.Text
+import terminus.ui.component.Select
 import terminus.ui.component.TextInput
 import terminus.ui.style.Border
 import terminus.ui.style.CellStyle
@@ -167,6 +168,51 @@ import terminus.ui.style.Underline
         Text(50)(_.withBox(_.withoutBorder)) {
           val g = greeting.get
           if g.isEmpty then "" else s"Hello, $g!"
+        }
+      }
+    }
+
+  NativeTerminal.run(program)
+
+@main def selectDemo(): Unit =
+  val fruits = Vector(
+    "Apple",
+    "Banana",
+    "Cherry",
+    "Date",
+    "Elderberry",
+    "Fig",
+    "Grape",
+    "Honeydew",
+    "Kiwi",
+    "Lemon",
+    "Mango",
+    "Nectarine",
+    "Orange",
+    "Papaya",
+    "Quince"
+  )
+
+  val listStyle = TextStyle.default
+    .withBox(_.withBorderStyle(_.withForeground(Color.BrightBlack)))
+    .withFocus(
+      _.withBox(_.withBorderStyle(_.withForeground(Color.White).withBold))
+    )
+
+  val program: FullScreen.InteractiveProgram[Unit] =
+    FullScreen.run { ctx ?=>
+      val choice = ctx.createSignal(0)
+
+      ctx.onKey(Key('q')) { ctx.stop() }
+      ctx.onKey(Key.controlC) { ctx.stop() }
+
+      Column {
+        Text(30, 1)(_.withBox(_.withoutBorder))("Pick a fruit. q to quit.")
+        FocusScope { _ ?=>
+          Select(30, 8, fruits, choice, listStyle)
+        }
+        Text(30)(_.withBox(_.withoutBorder)) {
+          s"Selected: ${fruits(choice.get)}"
         }
       }
     }

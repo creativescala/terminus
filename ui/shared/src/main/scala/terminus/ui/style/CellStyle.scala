@@ -27,6 +27,12 @@ final case class CellStyle(
     strikethrough: Boolean = false,
     blink: Boolean = false
 ):
+  def withForeground(color: Color): CellStyle =
+    this.copy(fg = color)
+
+  def withBackground(color: Color): CellStyle =
+    this.copy(bg = color)
+
   def withBold: CellStyle =
     this.copy(bold = true)
 

@@ -45,6 +45,9 @@ final case class BoxStyle(
   def withBorderStyle(style: CellStyle): BoxStyle =
     this.copy(borderStyle = style)
 
+  def withBorderStyle(update: CellStyle => CellStyle): BoxStyle =
+    this.copy(borderStyle = update(borderStyle))
+
   def withPadding(padding: Int): BoxStyle =
     this.copy(padding = padding)
 
