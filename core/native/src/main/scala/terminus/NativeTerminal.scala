@@ -17,6 +17,7 @@
 package terminus
 
 import terminus.effect.AnsiCodes
+import terminus.effect.Dimensions
 import terminus.effect.TerminalDimensions
 import terminus.effect.TerminalKeyReader
 import terminus.effect.WithEffect
@@ -35,7 +36,7 @@ object NativeTerminal
     extends Terminal,
       WithEffect,
       TerminalKeyReader,
-      effect.Dimensions:
+      Dimensions:
 
   private given termiosAccess: TermiosAccess[?] =
     if LinktimeInfo.isMac then clongTermiosAccess
