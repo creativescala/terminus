@@ -19,14 +19,14 @@ package terminus.ui.tool
 import terminus.ui.Buffer
 import terminus.ui.Cell
 import terminus.ui.Rect
-import terminus.ui.style.ComponentStyle
+import terminus.ui.style.BoxStyle
 
 object Box:
 
   /** The content rect inside a box: bounds shrunk by one cell for the border
     * (if present) and then by [[ComponentStyle.padding]] on each side.
     */
-  def innerRect(bounds: Rect, style: ComponentStyle): Rect =
+  def innerRect(bounds: Rect, style: BoxStyle): Rect =
     val offset = (if style.border.isDefined then 1 else 0) + style.padding
     Rect(
       bounds.x + offset,
@@ -41,7 +41,7 @@ object Box:
     * present) using the border style. The minimum usable size when a border is
     * present is 2×2. Out-of-bounds writes are silently clipped by the buffer.
     */
-  def render(bounds: Rect, style: ComponentStyle, buf: Buffer): Unit =
+  def render(bounds: Rect, style: BoxStyle, buf: Buffer): Unit =
     val borderOffset = if style.border.isDefined then 1 else 0
 
     // Fill interior with background style

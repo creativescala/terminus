@@ -22,8 +22,9 @@ import terminus.ui.LayoutContext
 import terminus.ui.Rect
 import terminus.ui.RenderContext
 import terminus.ui.Size
-import terminus.ui.style.ComponentStyle
-import terminus.ui.style.Style
+import terminus.ui.style.BoxStyle
+import terminus.ui.style.CellStyle
+import terminus.ui.style.TextStyle
 import terminus.ui.tool.Box
 
 object Text:
@@ -39,13 +40,16 @@ object Text:
   def component(
       width: Int,
       height: Int = 0,
-      text: => String,
-      box: ComponentStyle = ComponentStyle.default,
-      content: Style = Style.default
+      style: TextStyle,
+      text: => String
   )(using rc: RenderContext): Component =
     new Component:
-      private def activeBox: ComponentStyle =
-        if rc.isFocused then box.focused.getOrElse(box) else box
+      private def activeBox: BoxStyle =
+        if rc.isFocused then style.focus.map(_.box).getOrElse(style.box)
+        else style.box
+      private def activeContent: CellStyle =
+        if rc.isFocused then style.focus.map(_.content).getOrElse(style.content)
+        else style.content
 
       def size: Size =
         val ab = activeBox
@@ -59,12 +63,16 @@ object Text:
         val ab = activeBox
         Box.render(bounds, ab, buf)
         val inner = Box.innerRect(bounds, ab)
-        buf.putString(inner.x, inner.y, text, content)
+        buf.putString(inner.x, inner.y, text, activeContent)
 
   def apply(
       width: Int,
       height: Int = 0,
-      box: ComponentStyle = ComponentStyle.default,
-      content: Style = Style.default
+      style: TextStyle = TextStyle.default
   )(text: => String)(using lc: LayoutContext, rc: RenderContext): Unit =
-    lc.add(component(width, height, text, box, content))
+    lc.add(component(width, height, style, text))
+
+  def apply(width: Int, height: Int)(style: TextStyle => TextStyle)(
+      text: => String
+  )(using lc: LayoutContext, rc: RenderContext): Unit =
+    lc.add(component(width, height, style(TextStyle.default), text))

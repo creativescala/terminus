@@ -19,7 +19,7 @@ package terminus.ui
 import munit.FunSuite
 import terminus.StringBuilderTerminal
 import terminus.effect.AnsiCodes
-import terminus.ui.style.Style
+import terminus.ui.style.CellStyle
 
 class LayoutSuite extends FunSuite:
 
@@ -28,14 +28,14 @@ class LayoutSuite extends FunSuite:
     new Component:
       val size: Size = Size(width, height)
       def render(bounds: Rect, buf: Buffer): Unit =
-        buf.put(bounds.x, bounds.y, Cell(char.toInt, Style.default))
+        buf.put(bounds.x, bounds.y, Cell(char.toInt, CellStyle.default))
 
   /** A component that fills its entire bounds with a single character. */
   def filledCell(char: Char, width: Int = 1, height: Int = 1): Component =
     new Component:
       val size: Size = Size(width, height)
       def render(bounds: Rect, buf: Buffer): Unit =
-        val c = Cell(char.toInt, Style.default)
+        val c = Cell(char.toInt, CellStyle.default)
         var y = bounds.y
         while y < bounds.y + height do
           var x = bounds.x

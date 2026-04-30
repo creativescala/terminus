@@ -16,14 +16,13 @@
 
 package terminus.ui.style
 
-/** Component-level styling: border, background fill, and padding.
-  *
-  * This is distinct from the cell-level [[Style]], which controls text
-  * attributes (colour, bold, etc.). [[ComponentStyle]] controls the structural
-  * appearance of a component's bounding box.
+/** The properties that can be set for styling a components box: an optional
+  * border, a border style, and padding.
   *
   * @param border
-  *   The border to draw around the component. [[None]] means no border.
+  *   The border to draw around the component. [[None]] means no border. Use
+  *   [[Border.empty]] if you want a border that takes up space but doesn't
+  *   render any characters.
   * @param borderStyle
   *   Cell-level style applied to border characters.
   * @param background
@@ -31,13 +30,26 @@ package terminus.ui.style
   * @param padding
   *   Number of cells between the border and the content on each side.
   */
-final case class ComponentStyle(
+final case class BoxStyle(
     border: Option[Border] = Some(Border.single),
-    borderStyle: Style = Style.default,
-    background: Style = Style.default,
+    borderStyle: CellStyle = CellStyle.default,
     padding: Int = 0,
-    focused: Option[ComponentStyle] = None
-)
-object ComponentStyle:
-  val default: ComponentStyle = ComponentStyle()
-  val none: ComponentStyle = ComponentStyle(border = None)
+    background: CellStyle = CellStyle.default
+):
+  def withBorder(border: Border): BoxStyle =
+    this.copy(border = Some(border))
+
+  def withoutBorder: BoxStyle =
+    this.copy(border = None)
+
+  def withBorderStyle(style: CellStyle): BoxStyle =
+    this.copy(borderStyle = style)
+
+  def withPadding(padding: Int): BoxStyle =
+    this.copy(padding = padding)
+
+  def withBackground(style: CellStyle): BoxStyle =
+    this.copy(background = style)
+
+object BoxStyle:
+  val default = BoxStyle()

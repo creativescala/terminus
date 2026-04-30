@@ -17,8 +17,8 @@
 package terminus.ui
 
 import terminus.effect.AnsiCodes
+import terminus.ui.style.CellStyle
 import terminus.ui.style.Color
-import terminus.ui.style.Style
 
 /** A 2D grid of terminal cells that components render into.
   *
@@ -64,7 +64,7 @@ final class Buffer(val width: Int, val height: Int):
     * to the next row and reset the column back to [[x]]. Clips to buffer
     * bounds.
     */
-  def putString(x: Int, y: Int, s: String, style: Style): Unit =
+  def putString(x: Int, y: Int, s: String, style: CellStyle): Unit =
     var col = x
     var row = y
     var i = 0
@@ -94,7 +94,7 @@ final class Buffer(val width: Int, val height: Int):
     */
   def render(using t: Terminal): Unit =
     t.write(AnsiCodes.sgr("0"))
-    var currentStyle = Style.default
+    var currentStyle = CellStyle.default
     var y = 0
     while y < height do
       t.cursor.to(1, y + 1) // 1-based terminal coordinates
@@ -127,7 +127,7 @@ final class Buffer(val width: Int, val height: Int):
       s"Buffer dimensions must match for diff render: ${width}x${height} vs ${previous.width}x${previous.height}"
     )
     t.write(AnsiCodes.sgr("0"))
-    var currentStyle = Style.default
+    var currentStyle = CellStyle.default
     // Track where the terminal cursor currently is (0-based).
     // (-1, -1) means "unknown / needs explicit move".
     var cursorX = -1
@@ -156,7 +156,9 @@ final class Buffer(val width: Int, val height: Int):
   /** Emit SGR codes for any attributes that differ between [[from]] and [[to]],
     * and return [[to]] as the new current style.
     */
-  private def emitStyle(from: Style, to: Style)(using t: Terminal): Style =
+  private def emitStyle(from: CellStyle, to: CellStyle)(using
+      t: Terminal
+  ): CellStyle =
     if to != from then
       if to.fg != from.fg then t.write(fgCode(to.fg))
       if to.bg != from.bg then t.write(bgCode(to.bg))

@@ -4,13 +4,13 @@
 
 Three distinct levels:
 
-- **Cell-level `Style`** — color, bold, italic, underline, etc. Used everywhere, passed directly to `Buffer.putString` / `Buffer.put`. Already implemented.
-- **Component-level style** — padding, border, background fill. Parameters on the component itself, not on `Style`.
+- **Cell-level `CellStyle`** — color, bold, italic, underline, etc. Used everywhere, passed directly to `Buffer.putString` / `Buffer.put`. Already implemented.
+- **Component-level style** — padding, border, background fill. Parameters on the component itself, not on `CellStyle`.
 - **Parent-context style** — gutters, alignment modes. Expressed through a more specific `LayoutContext` subtype, only accessible when the parent provides it (compile-time enforcement).
 
 ## No cascade
 
-No CSS-style cascade. Scala provides sufficient abstraction (`Style` is a case class, `.copy()` works, shared styles are plain `val`s or functions). A cascade would add action-at-a-distance complexity for no gain. If ambient style context is ever needed, a `using` parameter is the right mechanism.
+No CSS-style cascade. Scala provides sufficient abstraction (`CellStyle` is a case class, `.copy()` works, shared styles are plain `val`s or functions). A cascade would add action-at-a-distance complexity for no gain. If ambient style context is ever needed, a `using` parameter is the right mechanism.
 
 ## CSS box model as reference
 
@@ -30,7 +30,7 @@ Separators (horizontal/vertical lines *between* children) are structurally diffe
 
 ## Block vs inline (deferred)
 
-The current `Text` component conflates a block element (box with border, background fill, padding) and an inline element (styled text content). This means `content: Style` has a `bg` field that can diverge from `ComponentStyle.background`, requiring the user to keep them in sync manually.
+The current `Text` component conflates a block element (box with border, background fill, padding) and an inline element (styled text content). This means `content: CellStyle` has a `bg` field that can diverge from `ComponentStyle.background`, requiring the user to keep them in sync manually.
 
 The clean resolution: content style `bg = Color.Default` means "transparent — inherit from the component background", matching CSS's default behaviour. An explicit `bg` on a content style is an intentional override (like a highlighted `<span>`). This requires a concept of cell-style transparency/inheritance, which is deferred until inline/span styling is tackled.
 

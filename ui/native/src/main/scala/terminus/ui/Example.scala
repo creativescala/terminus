@@ -19,9 +19,10 @@ package terminus.ui
 import terminus.Key
 import terminus.NativeTerminal
 import terminus.ui.component.Text
+import terminus.ui.style.Border
+import terminus.ui.style.CellStyle
 import terminus.ui.style.Color
-import terminus.ui.style.ComponentStyle
-import terminus.ui.style.Style
+import terminus.ui.style.TextStyle
 import terminus.ui.style.Underline
 
 // Run with: sbt 'uiNative/runMain terminus.ui.demo'
@@ -31,26 +32,26 @@ import terminus.ui.style.Underline
 
       // Row 1: text style attributes
       Row {
-        Text(24, 3, content = Style(bold = true))(
+        Text(24, 3)(_.withContent(_.withBold))(
           "Bold 💪"
         )
-        Text(24, 3, content = Style(italic = true))(
+        Text(24, 3)(_.withContent(_.withItalic))(
           "Italic ✨"
         )
-        Text(24, 3, content = Style(strikethrough = true))(
+        Text(24, 3)(_.withContent(_.withStrikethrough))(
           "Strikethrough ❌"
         )
       }
 
       // Row 2: underline variants and invert
       Row {
-        Text(24, 3, content = Style(underline = Underline.Straight))(
+        Text(24, 3)(_.withContent(_.withUnderline(Underline.Straight)))(
           "Straight underline"
         )
-        Text(24, 3, content = Style(underline = Underline.Curly))(
+        Text(24, 3)(_.withContent(_.withUnderline(Underline.Curly)))(
           "Curly underline"
         )
-        Text(24, 3, content = Style(invert = true))(
+        Text(24, 3)(_.withContent(_.withInvert))(
           "Inverted 🔄"
         )
       }
@@ -58,33 +59,22 @@ import terminus.ui.style.Underline
       // Row 3: component styling — coloured borders and background fill
       Row {
         Column {
-          Text(
-            24,
-            3,
-            box = ComponentStyle(borderStyle = Style(fg = Color.Red)),
-            content = Style(fg = Color.Red, bold = true)
+          Text(24, 3)(
+            _.withBox(_.withBorderStyle(CellStyle(fg = Color.Red)))
+              .withContent(CellStyle(fg = Color.Red, bold = true))
           )("🔴 Red — 红色")
-          Text(
-            24,
-            3,
-            box = ComponentStyle(borderStyle = Style(fg = Color.Green)),
-            content = Style(fg = Color.Green, bold = true)
+          Text(24, 3)(
+            _.withBox(_.withBorderStyle(CellStyle(fg = Color.Green)))
+              .withContent(CellStyle(fg = Color.Green, bold = true))
           )("🟢 Green — 緑")
-          Text(
-            24,
-            3,
-            box = ComponentStyle(borderStyle = Style(fg = Color.Blue)),
-            content = Style(fg = Color.Blue, bold = true)
+          Text(24, 3)(
+            _.withBox(_.withBorderStyle(CellStyle(fg = Color.Blue)))
+              .withContent(CellStyle(fg = Color.Blue, bold = true))
           )("🔵 Blue — 青色")
         }
-        Text(
-          24,
-          9,
-          box = ComponentStyle(
-            background = Style(bg = Color.Yellow),
-            borderStyle = Style(fg = Color.BrightBlack)
-          ),
-          content = Style(fg = Color.Black, bg = Color.Yellow)
+        Text(24, 9)(
+          _.withBox(_.withBorderStyle(CellStyle(fg = Color.Yellow)))
+            .withContent(CellStyle(fg = Color.Yellow, bold = true))
         )("Column on the left\nhas coloured\nborders.")
       }
     }
@@ -96,11 +86,13 @@ import terminus.ui.style.Underline
 
 // Run with: sbt 'uiNative/runMain terminus.ui.interactiveDemo'
 @main def interactiveDemo(): Unit =
-  val focusableBox = ComponentStyle(
-    borderStyle = Style(fg = Color.BrightBlack),
-    focused =
-      Some(ComponentStyle(borderStyle = Style(fg = Color.White, bold = true)))
-  )
+  val focusableBox = TextStyle.default
+    .withBox(
+      _.withBorderStyle(CellStyle(fg = Color.BrightBlack))
+    )
+    .withFocus(
+      _.withBox(_.withBorderStyle(CellStyle(fg = Color.White, bold = true)))
+    )
 
   val program: FullScreen.InteractiveProgram[Unit] =
     FullScreen.run { ctx ?=>
@@ -111,14 +103,14 @@ import terminus.ui.style.Underline
       ctx.onKey(Key.controlC) { ctx.stop() }
 
       Column {
-        Text(50, box = ComponentStyle.none)(
+        Text(50, 3)(_.withBox(_.withBorder(Border.empty)))(
           "Tab to switch focus, ↑/↓ to change, q to quit"
         )
 
         FocusScope { ctx ?=>
           ctx.onKey(Key.up) { countA.update(_ + 1) }
           ctx.onKey(Key.down) { countA.update(_ - 1) }
-          Text(50, box = focusableBox) {
+          Text(50, style = focusableBox) {
             val count = countA.get
             val footer =
               if count == 0 then ""
@@ -131,7 +123,7 @@ import terminus.ui.style.Underline
         FocusScope { ctx ?=>
           ctx.onKey(Key.up) { countB.update(_ + 1) }
           ctx.onKey(Key.down) { countB.update(_ - 1) }
-          Text(50, box = focusableBox) {
+          Text(50, style = focusableBox) {
             val count = countB.get
             val footer =
               if count == 0 then ""
