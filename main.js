@@ -4085,6 +4085,8 @@ $h_Lterminus_Format$format$underline$.prototype = $c_Lterminus_Format$format$und
 var $d_Lterminus_Format$format$underline$ = new $TypeData().initClass($c_Lterminus_Format$format$underline$, "terminus.Format$format$underline$", ({
   Lterminus_Format$format$underline$: 1
 }));
+function $f_Lterminus_Writer__$init$__V($thiz) {
+}
 /** @constructor */
 function $c_Lterminus_XtermJsOptions$() {
 }
@@ -4178,6 +4180,9 @@ function $m_Lterminus_effect_AnsiCodes$background$() {
 }
 /** @constructor */
 function $c_Lterminus_effect_AnsiCodes$cursor$() {
+  $n_Lterminus_effect_AnsiCodes$cursor$ = this;
+  $m_Lterminus_effect_AnsiCodes$().csi__T__sci_Seq__T("?25l", $m_sr_ScalaRunTime$().wrapRefArray__AO__sci_ArraySeq(new ($d_T.getArrayOf().constr)([])));
+  $m_Lterminus_effect_AnsiCodes$().csi__T__sci_Seq__T("?25h", $m_sr_ScalaRunTime$().wrapRefArray__AO__sci_ArraySeq(new ($d_T.getArrayOf().constr)([])));
 }
 $c_Lterminus_effect_AnsiCodes$cursor$.prototype = new $h_O();
 $c_Lterminus_effect_AnsiCodes$cursor$.prototype.constructor = $c_Lterminus_effect_AnsiCodes$cursor$;
@@ -4663,7 +4668,10 @@ function $h_Lterminus_examples_ColorForegroundGreen$() {
 }
 $h_Lterminus_examples_ColorForegroundGreen$.prototype = $c_Lterminus_examples_ColorForegroundGreen$.prototype;
 $c_Lterminus_examples_ColorForegroundGreen$.prototype.go__T__V = (function(id) {
-  var options = $m_Lterminus_XtermJsOptions$().apply__I__I__Lterminus_XtermJsOptions(80, 3);
+  $m_Lterminus_Terminal$();
+  $m_Lterminus_Terminal$();
+  var cols = 80;
+  var options = $m_Lterminus_XtermJsOptions$().apply__I__I__Lterminus_XtermJsOptions(cols, 3);
   var element = document.getElementById(id);
   var terminal = new $c_Lterminus_Terminal(element, options);
   $n($m_Lterminus_Terminal$().format__Lterminus_Format$format$());
@@ -4680,7 +4688,9 @@ $c_Lterminus_examples_ColorForegroundGreen$.prototype.go__T__V = (function(id) {
     var code$1 = $m_Lterminus_effect_AnsiCodes$foreground$().Lterminus_effect_AnsiCodes$foreground$__f_green;
     $n(stack$1).push__T__Lterminus_effect_Writer__V(code$1, this$7);
     try {
+      $m_Lterminus_Terminal$();
       terminal.write__T__V("This is Terminus!");
+      $m_Lterminus_Terminal$();
     } finally {
       $n(stack$1).pop__Lterminus_effect_Writer__V(this$7);
     }
@@ -4712,7 +4722,10 @@ function $h_Lterminus_examples_Format$() {
 }
 $h_Lterminus_examples_Format$.prototype = $c_Lterminus_examples_Format$.prototype;
 $c_Lterminus_examples_Format$.prototype.go__T__V = (function(id) {
-  var options = $m_Lterminus_XtermJsOptions$().apply__I__I__Lterminus_XtermJsOptions(80, 3);
+  $m_Lterminus_Terminal$();
+  $m_Lterminus_Terminal$();
+  var cols = 80;
+  var options = $m_Lterminus_XtermJsOptions$().apply__I__I__Lterminus_XtermJsOptions(cols, 3);
   var element = document.getElementById(id);
   var terminal = new $c_Lterminus_Terminal(element, options);
   $n($m_Lterminus_Terminal$().format__Lterminus_Format$format$());
@@ -4728,6 +4741,7 @@ $c_Lterminus_examples_Format$.prototype.go__T__V = (function(id) {
     var toggle = this$6.Lterminus_effect_Format$format$__f_strikethroughToggle;
     $n(toggle).on__Lterminus_effect_Writer__V(this$7);
     try {
+      $m_Lterminus_Terminal$();
       terminal.write__T__V("Bold and strikethrough\r\n");
     } finally {
       $n(toggle).off__Lterminus_effect_Writer__V(this$7);
@@ -4749,6 +4763,7 @@ $c_Lterminus_examples_Format$.prototype.go__T__V = (function(id) {
     var code$2 = $m_Lterminus_effect_AnsiCodes$background$().Lterminus_effect_AnsiCodes$background$__f_red;
     $n(stack$2).push__T__Lterminus_effect_Writer__V(code$2, this$14);
     try {
+      $m_Lterminus_Terminal$();
       terminal.write__T__V("Foreground and background color\r\n");
     } finally {
       $n(stack$2).pop__Lterminus_effect_Writer__V(this$14);
@@ -4769,6 +4784,7 @@ $c_Lterminus_examples_Format$.prototype.go__T__V = (function(id) {
     var code$3 = $m_Lterminus_effect_AnsiCodes$format$underline$().Lterminus_effect_AnsiCodes$format$underline$__f_curly;
     $n(stack$3).push__T__Lterminus_effect_Writer__V(code$3, this$21);
     try {
+      $m_Lterminus_Terminal$();
       terminal.write__T__V("Inverted with curly underline");
     } finally {
       $n(stack$3).pop__Lterminus_effect_Writer__V(this$21);
@@ -4776,6 +4792,7 @@ $c_Lterminus_examples_Format$.prototype.go__T__V = (function(id) {
   } finally {
     $n(toggle$1).off__Lterminus_effect_Writer__V(this$18);
   }
+  $m_Lterminus_Terminal$();
 });
 $c_Lterminus_examples_Format$.prototype.go = (function(arg) {
   var prep0 = $as_T(arg);
@@ -4801,7 +4818,10 @@ function $h_Lterminus_examples_NestedFormat$() {
 }
 $h_Lterminus_examples_NestedFormat$.prototype = $c_Lterminus_examples_NestedFormat$.prototype;
 $c_Lterminus_examples_NestedFormat$.prototype.go__T__V = (function(id) {
-  var options = $m_Lterminus_XtermJsOptions$().apply__I__I__Lterminus_XtermJsOptions(80, 3);
+  $m_Lterminus_Terminal$();
+  $m_Lterminus_Terminal$();
+  var cols = 80;
+  var options = $m_Lterminus_XtermJsOptions$().apply__I__I__Lterminus_XtermJsOptions(cols, 3);
   var element = document.getElementById(id);
   var terminal = new $c_Lterminus_Terminal(element, options);
   $n($m_Lterminus_Terminal$().foreground__Lterminus_Color$foreground$());
@@ -4811,6 +4831,7 @@ $c_Lterminus_examples_NestedFormat$.prototype.go__T__V = (function(id) {
   var code = $m_Lterminus_effect_AnsiCodes$foreground$().Lterminus_effect_AnsiCodes$foreground$__f_yellow;
   $n(stack).push__T__Lterminus_effect_Writer__V(code, this$4);
   try {
+    $m_Lterminus_Terminal$();
     terminal.write__T__V("Yellow ");
     $n($m_Lterminus_Terminal$().foreground__Lterminus_Color$foreground$());
     var this$7 = $n(terminal.foreground__Lterminus_effect_Color$foreground$());
@@ -4819,15 +4840,19 @@ $c_Lterminus_examples_NestedFormat$.prototype.go__T__V = (function(id) {
     var code$1 = $m_Lterminus_effect_AnsiCodes$foreground$().Lterminus_effect_AnsiCodes$foreground$__f_green;
     $n(stack$1).push__T__Lterminus_effect_Writer__V(code$1, this$8);
     try {
+      $m_Lterminus_Terminal$();
       terminal.write__T__V("Green ");
     } finally {
       $n(stack$1).pop__Lterminus_effect_Writer__V(this$8);
     }
+    $m_Lterminus_Terminal$();
     terminal.write__T__V("Yellow ");
   } finally {
     $n(stack).pop__Lterminus_effect_Writer__V(this$4);
   }
+  $m_Lterminus_Terminal$();
   terminal.write__T__V("Unstyled");
+  $m_Lterminus_Terminal$();
 });
 $c_Lterminus_examples_NestedFormat$.prototype.go = (function(arg) {
   var prep0 = $as_T(arg);
@@ -4869,25 +4894,29 @@ $c_Lterminus_examples_Prompt$.prototype.writeChoice__T__Z__Lterminus_Terminal__V
     var code = $m_Lterminus_effect_AnsiCodes$format$bold$().Lterminus_effect_AnsiCodes$format$bold$__f_on;
     $n(stack).push__T__Lterminus_effect_Writer__V(code, this$3);
     try {
+      $m_Lterminus_Terminal$();
       var string = (("> " + description) + "\r\n");
       $n(evidence$2).write__T__V(string);
     } finally {
       $n(stack).pop__Lterminus_effect_Writer__V(this$3);
     }
   } else {
+    $m_Lterminus_Terminal$();
     var string$1 = (("  " + description) + "\r\n");
     $n(evidence$2).write__T__V(string$1);
   }
 });
 $c_Lterminus_examples_Prompt$.prototype.write__I__Lterminus_Terminal__V = (function(selected, evidence$4) {
+  $m_Lterminus_Terminal$();
   $n(evidence$4).write__T__V("How cool is this?\r\n");
   this.writeChoice__T__Z__Lterminus_Terminal__V("Very cool", (selected === 0), evidence$4);
   this.writeChoice__T__Z__Lterminus_Terminal__V("Way cool", (selected === 1), evidence$4);
   this.writeChoice__T__Z__Lterminus_Terminal__V("So cool", (selected === 2), evidence$4);
+  $m_Lterminus_Terminal$();
   $n(evidence$4);
 });
 $c_Lterminus_examples_Prompt$.prototype.read__Lterminus_Terminal__s_concurrent_Future = (function(evidence$5) {
-  return $n($n(evidence$5).readKey__s_concurrent_Future()).flatMap__F1__s_concurrent_ExecutionContext__s_concurrent_Future(new $c_sjsr_AnonFunction1_$$Lambda$412915ce24663401f4bc24349a746e1dbd693dc1(((keyCode) => {
+  return $n(($m_Lterminus_Terminal$(), $n(evidence$5).readKey__s_concurrent_Future())).flatMap__F1__s_concurrent_ExecutionContext__s_concurrent_Future(new $c_sjsr_AnonFunction1_$$Lambda$412915ce24663401f4bc24349a746e1dbd693dc1(((keyCode) => {
     var keyCode$1 = $as_T(keyCode);
     switch (keyCode$1) {
       case "Enter": {
@@ -4948,11 +4977,15 @@ $c_Lterminus_examples_Prompt$.prototype.loop__I__Lterminus_Terminal__s_concurren
   })), $m_s_concurrent_ExecutionContext$().global__s_concurrent_ExecutionContextExecutor());
 });
 $c_Lterminus_examples_Prompt$.prototype.go__T__s_concurrent_Future = (function(id) {
-  var options = $m_Lterminus_XtermJsOptions$().apply__I__I__Lterminus_XtermJsOptions(80, 16);
+  $m_Lterminus_Terminal$();
+  $m_Lterminus_Terminal$();
+  var cols = 80;
+  var options = $m_Lterminus_XtermJsOptions$().apply__I__I__Lterminus_XtermJsOptions(cols, 16);
   var element = document.getElementById(id);
   var terminal = new $c_Lterminus_Terminal(element, options);
   return $n($m_Lterminus_examples_Prompt$().loop__I__Lterminus_Terminal__s_concurrent_Future(0, terminal)).map__F1__s_concurrent_ExecutionContext__s_concurrent_Future(new $c_sjsr_AnonFunction1_$$Lambda$412915ce24663401f4bc24349a746e1dbd693dc1(((v1) => {
     var idx = $uI(v1);
+    $m_Lterminus_Terminal$();
     var string = ("You selected " + idx);
     terminal.write__T__V(string);
   })), $m_s_concurrent_ExecutionContext$().global__s_concurrent_ExecutionContextExecutor());
@@ -4981,10 +5014,15 @@ function $h_Lterminus_examples_Write$() {
 }
 $h_Lterminus_examples_Write$.prototype = $c_Lterminus_examples_Write$.prototype;
 $c_Lterminus_examples_Write$.prototype.go__T__V = (function(id) {
-  var options = $m_Lterminus_XtermJsOptions$().apply__I__I__Lterminus_XtermJsOptions(80, 3);
+  $m_Lterminus_Terminal$();
+  $m_Lterminus_Terminal$();
+  var cols = 80;
+  var options = $m_Lterminus_XtermJsOptions$().apply__I__I__Lterminus_XtermJsOptions(cols, 3);
   var element = document.getElementById(id);
   var terminal = new $c_Lterminus_Terminal(element, options);
+  $m_Lterminus_Terminal$();
   terminal.write__T__V("\u201cEither write things worth reading or do things worth the writing.\u201d\r\n  -Benjamin Franklin");
+  $m_Lterminus_Terminal$();
 });
 $c_Lterminus_examples_Write$.prototype.go = (function(arg) {
   var prep0 = $as_T(arg);
@@ -12052,6 +12090,8 @@ function $c_Lterminus_Terminal$() {
   this.Lterminus_Terminal$__f_formatbitmap$2 = false;
   this.Lterminus_Terminal$__f_erase$lzy2 = null;
   this.Lterminus_Terminal$__f_erasebitmap$2 = false;
+  $n_Lterminus_Terminal$ = this;
+  $f_Lterminus_Writer__$init$__V(this);
 }
 $c_Lterminus_Terminal$.prototype = new $h_O();
 $c_Lterminus_Terminal$.prototype.constructor = $c_Lterminus_Terminal$;
