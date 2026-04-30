@@ -95,6 +95,7 @@ object FullScreen:
       private[ui] def invalidate(): Unit = ec.scheduleRerender()
       def createSignal[A](initial: A): Signal[A] = ec.createSignal(initial)
       def onKey(key: Key)(handler: => Unit): Unit = ec.onKey(key)(handler)
+      def onAnyKey(handler: Key => Unit): Unit = ec.onAnyKey(handler)
       def registerFocusable(): FocusId = ec.registerFocusable()
       private[ui] def focusedId: Option[FocusId] = ec.focusedId
       def stop(): Unit = ec.stop()
@@ -149,6 +150,7 @@ object FullScreen:
         def peek: A = value
         def set(a: A): Unit = value = a
       def onKey(key: Key)(handler: => Unit): Unit = ()
+      def onAnyKey(handler: Key => Unit): Unit = ()
       def registerFocusable(): FocusId = FocusId(0)
       private[ui] def focusedId: Option[FocusId] = None
       def stop(): Unit = ()

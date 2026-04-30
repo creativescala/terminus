@@ -72,6 +72,11 @@ object Text:
   )(text: => String)(using lc: LayoutContext, rc: RenderContext): Unit =
     lc.add(component(width, height, style, text))
 
+  def apply(width: Int)(style: TextStyle => TextStyle)(
+      text: => String
+  )(using lc: LayoutContext, rc: RenderContext): Unit =
+    lc.add(component(width, 0, style(TextStyle.default), text))
+
   def apply(width: Int, height: Int)(style: TextStyle => TextStyle)(
       text: => String
   )(using lc: LayoutContext, rc: RenderContext): Unit =

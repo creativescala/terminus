@@ -19,13 +19,17 @@ package terminus.ui
 import terminus.Key
 import terminus.NativeTerminal
 import terminus.ui.component.Text
+import terminus.ui.component.TextInput
 import terminus.ui.style.Border
 import terminus.ui.style.CellStyle
 import terminus.ui.style.Color
 import terminus.ui.style.TextStyle
 import terminus.ui.style.Underline
 
-// Run with: sbt 'uiNative/runMain terminus.ui.demo'
+// To build any of these examples, give sbt the command 'nativeLink'. Sbt will
+// then prompt for the demo to build. The executable will
+// 'ui/native/target/scala-<version>/terminus-ui'
+
 @main def demo(): Unit =
   val program: FullScreen.Program[Unit] =
     FullScreen {
@@ -84,7 +88,6 @@ import terminus.ui.style.Underline
     Terminal.newline
   }
 
-// Run with: sbt 'uiNative/runMain terminus.ui.interactiveDemo'
 @main def interactiveDemo(): Unit =
   val focusableBox = TextStyle.default
     .withBox(
@@ -131,6 +134,39 @@ import terminus.ui.style.Underline
               else "\nPositive"
             s"Counter B: ${count}${footer}"
           }
+        }
+      }
+    }
+
+  NativeTerminal.run(program)
+
+@main def textInputDemo(): Unit =
+  val inputStyle = TextStyle.default
+    .withBox(_.withBorderStyle(CellStyle(fg = Color.BrightBlack)))
+    .withFocus(
+      _.withBox(_.withBorderStyle(CellStyle(fg = Color.White, bold = true)))
+    )
+
+  val program: FullScreen.InteractiveProgram[Unit] =
+    FullScreen.run { ctx ?=>
+      val name = ctx.createSignal("")
+      val greeting = ctx.createSignal("")
+
+      ctx.onKey(Key('q')) { ctx.stop() }
+      ctx.onKey(Key.controlC) { ctx.stop() }
+      ctx.onKey(Key.enter) { greeting.set(name.peek) }
+      ctx.onKey(Key.newLine) { greeting.set(name.peek) }
+
+      Column {
+        Text(50, 1)(_.withBox(_.withoutBorder))(
+          "Type a name and press Enter. q to quit."
+        )
+        FocusScope { _ ?=>
+          TextInput(50, name, inputStyle)
+        }
+        Text(50)(_.withBox(_.withoutBorder)) {
+          val g = greeting.get
+          if g.isEmpty then "" else s"Hello, $g!"
         }
       }
     }

@@ -33,6 +33,17 @@ trait EventContext:
   def createSignal[A](initial: A): Signal[A]
   def onKey(key: Key)(handler: => Unit): Unit
 
+  /** Register a handler that fires for every key press.
+    *
+    * Unlike [[onKey]], which matches a specific [[Key]], this handler receives
+    * the pressed [[Key]] and can inspect it freely. Handlers registered here
+    * fire in addition to any matching [[onKey]] handlers for the same key.
+    *
+    * Inside a [[FocusScope]] the handler is automatically guarded so it only
+    * fires when that scope is focused.
+    */
+  def onAnyKey(handler: Key => Unit): Unit
+
   /** Register a new focusable scope and return its [[FocusId]].
     *
     * Scopes are registered in call order, which determines the Tab traversal
@@ -53,6 +64,8 @@ private[ui] final class EventContextImpl extends EventContext:
   private var _running: Boolean = true
   private val keyHandlers: mutable.Map[Key, mutable.ListBuffer[() => Unit]] =
     mutable.Map.empty
+  private val anyKeyHandlers: mutable.ListBuffer[Key => Unit] =
+    mutable.ListBuffer.empty
 
   private var _nextFocusId: Int = 0
   private val _focusables: mutable.ListBuffer[FocusId] =
@@ -75,6 +88,9 @@ private[ui] final class EventContextImpl extends EventContext:
     keyHandlers.getOrElseUpdate(key, mutable.ListBuffer.empty) += (() =>
       handler
     )
+
+  def onAnyKey(handler: Key => Unit): Unit =
+    anyKeyHandlers += handler
 
   def registerFocusable(): FocusId =
     val id = FocusId(_nextFocusId)
@@ -112,3 +128,4 @@ private[ui] final class EventContextImpl extends EventContext:
 
   private[ui] def dispatch(key: Key): Unit =
     keyHandlers.get(key).foreach(_.foreach(_.apply()))
+    anyKeyHandlers.foreach(_(key))

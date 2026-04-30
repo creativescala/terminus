@@ -57,6 +57,7 @@ object AppContext:
       private[ui] def invalidate(): Unit = parent.invalidate()
       def createSignal[A](initial: A): Signal[A] = parent.createSignal(initial)
       def onKey(key: Key)(handler: => Unit): Unit = parent.onKey(key)(handler)
+      def onAnyKey(handler: Key => Unit): Unit = parent.onAnyKey(handler)
       def registerFocusable(): FocusId = parent.registerFocusable()
       private[ui] def focusedId: Option[FocusId] = parent.focusedId
       def stop(): Unit = parent.stop()

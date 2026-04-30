@@ -38,6 +38,8 @@ object FocusScope:
       private[ui] def focusedId: Option[FocusId] = parent.focusedId
       def onKey(key: Key)(handler: => Unit): Unit =
         parent.onKey(key) { if isFocused then handler }
+      def onAnyKey(handler: Key => Unit): Unit =
+        parent.onAnyKey(key => if isFocused then handler(key))
       def stop(): Unit = parent.stop()
       def size: Size = parent.size
       def add(component: Component): Unit = parent.add(component)
