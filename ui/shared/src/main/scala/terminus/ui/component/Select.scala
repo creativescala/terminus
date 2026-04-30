@@ -104,7 +104,9 @@ object Select:
       scrollToShow(last)
     }
 
-    ctx.add(component(width, height, items, selected, scroll, style, label)(using ctx))
+    ctx.add(
+      component(width, height, items, selected, scroll, style, label)(using ctx)
+    )
 
   private def component[A](
       width: Int,

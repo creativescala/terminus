@@ -44,10 +44,10 @@ object TextInput:
     * }
     * }}}
     *
-    * Key bindings: printable characters insert at the cursor, Backspace / Delete
-    * delete around the cursor, Left / Right / Home / End move the cursor. Text
-    * longer than the visible area scrolls horizontally to keep the cursor in
-    * view.
+    * Key bindings: printable characters insert at the cursor, Backspace /
+    * Delete delete around the cursor, Left / Right / Home / End move the
+    * cursor. Text longer than the visible area scrolls horizontally to keep the
+    * cursor in view.
     */
   def apply(
       width: Int,
@@ -125,7 +125,8 @@ object TextInput:
         // Scroll to keep the cursor in view: cursor sits at the right edge when
         // the text overflows, and at its natural position otherwise.
         val scroll = (pos - inner.width + 1).max(0)
-        val visible = text.substring(scroll, (scroll + inner.width).min(text.length))
+        val visible =
+          text.substring(scroll, (scroll + inner.width).min(text.length))
         val cursorCol = pos - scroll // always in [0, inner.width)
 
         buf.putString(inner.x, inner.y, visible, ac)
@@ -133,4 +134,8 @@ object TextInput:
         // Draw the cursor by inverting the cell at the cursor column.
         val cursorChar =
           if cursorCol < visible.length then visible(cursorCol) else ' '
-        buf.put(inner.x + cursorCol, inner.y, Cell(cursorChar.toInt, ac.withInvert))
+        buf.put(
+          inner.x + cursorCol,
+          inner.y,
+          Cell(cursorChar.toInt, ac.withInvert)
+        )

@@ -18,8 +18,8 @@ package terminus.ui
 
 import terminus.Key
 import terminus.NativeTerminal
-import terminus.ui.component.Text
 import terminus.ui.component.Select
+import terminus.ui.component.Text
 import terminus.ui.component.TextInput
 import terminus.ui.style.Border
 import terminus.ui.style.CellStyle
