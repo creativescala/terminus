@@ -25,6 +25,16 @@ final case class Border(
     bottomRight: Char
 )
 object Border:
+  /** A border that reserves space but does not render any characters. */
+  val empty = Border(
+    topLeft = ' ',
+    topRight = ' ',
+    horizontal = ' ',
+    vertical = ' ',
+    bottomLeft = ' ',
+    bottomRight = ' '
+  )
+
   val single = Border(
     topLeft = '┌',
     topRight = '┐',

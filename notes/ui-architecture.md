@@ -31,7 +31,7 @@ Rather than FRP's higher-order style (`signal.map(v => ...)`) the reactive conte
 
 ### Rendering
 
-- **`Cell(codePoint: Int, style: Style)`** — a single terminal cell. `codePoint = 0` is the continuation sentinel for the right half of wide characters.
+- **`Cell(codePoint: Int, style: CellStyle)`** — a single terminal cell. `codePoint = 0` is the continuation sentinel for the right half of wide characters.
 - **`Buffer(width, height)`** — row-major flat array of cells. Out-of-bounds writes are silently ignored (component isolation). Key methods: `put`, `fill`, `putString`, `render`, `renderDiff`.
 - **`Rect(x, y, width, height)`** — 0-based position + size. 1-based conversion happens only inside `Buffer.render`.
 - **`Style`** — cell-level attributes: fg/bg color, bold, italic, underline, blink, invert, strikethrough.

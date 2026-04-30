@@ -19,7 +19,7 @@ package terminus.ui
 import munit.FunSuite
 import terminus.StringBuilderTerminal
 import terminus.effect.AnsiCodes
-import terminus.ui.style.Style
+import terminus.ui.style.CellStyle
 
 class BufferSuite extends FunSuite:
 
@@ -43,8 +43,8 @@ class BufferSuite extends FunSuite:
   test("renderDiff emits only resets when nothing has changed") {
     val prev = Buffer(3, 1)
     val curr = Buffer(3, 1)
-    prev.put(0, 0, Cell('A'.toInt, Style.default))
-    curr.put(0, 0, Cell('A'.toInt, Style.default))
+    prev.put(0, 0, Cell('A'.toInt, CellStyle.default))
+    curr.put(0, 0, Cell('A'.toInt, CellStyle.default))
 
     val out = capture(curr.renderDiff(prev))
     assertEquals(out, reset + reset)
@@ -57,8 +57,8 @@ class BufferSuite extends FunSuite:
   test("renderDiff moves to the changed cell and writes it") {
     val prev = Buffer(3, 1)
     val curr = Buffer(3, 1)
-    prev.put(0, 0, Cell('A'.toInt, Style.default))
-    curr.put(0, 0, Cell('B'.toInt, Style.default))
+    prev.put(0, 0, Cell('A'.toInt, CellStyle.default))
+    curr.put(0, 0, Cell('B'.toInt, CellStyle.default))
 
     val out = capture(curr.renderDiff(prev))
     assertEquals(out, reset + moveTo(1, 1) + "B" + reset)
@@ -67,8 +67,8 @@ class BufferSuite extends FunSuite:
   test("renderDiff writes a changed cell not at the origin") {
     val prev = Buffer(3, 1)
     val curr = Buffer(3, 1)
-    prev.put(2, 0, Cell('A'.toInt, Style.default))
-    curr.put(2, 0, Cell('Z'.toInt, Style.default))
+    prev.put(2, 0, Cell('A'.toInt, CellStyle.default))
+    curr.put(2, 0, Cell('Z'.toInt, CellStyle.default))
 
     val out = capture(curr.renderDiff(prev))
     assertEquals(out, reset + moveTo(3, 1) + "Z" + reset)
@@ -82,10 +82,10 @@ class BufferSuite extends FunSuite:
     val prev = Buffer(3, 1)
     val curr = Buffer(3, 1)
     // Both cells at x=0 and x=1 change
-    prev.put(0, 0, Cell('A'.toInt, Style.default))
-    prev.put(1, 0, Cell('B'.toInt, Style.default))
-    curr.put(0, 0, Cell('C'.toInt, Style.default))
-    curr.put(1, 0, Cell('D'.toInt, Style.default))
+    prev.put(0, 0, Cell('A'.toInt, CellStyle.default))
+    prev.put(1, 0, Cell('B'.toInt, CellStyle.default))
+    curr.put(0, 0, Cell('C'.toInt, CellStyle.default))
+    curr.put(1, 0, Cell('D'.toInt, CellStyle.default))
 
     val out = capture(curr.renderDiff(prev))
     // Only one cursor.to at the start; 'D' follows 'C' without a move
@@ -96,10 +96,10 @@ class BufferSuite extends FunSuite:
     val prev = Buffer(4, 1)
     val curr = Buffer(4, 1)
     // Cells at x=0 and x=3 change; x=1 and x=2 are unchanged
-    prev.put(0, 0, Cell('A'.toInt, Style.default))
-    prev.put(3, 0, Cell('B'.toInt, Style.default))
-    curr.put(0, 0, Cell('X'.toInt, Style.default))
-    curr.put(3, 0, Cell('Y'.toInt, Style.default))
+    prev.put(0, 0, Cell('A'.toInt, CellStyle.default))
+    prev.put(3, 0, Cell('B'.toInt, CellStyle.default))
+    curr.put(0, 0, Cell('X'.toInt, CellStyle.default))
+    curr.put(3, 0, Cell('Y'.toInt, CellStyle.default))
 
     val out = capture(curr.renderDiff(prev))
     assertEquals(out, reset + moveTo(1, 1) + "X" + moveTo(4, 1) + "Y" + reset)
@@ -112,10 +112,10 @@ class BufferSuite extends FunSuite:
   test("renderDiff handles changes on different rows") {
     val prev = Buffer(2, 2)
     val curr = Buffer(2, 2)
-    prev.put(0, 0, Cell('A'.toInt, Style.default))
-    prev.put(0, 1, Cell('B'.toInt, Style.default))
-    curr.put(0, 0, Cell('X'.toInt, Style.default))
-    curr.put(0, 1, Cell('Y'.toInt, Style.default))
+    prev.put(0, 0, Cell('A'.toInt, CellStyle.default))
+    prev.put(0, 1, Cell('B'.toInt, CellStyle.default))
+    curr.put(0, 0, Cell('X'.toInt, CellStyle.default))
+    curr.put(0, 1, Cell('Y'.toInt, CellStyle.default))
 
     val out = capture(curr.renderDiff(prev))
     assertEquals(
@@ -131,8 +131,8 @@ class BufferSuite extends FunSuite:
   test("renderDiff emits SGR codes when style changes") {
     val prev = Buffer(2, 1)
     val curr = Buffer(2, 1)
-    prev.put(0, 0, Cell('A'.toInt, Style.default))
-    curr.put(0, 0, Cell('A'.toInt, Style(bold = true)))
+    prev.put(0, 0, Cell('A'.toInt, CellStyle.default))
+    curr.put(0, 0, Cell('A'.toInt, CellStyle(bold = true)))
 
     val out = capture(curr.renderDiff(prev))
     assertEquals(out, reset + moveTo(1, 1) + boldOn + "A" + reset)
@@ -141,8 +141,8 @@ class BufferSuite extends FunSuite:
   test("renderDiff does not emit SGR codes when style is unchanged") {
     val prev = Buffer(2, 1)
     val curr = Buffer(2, 1)
-    prev.put(0, 0, Cell('A'.toInt, Style(bold = true)))
-    curr.put(0, 0, Cell('B'.toInt, Style(bold = true)))
+    prev.put(0, 0, Cell('A'.toInt, CellStyle(bold = true)))
+    curr.put(0, 0, Cell('B'.toInt, CellStyle(bold = true)))
 
     val out = capture(curr.renderDiff(prev))
     // bold was on from the reset start; no bold code needed before 'B'
@@ -158,12 +158,12 @@ class BufferSuite extends FunSuite:
     val curr = Buffer(4, 1)
     // Wide char 😀 at x=0 (continuation at x=1) unchanged; narrow char at x=2 changes
     val smile = "😀".codePointAt(0)
-    prev.put(0, 0, Cell(smile, Style.default))
+    prev.put(0, 0, Cell(smile, CellStyle.default))
     prev.put(1, 0, Cell.continuation)
-    prev.put(2, 0, Cell('A'.toInt, Style.default))
-    curr.put(0, 0, Cell(smile, Style.default))
+    prev.put(2, 0, Cell('A'.toInt, CellStyle.default))
+    curr.put(0, 0, Cell(smile, CellStyle.default))
     curr.put(1, 0, Cell.continuation)
-    curr.put(2, 0, Cell('B'.toInt, Style.default))
+    curr.put(2, 0, Cell('B'.toInt, CellStyle.default))
 
     val out = capture(curr.renderDiff(prev))
     assertEquals(out, reset + moveTo(3, 1) + "B" + reset)
@@ -174,9 +174,9 @@ class BufferSuite extends FunSuite:
     val curr = Buffer(4, 1)
     val smile = "😀".codePointAt(0)
     val wave = "👋".codePointAt(0)
-    prev.put(0, 0, Cell(smile, Style.default))
+    prev.put(0, 0, Cell(smile, CellStyle.default))
     prev.put(1, 0, Cell.continuation)
-    curr.put(0, 0, Cell(wave, Style.default))
+    curr.put(0, 0, Cell(wave, CellStyle.default))
     curr.put(1, 0, Cell.continuation)
 
     val out = capture(curr.renderDiff(prev))
@@ -205,14 +205,14 @@ class BufferSuite extends FunSuite:
 
   test("putString writes a simple string on one row") {
     val buf = Buffer(3, 1)
-    buf.putString(0, 0, "ABC", Style.default)
+    buf.putString(0, 0, "ABC", CellStyle.default)
     val out = renderFull(buf)
     assertEquals(out, reset + moveTo(1, 1) + "A" + "B" + "C" + reset)
   }
 
   test("putString newline advances to next row and resets column") {
     val buf = Buffer(3, 2)
-    buf.putString(0, 0, "AB\nCD", Style.default)
+    buf.putString(0, 0, "AB\nCD", CellStyle.default)
     // Row 1: "AB", Row 2: "CD"
     val out = renderFull(buf)
     assertEquals(
@@ -226,7 +226,7 @@ class BufferSuite extends FunSuite:
 
   test("putString respects starting x when resetting after newline") {
     val buf = Buffer(4, 2)
-    buf.putString(1, 0, "AB\nCD", Style.default)
+    buf.putString(1, 0, "AB\nCD", CellStyle.default)
     // Starts at col 1; after newline resets to col 1 on row 2
     val out = renderFull(buf)
     assertEquals(

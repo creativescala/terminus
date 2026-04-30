@@ -16,16 +16,7 @@
 
 package terminus.ui.style
 
-/** Styling attributes for a single terminal cell. */
-final case class Style(
-    fg: Color = Color.Default,
-    bg: Color = Color.Default,
-    bold: Boolean = false,
-    italic: Boolean = false,
-    underline: Underline = Underline.None,
-    invert: Boolean = false,
-    strikethrough: Boolean = false,
-    blink: Boolean = false
-)
-object Style:
-  val default: Style = Style()
+/** Trait for style types that can be copied, allowing copy-on-write semantics.
+  */
+trait WithCopy[A]:
+  def copy(): A
