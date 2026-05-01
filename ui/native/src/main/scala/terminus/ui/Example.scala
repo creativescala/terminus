@@ -118,7 +118,7 @@ import terminus.ui.style.Underline
         FocusScope { ctx ?=>
           ctx.onKey(Key.up) { countA.update(_ + 1) }
           ctx.onKey(Key.down) { countA.update(_ - 1) }
-          Text(50, style = focusableBox) {
+          Text(50)(_ => focusableBox) {
             val count = countA.get
             val footer =
               if count == 0 then ""
@@ -131,7 +131,7 @@ import terminus.ui.style.Underline
         FocusScope { ctx ?=>
           ctx.onKey(Key.up) { countB.update(_ + 1) }
           ctx.onKey(Key.down) { countB.update(_ - 1) }
-          Text(50, style = focusableBox) {
+          Text(50)(_ => focusableBox) {
             val count = countB.get
             val footer =
               if count == 0 then ""

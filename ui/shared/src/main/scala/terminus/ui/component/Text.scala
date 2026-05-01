@@ -29,6 +29,9 @@ import terminus.ui.style.TextStyle
 import terminus.ui.tool.Box
 
 object Text:
+  sealed trait SizeToContent
+  object SizeToContent extends SizeToContent
+
   /** Create a Text component.
     *
     * When `height` is 0 (the default) the height is computed from the content:
@@ -40,7 +43,7 @@ object Text:
     */
   def component(
       width: Int,
-      height: Int = 0,
+      height: Int | SizeToContent,
       style: TextStyle,
       text: LeafContent[String]
   )(using rc: RenderContext): Component =
@@ -54,11 +57,13 @@ object Text:
 
       def size: Size =
         val ab = activeBox
-        if height > 0 then Size(width, height)
-        else
-          val offset = (if ab.border.isDefined then 1 else 0) + ab.padding
-          val lineCount = text.split('\n').length.max(1)
-          Size(width, lineCount + 2 * offset)
+        height match
+          case SizeToContent =>
+            val offset = (if ab.border.isDefined then 1 else 0) + ab.padding
+            val lineCount = text.split('\n').length.max(1)
+            Size(width, lineCount + 2 * offset)
+
+          case height: Int => Size(width, height)
 
       def render(bounds: Rect, buf: Buffer): Unit =
         val ab = activeBox
@@ -66,19 +71,9 @@ object Text:
         val inner = Box.innerRect(bounds, ab)
         buf.putString(inner.x, inner.y, text, activeContent)
 
-  def apply(
-      width: Int,
-      height: Int = 0,
-      style: TextStyle = TextStyle.default
-  )(text: => String)(using ctx: AppContext): Unit =
-    lc.add(component(width, height, style, text))
-
-  def apply(width: Int)(style: TextStyle => TextStyle)(
-      text: LeafContent[String]
-  )(using lc: LayoutContext, rc: RenderContext): Unit =
-    lc.add(component(width, 0, style(TextStyle.default), text))
-
-  def apply(width: Int, height: Int)(style: TextStyle => TextStyle)(
-      text: LeafContent[String]
+  def apply(width: Int, height: Int | SizeToContent = SizeToContent)(
+      style: TextStyle => TextStyle
+  )(
+      text: LeafContext[String]
   )(using lc: LayoutContext, rc: RenderContext): Unit =
     lc.add(component(width, height, style(TextStyle.default), text))
