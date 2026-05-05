@@ -16,12 +16,18 @@
 
 package terminus.ui
 
+/** The context that builds the component tree.
+  *
+  * Allows children components to register themselves with this context.
+  */
 trait LayoutContext:
   def size: Size
   def add(component: Component): Unit
 
+/** The context for the root of a component tree. */
 trait RootContext extends LayoutContext:
   def render(using Terminal): Unit
 
+/** Context for any child components. */
 trait ChildContext extends LayoutContext:
   def render(bounds: Rect, buf: Buffer): Unit
