@@ -74,6 +74,6 @@ object Text:
   def apply(width: Int, height: Int | SizeToContent = SizeToContent)(
       style: TextStyle => TextStyle
   )(
-      text: LeafContext[String]
+      text: LeafContent[String]
   )(using lc: LayoutContext, rc: RenderContext): Unit =
     lc.add(component(width, height, style(TextStyle.default), text))

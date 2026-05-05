@@ -18,10 +18,7 @@ package terminus.ui
 
 import terminus.Key
 import terminus.NativeTerminal
-<<<<<<< HEAD
 import terminus.Terminal
-=======
->>>>>>> 4837b68 (First version of TUI toolkit (#38))
 import terminus.ui.component.Select
 import terminus.ui.component.Text
 import terminus.ui.component.TextInput
@@ -166,7 +163,7 @@ import terminus.ui.style.Underline
         Text(50, 1)(_.withBox(_.withoutBorder))(
           "Type a name and press Enter. q to quit."
         )
-        FocusScope { _ ?=>
+        FocusScope {
           TextInput(50, name, inputStyle)
         }
         Text(50)(_.withBox(_.withoutBorder)) {
