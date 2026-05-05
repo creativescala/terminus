@@ -19,6 +19,7 @@ package terminus.ui.component
 import terminus.ui.Buffer
 import terminus.ui.Component
 import terminus.ui.LayoutContext
+import terminus.ui.LeafContent
 import terminus.ui.Rect
 import terminus.ui.RenderContext
 import terminus.ui.Size
@@ -41,7 +42,7 @@ object Text:
       width: Int,
       height: Int = 0,
       style: TextStyle,
-      text: => String
+      text: LeafContent[String]
   )(using rc: RenderContext): Component =
     new Component:
       private def activeBox: BoxStyle =
@@ -69,15 +70,15 @@ object Text:
       width: Int,
       height: Int = 0,
       style: TextStyle = TextStyle.default
-  )(text: => String)(using lc: LayoutContext, rc: RenderContext): Unit =
+  )(text: => String)(using ctx: AppContext): Unit =
     lc.add(component(width, height, style, text))
 
   def apply(width: Int)(style: TextStyle => TextStyle)(
-      text: => String
+      text: LeafContent[String]
   )(using lc: LayoutContext, rc: RenderContext): Unit =
     lc.add(component(width, 0, style(TextStyle.default), text))
 
   def apply(width: Int, height: Int)(style: TextStyle => TextStyle)(
-      text: => String
+      text: LeafContent[String]
   )(using lc: LayoutContext, rc: RenderContext): Unit =
     lc.add(component(width, height, style(TextStyle.default), text))

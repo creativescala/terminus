@@ -29,21 +29,6 @@ import terminus.Key
   */
 trait AppContext extends RenderContext, EventContext, LayoutContext
 
-/** Content of a leaf component (e.g. Text).
-  *
-  * The [[RenderContext]] in scope enables signal reads to register the
-  * component as a subscriber, so that signal changes can trigger a targeted
-  * re-render.
-  */
-type LeafContent[A] = RenderContext ?=> A
-
-/** Body of a layout component (e.g. Row, Column) or the top-level app body.
-  *
-  * Provides the full reactive + layout capability set: signals, key handlers,
-  * and sub-component layout.
-  */
-type AppContent[A] = AppContext ?=> A
-
 object AppContext:
 
   /** Creates a child AppContext that delegates [[RenderContext]] and
