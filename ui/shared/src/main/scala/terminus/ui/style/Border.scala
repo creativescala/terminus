@@ -53,6 +53,24 @@ object Border:
     bottomRight = '╝'
   )
 
+  val thick = Border(
+    topLeft = '┏',
+    topRight = '┓',
+    horizontal = '━',
+    vertical = '┃',
+    bottomLeft = '┗',
+    bottomRight = '┛'
+  )
+
+  val rounded = Border(
+    topLeft = '╭',
+    topRight = '╮',
+    horizontal = '─',
+    vertical = '│',
+    bottomLeft = '╰',
+    bottomRight = '╯'
+  )
+
   val ascii = Border(
     topLeft = '+',
     topRight = '+',
