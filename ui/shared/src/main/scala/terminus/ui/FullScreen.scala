@@ -119,7 +119,7 @@ object FullScreen:
                 // If components have resized between frames we cannot diff.
                 // We also clear the screen in this case, as the older content
                 // may take up more space than the new content and we must
-                // ensure it is cleared.
+                // ensure older content is not displayed.
                 if buf.width == p.width && buf.height == p.height then
                   buf.renderDiff(p)
                 else

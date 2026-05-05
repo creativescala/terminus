@@ -17,7 +17,6 @@
 package terminus.ui
 
 import terminus.Key
-import terminus.NativeTerminal
 import terminus.Terminal
 import terminus.ui.component.Select
 import terminus.ui.component.Text
@@ -85,7 +84,7 @@ import terminus.ui.style.Underline
       }
     }
 
-  NativeTerminal.run {
+  Terminal.run {
     program
     Terminal.newline
   }
@@ -140,7 +139,7 @@ import terminus.ui.style.Underline
       }
     }
 
-  NativeTerminal.run(program)
+  Terminal.run(program)
 
 @main def textInputDemo(): Unit =
   val inputStyle = TextStyle.default
@@ -173,7 +172,7 @@ import terminus.ui.style.Underline
       }
     }
 
-  NativeTerminal.run(program)
+  Terminal.run(program)
 
 @main def selectDemo(): Unit =
   val fruits = Vector(
@@ -218,10 +217,10 @@ import terminus.ui.style.Underline
       }
     }
 
-  NativeTerminal.run(program)
+  Terminal.run(program)
 
 @main def terminalDimensionsDemo(): Unit =
-  NativeTerminal.run {
+  Terminal.run {
     val dimensions = Terminal.dimensions.get
     Terminal.write(s"Dimensions: $dimensions\n")
     Terminal.flush()
