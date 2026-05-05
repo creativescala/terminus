@@ -16,17 +16,15 @@
 
 package terminus.ui
 
-/** The context that builds the component tree.
-  *
-  * Allows children components to register themselves with this context.
-  */
-trait LayoutContext:
-  def add(component: Component): Unit
+/** The size constraint for one axis of a component. */
+enum Constraint:
+  /** Exactly `cells` terminal cells. */
+  case Fixed(cells: Int)
 
-/** The context for the root of a component tree. */
-trait RootContext extends LayoutContext:
-  def render(using Terminal): Unit
+  /** A fraction of the container's size on this axis (0.0–1.0). */
+  case Percentage(percent: Double)
 
-/** Context for any child components. */
-trait ChildContext extends LayoutContext:
-  def render(bounds: Rect, buf: Buffer): Unit
+  /** A proportional share of the remaining space after fixed and percentage
+    * children have been placed.
+    */
+  case Weight(weight: Int)

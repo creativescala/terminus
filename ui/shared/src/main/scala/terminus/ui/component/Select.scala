@@ -125,7 +125,7 @@ object Select:
         if rc.isFocused then style.focus.map(_.content).getOrElse(style.content)
         else style.content
 
-      def size: Size = Size(width, height)
+      def size: Size = Size.fixed(width, height)
 
       def render(bounds: Rect, buf: Buffer): Unit =
         val ab = activeBox

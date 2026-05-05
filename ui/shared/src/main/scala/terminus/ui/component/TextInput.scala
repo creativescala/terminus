@@ -110,7 +110,7 @@ object TextInput:
       def size: Size =
         val ab = activeBox
         val offset = (if ab.border.isDefined then 1 else 0) + ab.padding
-        Size(width, 1 + 2 * offset)
+        Size.fixed(width, 1 + 2 * offset)
 
       def render(bounds: Rect, buf: Buffer): Unit =
         val ab = activeBox

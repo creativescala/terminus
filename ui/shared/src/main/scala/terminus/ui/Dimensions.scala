@@ -16,17 +16,16 @@
 
 package terminus.ui
 
-/** The context that builds the component tree.
-  *
-  * Allows children components to register themselves with this context.
+/** Concrete cell dimensions: the actual width and height of a component after
+  * layout has been resolved.
   */
-trait LayoutContext:
-  def add(component: Component): Unit
+final case class Dimensions(width: Int, height: Int):
 
-/** The context for the root of a component tree. */
-trait RootContext extends LayoutContext:
-  def render(using Terminal): Unit
+  def row(that: Dimensions): Dimensions =
+    Dimensions(this.width + that.width, this.height.max(that.height))
 
-/** Context for any child components. */
-trait ChildContext extends LayoutContext:
-  def render(bounds: Rect, buf: Buffer): Unit
+  def column(that: Dimensions): Dimensions =
+    Dimensions(this.width.max(that.width), this.height + that.height)
+
+object Dimensions:
+  val zero: Dimensions = Dimensions(0, 0)

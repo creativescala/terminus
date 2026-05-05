@@ -41,7 +41,6 @@ object FocusScope:
       def onAnyKey(handler: Key => Unit): Unit =
         parent.onAnyKey(key => if isFocused then handler(key))
       def stop(): Unit = parent.stop()
-      def size: Size = parent.size
       def add(component: Component): Unit = parent.add(component)
       override def isFocused: Boolean = parent.focusedId == Some(id)
     f

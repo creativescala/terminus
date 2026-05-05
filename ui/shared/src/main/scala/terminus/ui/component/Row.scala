@@ -21,6 +21,7 @@ import terminus.ui.AppContext
 import terminus.ui.Buffer
 import terminus.ui.ChildContext
 import terminus.ui.Component
+import terminus.ui.Dimensions
 import terminus.ui.Rect
 import terminus.ui.Size
 
@@ -30,8 +31,12 @@ class Row() extends ChildContext, Component:
   private val children: mutable.ArrayBuffer[Component] =
     mutable.ArrayBuffer.empty
 
+  private def availableSize: Dimensions =
+    children.foldLeft(Dimensions.zero)((acc, c) => acc.row(c.size.toDimensions))
+
   def size: Size =
-    children.foldLeft(Size.zero)((acc, c) => acc.row(c.size))
+    val d = availableSize
+    Size.fixed(d.width, d.height)
 
   def add(component: Component): Unit =
     children += component
@@ -39,7 +44,7 @@ class Row() extends ChildContext, Component:
   def render(bounds: Rect, buf: Buffer): Unit =
     var x = bounds.x
     children.foreach { child =>
-      val childSize = child.size
+      val childSize = child.size.toDimensions
       child.render(Rect(x, bounds.y, childSize.width, childSize.height), buf)
       x += childSize.width
     }

@@ -31,14 +31,14 @@ class LayoutSuite extends FunSuite:
   /** A minimal component that writes a single character at its origin. */
   def cell(char: Char, width: Int = 1, height: Int = 1): Component =
     new Component:
-      val size: Size = Size(width, height)
+      val size: Size = Size.fixed(width, height)
       def render(bounds: Rect, buf: Buffer): Unit =
         buf.put(bounds.x, bounds.y, Cell(char.toInt, CellStyle.default))
 
   /** A component that fills its entire bounds with a single character. */
   def filledCell(char: Char, width: Int = 1, height: Int = 1): Component =
     new Component:
-      val size: Size = Size(width, height)
+      val size: Size = Size.fixed(width, height)
       def render(bounds: Rect, buf: Buffer): Unit =
         val c = Cell(char.toInt, CellStyle.default)
         var y = bounds.y
@@ -51,9 +51,10 @@ class LayoutSuite extends FunSuite:
 
   /** Render a component into a fresh buffer and return the terminal output. */
   def renderToString(component: Component): String =
-    val buf = Buffer(component.size.width, component.size.height)
+    val dims = component.size.toDimensions
+    val buf = Buffer(dims.width, dims.height)
     component.render(
-      Rect(0, 0, component.size.width, component.size.height),
+      Rect(0, 0, dims.width, dims.height),
       buf
     )
     val t = StringBuilderTerminal()
@@ -69,7 +70,7 @@ class LayoutSuite extends FunSuite:
 
   test("Row size is zero with no children") {
     val row = new Row()
-    assertEquals(row.size, Size(0, 0))
+    assertEquals(row.size, Size.zero)
   }
 
   test("Row size sums widths and takes max height") {
@@ -77,7 +78,7 @@ class LayoutSuite extends FunSuite:
     row.add(cell('A', width = 3, height = 2))
     row.add(cell('B', width = 5, height = 1))
     // width = 3 + 5 = 8, height = max(2, 1) = 2
-    assertEquals(row.size, Size(8, 2))
+    assertEquals(row.size, Size.fixed(8, 2))
   }
 
   // ---------------------------------------------------------------------------
@@ -124,7 +125,7 @@ class LayoutSuite extends FunSuite:
 
   test("Column size is zero with no children") {
     val col = new Column()
-    assertEquals(col.size, Size(0, 0))
+    assertEquals(col.size, Size.zero)
   }
 
   test("Column size takes max width and sums heights") {
@@ -132,7 +133,7 @@ class LayoutSuite extends FunSuite:
     col.add(cell('A', width = 3, height = 1))
     col.add(cell('B', width = 5, height = 2))
     // width = max(3, 5) = 5, height = 1 + 2 = 3
-    assertEquals(col.size, Size(5, 3))
+    assertEquals(col.size, Size.fixed(5, 3))
   }
 
   // ---------------------------------------------------------------------------

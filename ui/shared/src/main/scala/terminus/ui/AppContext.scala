@@ -45,6 +45,5 @@ object AppContext:
       def registerFocusable(): FocusId = parent.registerFocusable()
       private[ui] def focusedId: Option[FocusId] = parent.focusedId
       def stop(): Unit = parent.stop()
-      def size: Size = rc.size
       def add(component: Component): Unit = rc.add(component)
       override def isFocused: Boolean = parent.isFocused

@@ -23,7 +23,7 @@ package terminus.ui
   * happens only at flush time inside [[Buffer.render]].
   */
 final case class Rect(x: Int, y: Int, width: Int, height: Int):
-  def size: Size = Size(width, height)
+  def size: Size = Size.fixed(width, height)
 
   /** Exclusive right edge. */
   def right: Int = x + width

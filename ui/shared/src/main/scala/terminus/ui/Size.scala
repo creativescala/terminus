@@ -16,19 +16,31 @@
 
 package terminus.ui
 
-/** Represents the size of component in terms of temrinal cells. */
-final case class Size(width: Int, height: Int):
+/** The layout size of a component: a constraint for each axis.
+  *
+  * For components with a known fixed size use [[Size.fixed]]. Percentage and
+  * weight constraints are resolved by the parent layout container at render
+  * time.
+  */
+final case class Size(width: Constraint, height: Constraint):
 
-  /** Combine two sizes into a row. That is, add together width and take the max
-    * height.
+  /** Resolve this size to concrete [[Dimensions]].
+    *
+    * Only valid when both constraints are [[Constraint.Fixed]]; non-fixed
+    * constraints resolve to 0 until the layout algorithm is extended to handle
+    * them.
     */
-  def row(that: Size): Size =
-    Size(this.width + that.width, this.height.max(that.height))
+  def toDimensions: Dimensions =
+    val w = width match
+      case Constraint.Fixed(n) => n
+      case _                   => 0
+    val h = height match
+      case Constraint.Fixed(n) => n
+      case _                   => 0
+    Dimensions(w, h)
 
-  /** Combine two sizes into a column. That is, take the max of width and add
-    * together the height.
-    */
-  def column(that: Size): Size =
-    Size(this.width.max(that.width), this.height + that.height)
 object Size:
-  val zero: Size = Size(0, 0)
+  def fixed(width: Int, height: Int): Size =
+    Size(Constraint.Fixed(width), Constraint.Fixed(height))
+
+  val zero: Size = fixed(0, 0)

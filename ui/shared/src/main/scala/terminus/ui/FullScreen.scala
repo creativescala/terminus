@@ -32,18 +32,20 @@ class FullScreen() extends RootContext:
   private val children: mutable.ArrayBuffer[Component] =
     mutable.ArrayBuffer.empty
 
-  def size: Size =
-    children.foldLeft(Size.zero)((acc, c) => acc.column(c.size))
+  private def availableSize: Dimensions =
+    children.foldLeft(Dimensions.zero)((acc, c) =>
+      acc.column(c.size.toDimensions)
+    )
 
   def add(component: Component): Unit =
     children += component
 
   private[ui] def toBuffer(): Buffer =
-    val currentSize = size
+    val currentSize = availableSize
     val buf = Buffer(currentSize.width, currentSize.height)
     var y = 0
     children.foreach { child =>
-      val childSize = child.size
+      val childSize = child.size.toDimensions
       child.render(Rect(0, y, childSize.width, childSize.height), buf)
       y += childSize.height
     }
@@ -99,7 +101,6 @@ object FullScreen:
       def registerFocusable(): FocusId = ec.registerFocusable()
       private[ui] def focusedId: Option[FocusId] = ec.focusedId
       def stop(): Unit = ec.stop()
-      def size: Size = fullScreen.size
       def add(component: Component): Unit = fullScreen.add(component)
 
     f // build component tree and register handlers
@@ -154,5 +155,4 @@ object FullScreen:
       def registerFocusable(): FocusId = FocusId(0)
       private[ui] def focusedId: Option[FocusId] = None
       def stop(): Unit = ()
-      def size: Size = fullScreen.size
       def add(component: Component): Unit = fullScreen.add(component)

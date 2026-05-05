@@ -62,9 +62,9 @@ object Text:
           case SizeToContent =>
             val offset = (if ab.border.isDefined then 1 else 0) + ab.padding
             val lineCount = text.split('\n').length.max(1)
-            Size(width, lineCount + 2 * offset)
+            Size.fixed(width, lineCount + 2 * offset)
 
-          case height: Int => Size(width, height)
+          case height: Int => Size.fixed(width, height)
 
       def render(bounds: Rect, buf: Buffer): Unit =
         val ab = activeBox
