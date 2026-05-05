@@ -18,6 +18,7 @@ package terminus.ui
 
 import terminus.Key
 import terminus.NativeTerminal
+import terminus.Terminal
 import terminus.ui.component.Select
 import terminus.ui.component.Text
 import terminus.ui.component.TextInput
@@ -218,3 +219,10 @@ import terminus.ui.style.Underline
     }
 
   NativeTerminal.run(program)
+
+@main def terminalDimensionsDemo(): Unit =
+  NativeTerminal.run {
+    val dimensions = Terminal.dimensions.get
+    Terminal.write(s"Dimensions: $dimensions\n")
+    Terminal.flush()
+  }

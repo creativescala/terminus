@@ -17,6 +17,7 @@
 package terminus
 
 import terminus.effect.AnsiCodes
+import terminus.effect.TerminalDimensions
 import terminus.effect.TerminalKeyReader
 import terminus.effect.WithEffect
 
@@ -24,12 +25,17 @@ import scala.concurrent.duration.Duration
 import scala.scalanative.libc
 import scala.scalanative.meta.LinktimeInfo
 import scala.scalanative.posix
+import scala.scalanative.posix.sys.ioctl as ioctlSys
 import scala.scalanative.unsigned.*
 
 import scalanative.unsafe.*
 
 /** A Terminal implementation for Scala Native. */
-object NativeTerminal extends Terminal, WithEffect, TerminalKeyReader:
+object NativeTerminal
+    extends Terminal,
+      WithEffect,
+      TerminalKeyReader,
+      effect.Dimensions:
 
   private given termiosAccess: TermiosAccess[?] =
     if LinktimeInfo.isMac then clongTermiosAccess
@@ -116,4 +122,30 @@ object NativeTerminal extends Terminal, WithEffect, TerminalKeyReader:
         termios.setRawMode()
         f()
       finally termios.setAttributes(origAttrs)
+    }
+
+  def getDimensions: TerminalDimensions =
+    Zone {
+      val ws = alloc[WinSize]()
+      val _ = ioctlSys.ioctl(
+        posix.unistd.STDIN_FILENO,
+        winsizeConstants.TIOCGWINSZ,
+        ws.asInstanceOf[Ptr[Byte]]
+      )
+      // winsize fields: ws_row (_1), ws_col (_2)
+      TerminalDimensions(ws._2.toInt, ws._1.toInt)
+    }
+
+  def setDimensions(dimensions: TerminalDimensions): Unit =
+    Zone {
+      val ws = alloc[WinSize]()
+      ws._1 = dimensions.rows.toUShort
+      ws._2 = dimensions.columns.toUShort
+      ws._3 = 0.toUShort
+      ws._4 = 0.toUShort
+      val _ = ioctlSys.ioctl(
+        posix.unistd.STDIN_FILENO,
+        winsizeConstants.TIOCSWINSZ,
+        ws.asInstanceOf[Ptr[Byte]]
+      )
     }
