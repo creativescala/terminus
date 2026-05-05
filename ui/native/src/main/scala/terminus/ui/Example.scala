@@ -18,6 +18,8 @@ package terminus.ui
 
 import terminus.Key
 import terminus.Terminal
+import terminus.ui.component.Column
+import terminus.ui.component.Row
 import terminus.ui.component.Select
 import terminus.ui.component.Text
 import terminus.ui.component.TextInput

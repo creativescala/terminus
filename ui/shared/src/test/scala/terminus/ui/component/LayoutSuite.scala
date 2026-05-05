@@ -14,11 +14,16 @@
  * limitations under the License.
  */
 
-package terminus.ui
+package terminus.ui.component
 
 import munit.FunSuite
 import terminus.StringBuilderTerminal
 import terminus.effect.AnsiCodes
+import terminus.ui.Buffer
+import terminus.ui.Cell
+import terminus.ui.Component
+import terminus.ui.Rect
+import terminus.ui.Size
 import terminus.ui.style.CellStyle
 
 class LayoutSuite extends FunSuite:

@@ -14,7 +14,15 @@
  * limitations under the License.
  */
 
-package terminus.ui
+package terminus.ui.component
+
+import terminus.ui.AppContent
+import terminus.ui.AppContext
+import terminus.ui.Buffer
+import terminus.ui.ChildContext
+import terminus.ui.Component
+import terminus.ui.Rect
+import terminus.ui.Size
 
 import scala.collection.mutable
 
