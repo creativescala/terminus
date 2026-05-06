@@ -21,41 +21,64 @@ import terminus.ui.AppContext
 import terminus.ui.Buffer
 import terminus.ui.ChildContext
 import terminus.ui.Component
-import terminus.ui.Dimensions
 import terminus.ui.Rect
 import terminus.ui.Size
+import terminus.ui.style.Align
+import terminus.ui.style.Justify
+import terminus.ui.style.LayoutStyle
 
 import scala.collection.mutable
 
-class Column() extends ChildContext, Component:
+class Column(val size: Size, val layoutStyle: LayoutStyle = LayoutStyle.default)
+    extends ChildContext,
+      Component:
   private val children: mutable.ArrayBuffer[Component] =
     mutable.ArrayBuffer.empty
-
-  private def availableSize: Dimensions =
-    children.foldLeft(Dimensions.zero)((acc, c) =>
-      acc.column(c.size.toDimensions)
-    )
-
-  def size: Size =
-    val d = availableSize
-    Size.fixed(d.width, d.height)
 
   def add(component: Component): Unit =
     children += component
 
   def render(bounds: Rect, buf: Buffer): Unit =
-    var y = bounds.y
-    children.foreach { child =>
-      val childSize = child.size.toDimensions
-      child.render(Rect(bounds.x, y, childSize.width, childSize.height), buf)
-      y += childSize.height
+    val heights =
+      Layout.resolveAxis(
+        children.view.map(_.size.height).toIndexedSeq,
+        bounds.height
+      )
+    val freeSpace = (bounds.height - heights.sum).max(0)
+    val n = children.size
+
+    val (startOffset, gap) = layoutStyle.justify match
+      case Justify.Start        => (0, 0)
+      case Justify.End          => (freeSpace, 0)
+      case Justify.Center       => (freeSpace / 2, 0)
+      case Justify.SpaceBetween => (0, if n > 1 then freeSpace / (n - 1) else 0)
+      case Justify.SpaceAround  =>
+        val space = if n > 0 then freeSpace / n else 0
+        (space / 2, space)
+      case Justify.SpaceEvenly =>
+        val space = if n > 0 then freeSpace / (n + 1) else 0
+        (space, space)
+
+    var y = bounds.y + startOffset
+    children.zip(heights).foreach { (child, h) =>
+      val naturalW = Layout.resolveSingle(child.size.width, bounds.width)
+      val (x, w) = layoutStyle.align match
+        case Align.Stretch => (bounds.x, bounds.width)
+        case Align.Start   => (bounds.x, naturalW)
+        case Align.End     => (bounds.x + bounds.width - naturalW, naturalW)
+        case Align.Center  =>
+          (bounds.x + (bounds.width - naturalW) / 2, naturalW)
+      child.render(Rect(x, y, w, h), buf)
+      y += h + gap
     }
 
 object Column:
-  def apply[A](
+  def apply[A](size: Size, style: LayoutStyle => LayoutStyle = identity)(
       f: AppContent[A]
-  )(using parent: AppContext): A =
-    val column = new Column()
+  )(using
+      parent: AppContext
+  ): A =
+    val column = new Column(size, style(LayoutStyle.default))
     given AppContext = AppContext.child(parent, column)
     val result = f
     parent.add(column)

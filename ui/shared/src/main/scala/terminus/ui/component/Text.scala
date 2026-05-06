@@ -72,8 +72,10 @@ object Text:
         val inner = Box.innerRect(bounds, ab)
         buf.putString(inner.x, inner.y, text, activeContent)
 
-  def apply(width: Int, height: Int | SizeToContent = SizeToContent)(
-      style: TextStyle => TextStyle
+  def apply(
+      width: Int,
+      height: Int | SizeToContent = SizeToContent,
+      style: TextStyle => TextStyle = identity
   )(
       text: LeafContent[String]
   )(using lc: LayoutContext, rc: RenderContext): Unit =

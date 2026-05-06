@@ -38,48 +38,56 @@ import terminus.ui.style.Underline
     FullScreen {
 
       // Row 1: text style attributes
-      Row {
-        Text(24, 3)(_.withContent(_.withBold))(
+      Row(Size.fixed(72, 3)) {
+        Text(24, 3, _.withContent(_.withBold))(
           "Bold 💪"
         )
-        Text(24, 3)(_.withContent(_.withItalic))(
+        Text(24, 3, _.withContent(_.withItalic))(
           "Italic ✨"
         )
-        Text(24, 3)(_.withContent(_.withStrikethrough))(
+        Text(24, 3, _.withContent(_.withStrikethrough))(
           "Strikethrough ❌"
         )
       }
 
       // Row 2: underline variants and invert
-      Row {
-        Text(24, 3)(_.withContent(_.withUnderline(Underline.Straight)))(
+      Row(Size.fixed(72, 3)) {
+        Text(24, 3, _.withContent(_.withUnderline(Underline.Straight)))(
           "Straight underline"
         )
-        Text(24, 3)(_.withContent(_.withUnderline(Underline.Curly)))(
+        Text(24, 3, _.withContent(_.withUnderline(Underline.Curly)))(
           "Curly underline"
         )
-        Text(24, 3)(_.withContent(_.withInvert))(
+        Text(24, 3, _.withContent(_.withInvert))(
           "Inverted 🔄"
         )
       }
 
       // Row 3: component styling — coloured borders and background fill
-      Row {
-        Column {
-          Text(24, 3)(
+      Row(Size.fixed(48, 9)) {
+        Column(Size.fixed(24, 9)) {
+          Text(
+            24,
+            3,
             _.withBox(_.withBorderStyle(CellStyle(fg = Color.Red)))
               .withContent(CellStyle(fg = Color.Red, bold = true))
           )("🔴 Red — 红色")
-          Text(24, 3)(
+          Text(
+            24,
+            3,
             _.withBox(_.withBorderStyle(CellStyle(fg = Color.Green)))
               .withContent(CellStyle(fg = Color.Green, bold = true))
           )("🟢 Green — 緑")
-          Text(24, 3)(
+          Text(
+            24,
+            3,
             _.withBox(_.withBorderStyle(CellStyle(fg = Color.Blue)))
               .withContent(CellStyle(fg = Color.Blue, bold = true))
           )("🔵 Blue — 青色")
         }
-        Text(24, 9)(
+        Text(
+          24,
+          9,
           _.withBox(_.withBorderStyle(CellStyle(fg = Color.Yellow)))
             .withContent(CellStyle(fg = Color.Yellow, bold = true))
         )("Column on the left\nhas coloured\nborders.")
@@ -108,15 +116,15 @@ import terminus.ui.style.Underline
       ctx.onKey(Key('q')) { ctx.stop() }
       ctx.onKey(Key.controlC) { ctx.stop() }
 
-      Column {
-        Text(50, 3)(_.withBox(_.withBorder(Border.empty)))(
+      Column(Size.fixed(50, 9)) {
+        Text(50, 3, _.withBox(_.withBorder(Border.empty)))(
           "Tab to switch focus, ↑/↓ to change, q to quit"
         )
 
         FocusScope { ctx ?=>
           ctx.onKey(Key.up) { countA.update(_ + 1) }
           ctx.onKey(Key.down) { countA.update(_ - 1) }
-          Text(50)(_ => focusableBox) {
+          Text(50, style = _ => focusableBox) {
             val count = countA.get
             val footer =
               if count == 0 then ""
@@ -129,7 +137,7 @@ import terminus.ui.style.Underline
         FocusScope { ctx ?=>
           ctx.onKey(Key.up) { countB.update(_ + 1) }
           ctx.onKey(Key.down) { countB.update(_ - 1) }
-          Text(50)(_ => focusableBox) {
+          Text(50, style = _ => focusableBox) {
             val count = countB.get
             val footer =
               if count == 0 then ""
@@ -160,14 +168,14 @@ import terminus.ui.style.Underline
       ctx.onKey(Key.enter) { greeting.set(name.peek) }
       ctx.onKey(Key.newLine) { greeting.set(name.peek) }
 
-      Column {
-        Text(50, 1)(_.withBox(_.withoutBorder))(
+      Column(Size.fixed(50, 5)) {
+        Text(50, 1, _.withBox(_.withoutBorder))(
           "Type a name and press Enter. q to quit."
         )
         FocusScope {
           TextInput(50, name, inputStyle)
         }
-        Text(50)(_.withBox(_.withoutBorder)) {
+        Text(50, style = _.withBox(_.withoutBorder)) {
           val g = greeting.get
           if g.isEmpty then "" else s"Hello, $g!"
         }
@@ -208,12 +216,12 @@ import terminus.ui.style.Underline
       ctx.onKey(Key('q')) { ctx.stop() }
       ctx.onKey(Key.controlC) { ctx.stop() }
 
-      Column {
-        Text(30, 1)(_.withBox(_.withoutBorder))("Pick a fruit. q to quit.")
+      Column(Size.fixed(30, 10)) {
+        Text(30, 1, _.withBox(_.withoutBorder))("Pick a fruit. q to quit.")
         FocusScope { _ ?=>
           Select(30, 8, fruits, choice, listStyle)
         }
-        Text(30)(_.withBox(_.withoutBorder)) {
+        Text(30, style = _.withBox(_.withoutBorder)) {
           s"Selected: ${fruits(choice.get)}"
         }
       }
