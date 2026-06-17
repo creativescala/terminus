@@ -14,11 +14,12 @@
  * limitations under the License.
  */
 
-package terminus.ui
+package terminus.ui.layout
 
 import terminus.effect.AnsiCodes
 import terminus.ui.style.CellStyle
 import terminus.ui.style.Color
+import terminus.ui.style.Underline
 
 /** A 2D grid of terminal cells that components render into.
   *
@@ -92,7 +93,7 @@ final class Buffer(val width: Int, val height: Int):
     * Continuation cells (right half of wide characters) are skipped. Emits a
     * full SGR reset before and after rendering.
     */
-  def render(using t: Terminal): Unit =
+  def render(using t: terminus.effect.Cursor & terminus.effect.Writer): Unit =
     t.write(AnsiCodes.sgr("0"))
     var currentStyle = CellStyle.default
     var y = 0
@@ -181,14 +182,14 @@ final class Buffer(val width: Int, val height: Int):
         else AnsiCodes.format.strikethrough.off)
     to
 
-  private def underlineCode(underline: style.Underline): String =
+  private def underlineCode(underline: Underline): String =
     underline match
-      case style.Underline.None     => AnsiCodes.format.underline.off
-      case style.Underline.Straight => AnsiCodes.format.underline.straight
-      case style.Underline.Double   => AnsiCodes.format.underline.double
-      case style.Underline.Curly    => AnsiCodes.format.underline.curly
-      case style.Underline.Dotted   => AnsiCodes.format.underline.dotted
-      case style.Underline.Dashed   => AnsiCodes.format.underline.dashed
+      case Underline.None     => AnsiCodes.format.underline.off
+      case Underline.Straight => AnsiCodes.format.underline.straight
+      case Underline.Double   => AnsiCodes.format.underline.double
+      case Underline.Curly    => AnsiCodes.format.underline.curly
+      case Underline.Dotted   => AnsiCodes.format.underline.dotted
+      case Underline.Dashed   => AnsiCodes.format.underline.dashed
 
   private def fgCode(color: Color): String =
     color match

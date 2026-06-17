@@ -16,36 +16,35 @@
 
 package terminus.ui.component
 
-import terminus.ui.AppContent
-import terminus.ui.AppContext
-import terminus.ui.Buffer
-import terminus.ui.ChildContext
-import terminus.ui.Component
-import terminus.ui.Rect
-import terminus.ui.Size
+import terminus.ui.layout.Buffer
+import terminus.ui.layout.Component
+import terminus.ui.layout.Rect
+import terminus.ui.layout.Size
 import terminus.ui.style.Align
 import terminus.ui.style.Justify
 import terminus.ui.style.LayoutStyle
+import terminus.ui.event.DefaultEvent
+import terminus.ui.layout.DefaultLayout
+import terminus.ui.capability.Event
+import terminus.ui.capability.Layout
+import terminus.ui.event.FocusId
 
 import scala.collection.mutable
 
-class Row(val size: Size, val layoutStyle: LayoutStyle = LayoutStyle.default)
-    extends ChildContext,
-      Component:
-  private val children: mutable.ArrayBuffer[Component] =
-    mutable.ArrayBuffer.empty
-
-  def add(component: Component): Unit =
-    children += component
+final class Row(
+    val size: Size,
+    layoutStyle: LayoutStyle = LayoutStyle.default,
+    context: DefaultLayout & DefaultEvent
+) extends Component:
 
   def render(bounds: Rect, buf: Buffer): Unit =
     val widths =
       Layout.resolveAxis(
-        children.view.map(_.size.width).toIndexedSeq,
+        context.components.view.map(_.size.width).toIndexedSeq,
         bounds.width
       )
     val freeSpace = (bounds.width - widths.sum).max(0)
-    val n = children.size
+    val n = context.components.size
 
     val (startOffset, gap) = layoutStyle.justify match
       case Justify.Start        => (0, 0)
@@ -60,7 +59,7 @@ class Row(val size: Size, val layoutStyle: LayoutStyle = LayoutStyle.default)
         (space, space)
 
     var x = bounds.x + startOffset
-    children.zip(widths).foreach { (child, w) =>
+    context.components.zip(widths).foreach { (child, w) =>
       val naturalH = Layout.resolveSingle(child.size.height, bounds.height)
       val (y, h) = layoutStyle.align match
         case Align.Stretch => (bounds.y, bounds.height)
@@ -73,14 +72,18 @@ class Row(val size: Size, val layoutStyle: LayoutStyle = LayoutStyle.default)
     }
 
 object Row:
-  def apply[A](
+  def apply(
       size: Size,
       style: LayoutStyle => LayoutStyle = identity
-  )(f: AppContent[A])(using
-      parent: AppContext
-  ): A =
-    val row = new Row(size, style(LayoutStyle.default))
-    given AppContext = AppContext.child(parent, row)
-    val result = f
-    parent.add(row)
-    result
+  )(body: Event & Layout ?=> Unit)(using
+      ctx: Layout
+  ): Unit =
+    ctx.addComponent { runtime =>
+      val focusId = FocusId.next
+      val context = new DefaultEvent(focusId, runtime)
+        with DefaultLayout(runtime) {}
+      // Evaluate body here so we do not retain a reference to it and it can be garbage collected.
+      body(using context)
+
+      new Row(size, style(LayoutStyle.default), context)
+    }

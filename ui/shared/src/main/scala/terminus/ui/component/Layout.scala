@@ -16,7 +16,7 @@
 
 package terminus.ui.component
 
-import terminus.ui.Constraint
+import terminus.ui.layout.Constraint
 
 /** Layout utilities. */
 private object Layout:

@@ -20,51 +20,80 @@ import terminus.AlternateScreenMode
 import terminus.Cursor
 import terminus.Erase
 import terminus.Key
+import terminus.KeyCode
 import terminus.KeyReader
 import terminus.RawMode
 import terminus.Writer
 import terminus.effect
+import terminus.ui.event.DefaultEvent
+import terminus.ui.layout.Dimensions
+import terminus.ui.layout.DefaultLayout
+import terminus.ui.layout.Rect
+import terminus.ui.layout.Buffer
+import terminus.ui.event.FocusId
+import terminus.ui.component.Column
+import terminus.ui.runtime.Runtime
+import terminus.ui.capability.Layout
+import terminus.ui.layout.Size
+import terminus.ui.layout.Constraint
+import terminus.ui.style.LayoutStyle
 
 import scala.collection.mutable
 
-/** A RootContext that acts as a column and renders into a cell buffer. */
-class FullScreen() extends RootContext:
-  private val children: mutable.ArrayBuffer[Component] =
-    mutable.ArrayBuffer.empty
-
-  private def availableSize: Dimensions =
-    children.foldLeft(Dimensions.zero)((acc, c) =>
-      acc.column(c.size.toDimensions)
-    )
-
-  def add(component: Component): Unit =
-    children += component
+/** The root of a component tree. Acts as a column and renders into the
+  * alternate screen of the terminal.
+  */
+class FullScreen(runtime: Runtime, column: Column):
 
   private[ui] def toBuffer(): Buffer =
-    val currentSize = availableSize
-    val buf = Buffer(currentSize.width, currentSize.height)
-    var y = 0
-    children.foreach { child =>
-      val childSize = child.size.toDimensions
-      child.render(Rect(0, y, childSize.width, childSize.height), buf)
-      y += childSize.height
-    }
+    val currentDimensions = column.size.toDimensions
+    val buf = Buffer(currentDimensions.width, currentDimensions.height)
+    column.render(
+      Rect(0, 0, currentDimensions.width, currentDimensions.height),
+      buf
+    )
     buf
 
-  def render(using Terminal): Unit =
-    toBuffer().render
+  def run(terminal: FullScreen.InteractiveTerminal): Unit =
+    import FullScreen.InteractiveTerminal
+
+    val program: InteractiveTerminal ?=> Unit =
+      InteractiveTerminal.cursor.hidden {
+        InteractiveTerminal.raw {
+          InteractiveTerminal.alternateScreen {
+            InteractiveTerminal.erase.screen()
+
+            var quit = false
+
+            // Setup default handlers
+            runtime.addRootHandlers(
+              Map(
+                Key.tab -> Seq(() => runtime.nextFocus()),
+                Key.shift(KeyCode.Tab) -> Seq(() => runtime.prevFocus()),
+                Key.controlQ -> Seq(() => quit = true)
+              )
+            )
+
+            def renderFrame(): Unit =
+              val buf = toBuffer()
+              InteractiveTerminal.erase.screen()
+              buf.render
+
+            while !quit do
+              renderFrame()
+              InteractiveTerminal.readKey() match
+                case terminus.Eof => quit = true
+                case key: Key     => runtime.dispatch(key)
+          }
+        }
+      }
+
+    program(using terminal)
 
 object FullScreen:
-  type Terminal = effect.AlternateScreenMode & effect.Erase &
-    terminus.ui.Terminal
-  type Program[A] = FullScreen.Terminal ?=> A
-
-  type InteractiveTerminal =
-    FullScreen.Terminal & effect.AlternateScreenMode & effect.KeyReader &
-      effect.RawMode
-  type InteractiveProgram[A] = InteractiveTerminal ?=> A
-
-  object Terminal extends AlternateScreenMode, Cursor, Erase, Writer
+  type InteractiveTerminal = effect.AlternateScreenMode & effect.Erase &
+    effect.Cursor & effect.Writer & effect.AlternateScreenMode &
+    effect.KeyReader & effect.RawMode
   object InteractiveTerminal
       extends AlternateScreenMode,
         Cursor,
@@ -73,86 +102,18 @@ object FullScreen:
         RawMode,
         Writer
 
-  def apply[A](f: AppContent[A]): FullScreen.Program[A] =
-    val fullScreen = new FullScreen()
-    given AppContext = noopAppContext(fullScreen)
-    val result = f
-    FullScreen.Terminal.erase.screen()
-    fullScreen.render
-    result
+  def apply(body: Layout ?=> Unit): FullScreen =
+    val focusId = FocusId.next
+    val runtime = Runtime.empty
+    val context = new DefaultEvent(focusId, runtime)
+      with DefaultLayout(runtime) {}
+    // Evaluate body here so we do not retain a reference to it and it can be garbage collected.
+    body(using context)
+    val column = new Column(
+      Size(Constraint.Percentage(1.0), Constraint.Percentage(1.0)),
+      LayoutStyle.default,
+      context
+    )
+    val fullScreen = new FullScreen(runtime, column)
 
-  /** Run an interactive event loop.
-    *
-    * `f` is called once to build the component tree and register event
-    * handlers. The tree is then rendered, and the loop blocks on key input,
-    * dispatching to registered handlers and re-rendering whenever a signal
-    * changes. The loop exits when [[EventContext.stop]] is called or stdin
-    * reaches EOF.
-    */
-  def run(f: AppContent[Unit]): InteractiveProgram[Unit] = t ?=>
-    val ec = new EventContextImpl()
-    val fullScreen = new FullScreen()
-
-    given AppContext = new AppContext:
-      private[ui] def invalidate(): Unit = ec.scheduleRerender()
-      def createSignal[A](initial: A): Signal[A] = ec.createSignal(initial)
-      def onKey(key: Key)(handler: => Unit): Unit = ec.onKey(key)(handler)
-      def onAnyKey(handler: Key => Unit): Unit = ec.onAnyKey(handler)
-      def registerFocusable(): FocusId = ec.registerFocusable()
-      private[ui] def focusedId: Option[FocusId] = ec.focusedId
-      def stop(): Unit = ec.stop()
-      def add(component: Component): Unit = fullScreen.add(component)
-
-    f // build component tree and register handlers
-
-    InteractiveTerminal.cursor.hidden {
-      InteractiveTerminal.raw {
-        InteractiveTerminal.alternateScreen {
-          InteractiveTerminal.erase.screen()
-
-          var prevBuffer: Option[Buffer] = None
-
-          def renderFrame(): Unit =
-            val buf = fullScreen.toBuffer()
-            prevBuffer match
-              case None    => buf.render
-              case Some(p) =>
-                // If components have resized between frames we cannot diff.
-                // We also clear the screen in this case, as the older content
-                // may take up more space than the new content and we must
-                // ensure older content is not displayed.
-                if buf.width == p.width && buf.height == p.height then
-                  buf.renderDiff(p)
-                else
-                  InteractiveTerminal.erase.screen()
-                  buf.render
-            prevBuffer = Some(buf)
-            ec.clearRerender()
-
-          renderFrame()
-
-          while ec.running do
-            InteractiveTerminal.readKey() match
-              case terminus.Eof => ec.stop()
-              case key: Key     =>
-                ec.dispatch(key)
-                if ec.needsRerender then renderFrame()
-        }
-      }
-    }
-
-  /** A no-op AppContext for non-interactive (single-render) use. */
-  private def noopAppContext(fullScreen: FullScreen): AppContext =
-    new AppContext:
-      private[ui] def invalidate(): Unit = ()
-      def createSignal[A](initial: A): Signal[A] = new Signal[A]:
-        private var value = initial
-        def get(using RenderContext): A = value
-        def peek: A = value
-        def set(a: A): Unit = value = a
-      def onKey(key: Key)(handler: => Unit): Unit = ()
-      def onAnyKey(handler: Key => Unit): Unit = ()
-      def registerFocusable(): FocusId = FocusId(0)
-      private[ui] def focusedId: Option[FocusId] = None
-      def stop(): Unit = ()
-      def add(component: Component): Unit = fullScreen.add(component)
+    fullScreen

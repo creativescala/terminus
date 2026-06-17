@@ -16,13 +16,11 @@
 
 package terminus.ui.component
 
-import terminus.ui.Buffer
-import terminus.ui.Component
-import terminus.ui.LayoutContext
-import terminus.ui.LeafContent
-import terminus.ui.Rect
-import terminus.ui.RenderContext
-import terminus.ui.Size
+import terminus.ui.layout.Buffer
+import terminus.ui.layout.Component
+import terminus.ui.layout.Rect
+import terminus.ui.layout.Size
+import terminus.ui.capability.Layout
 import terminus.ui.style.BoxStyle
 import terminus.ui.style.CellStyle
 import terminus.ui.style.TextStyle
@@ -78,5 +76,5 @@ object Text:
       style: TextStyle => TextStyle = identity
   )(
       text: LeafContent[String]
-  )(using lc: LayoutContext, rc: RenderContext): Unit =
+  )(using lc: Layout, rc: RenderContext): Unit =
     lc.add(component(width, height, style(TextStyle.default), text))

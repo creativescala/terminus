@@ -14,22 +14,25 @@
  * limitations under the License.
  */
 
-package terminus.ui
+package terminus.ui.capability
 
 import scala.annotation.implicitNotFound
 
+import scala.collection.mutable
+import terminus.ui.react.Listener
+
 /** Reactive scope for a component render pass.
   *
-  * Signal reads inside a component's content use the RenderContext in scope to
-  * register the component as a subscriber, so that signal changes can trigger a
-  * targeted re-render.
+  * Signal reads inside a component's content use the React capability in scope
+  * to register the component as a subscriber, so that signal changes can
+  * trigger a targeted re-render.
   *
   * For the initial full-frame re-render implementation this is a stub; the full
   * dependency-tracking mechanism will be wired in when subtree re-render is
   * implemented.
   */
 @implicitNotFound(
-  """signal.get requires a RenderContext, which is only available inside a
+  """signal.get requires a React capability, which is only available inside a
 component content lambda (the body passed to Text, etc.).
 
 If you meant to read this signal reactively, move the call inside a
@@ -38,14 +41,5 @@ component's content: Text(w, h) { mySignal.get }
 If you intentionally want an untracked read in setup or event-handler
 code, use signal.peek instead."""
 )
-trait RenderContext:
-  private[ui] def invalidate(): Unit
-
-  /** Returns true if this component is inside a focused [[FocusScope]], or if
-    * it is not inside any [[FocusScope]] at all.
-    *
-    * Must be read in render scope (inside a component content lambda) to
-    * reflect the current focus state. Reading it in setup scope captures the
-    * value at construction time and will not update.
-    */
-  def isFocused: Boolean = true
+trait React:
+  val stack: mutable.Stack[Listener]

@@ -14,19 +14,11 @@
  * limitations under the License.
  */
 
-package terminus.ui
+package terminus.ui.layout
 
-/** The context that builds the component tree.
-  *
-  * Allows children components to register themselves with this context.
+/** A component is something that can be rendered to the terminal and
+  * participates in layout.
   */
-trait LayoutContext:
-  def add(component: Component): Unit
-
-/** The context for the root of a component tree. */
-trait RootContext extends LayoutContext:
-  def render(using Terminal): Unit
-
-/** Context for any child components. */
-trait ChildContext extends LayoutContext:
+trait Component:
+  def size: Size
   def render(bounds: Rect, buf: Buffer): Unit

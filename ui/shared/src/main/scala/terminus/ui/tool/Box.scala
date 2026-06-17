@@ -16,9 +16,9 @@
 
 package terminus.ui.tool
 
-import terminus.ui.Buffer
-import terminus.ui.Cell
-import terminus.ui.Rect
+import terminus.ui.layout.Buffer
+import terminus.ui.layout.Cell
+import terminus.ui.layout.Rect
 import terminus.ui.style.BoxStyle
 
 object Box:

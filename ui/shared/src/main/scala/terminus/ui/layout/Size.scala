@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package terminus.ui
+package terminus.ui.layout
 
 /** The layout size of a component: a constraint for each axis.
   *

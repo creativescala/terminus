@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package terminus.ui
+package terminus.ui.layout
 
 /** Terminal display width of Unicode code points.
   *

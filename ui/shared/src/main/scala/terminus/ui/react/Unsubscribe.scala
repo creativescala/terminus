@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Creative Scala
+ * Copyright 2026 Creative Scala
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,11 +14,15 @@
  * limitations under the License.
  */
 
-package terminus.ui
+package terminus.ui.react
 
-/** A component is something that can be rendered to the terminal and
-  * participates in layout.
+import scala.collection.mutable
+
+/** An Unsubscribe is a handle to unsubscribe a subscriber from a Reactive's
+  * subscriber list.
   */
-trait Component:
-  def size: Size
-  def render(bounds: Rect, buf: Buffer): Unit
+opaque type Unsubscribe = () => Unit
+object Unsubscribe:
+  def apply[K](key: K, set: mutable.Set[K]): Unsubscribe =
+    () => set -= key
+extension (unsubscribe: Unsubscribe) def apply() = unsubscribe()

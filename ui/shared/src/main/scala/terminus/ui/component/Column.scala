@@ -16,36 +16,34 @@
 
 package terminus.ui.component
 
-import terminus.ui.AppContent
-import terminus.ui.AppContext
-import terminus.ui.Buffer
-import terminus.ui.ChildContext
-import terminus.ui.Component
-import terminus.ui.Rect
-import terminus.ui.Size
+import terminus.ui.capability.{Event, Layout}
+import terminus.ui.layout.Component
+import terminus.ui.layout.Rect
+import terminus.ui.layout.Size
 import terminus.ui.style.Align
 import terminus.ui.style.Justify
 import terminus.ui.style.LayoutStyle
+import terminus.ui.event.DefaultEvent
+import terminus.ui.layout.DefaultLayout
+import terminus.ui.layout.Buffer
+import terminus.ui.event.FocusId
 
 import scala.collection.mutable
 
-class Column(val size: Size, val layoutStyle: LayoutStyle = LayoutStyle.default)
-    extends ChildContext,
-      Component:
-  private val children: mutable.ArrayBuffer[Component] =
-    mutable.ArrayBuffer.empty
-
-  def add(component: Component): Unit =
-    children += component
+final class Column private[ui] (
+    size: Size,
+    layoutStyle: LayoutStyle = LayoutStyle.default,
+    context: DefaultEvent & DefaultLayout
+) extends Component:
 
   def render(bounds: Rect, buf: Buffer): Unit =
     val heights =
       Layout.resolveAxis(
-        children.view.map(_.size.height).toIndexedSeq,
+        context.components.view.map(_.size.height).toIndexedSeq,
         bounds.height
       )
     val freeSpace = (bounds.height - heights.sum).max(0)
-    val n = children.size
+    val n = context.components.size
 
     val (startOffset, gap) = layoutStyle.justify match
       case Justify.Start        => (0, 0)
@@ -60,7 +58,7 @@ class Column(val size: Size, val layoutStyle: LayoutStyle = LayoutStyle.default)
         (space, space)
 
     var y = bounds.y + startOffset
-    children.zip(heights).foreach { (child, h) =>
+    context.components.zip(heights).foreach { (child, h) =>
       val naturalW = Layout.resolveSingle(child.size.width, bounds.width)
       val (x, w) = layoutStyle.align match
         case Align.Stretch => (bounds.x, bounds.width)
@@ -73,13 +71,15 @@ class Column(val size: Size, val layoutStyle: LayoutStyle = LayoutStyle.default)
     }
 
 object Column:
-  def apply[A](size: Size, style: LayoutStyle => LayoutStyle = identity)(
-      f: AppContent[A]
-  )(using
-      parent: AppContext
-  ): A =
-    val column = new Column(size, style(LayoutStyle.default))
-    given AppContext = AppContext.child(parent, column)
-    val result = f
-    parent.add(column)
-    result
+  def apply(size: Size, style: LayoutStyle => LayoutStyle = identity)(
+      body: Event & Layout ?=> Unit
+  )(using ctx: Layout): Unit =
+    ctx.addComponent { runtime =>
+      val focusId = FocusId.next
+      val context = new DefaultEvent(focusId, runtime)
+        with DefaultLayout(runtime) {}
+      // Evaluate body here so we do not retain a reference to it and it can be garbage collected.
+      body(using context)
+
+      new Column(size, style(LayoutStyle.default), context)
+    }

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package terminus.ui
+package terminus.ui.layout
 
 /** Concrete cell dimensions: the actual width and height of a component after
   * layout has been resolved.

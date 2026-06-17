@@ -14,13 +14,17 @@
  * limitations under the License.
  */
 
-package terminus.ui
+package terminus.ui.layout
 
-/** Opaque token identifying a focusable component, returned by
-  * [[EventContext.registerFocusable]]. Used by [[FocusScope]] to gate key
-  * handlers on whether this scope is currently focused.
-  */
-opaque type FocusId = Int
+/** The size constraint for one axis of a component. */
+enum Constraint:
+  /** Exactly `cells` terminal cells. */
+  case Fixed(cells: Int)
 
-private[ui] object FocusId:
-  def apply(id: Int): FocusId = id
+  /** A fraction of the container's size on this axis (0.0–1.0). */
+  case Percentage(percent: Double)
+
+  /** A proportional share of the remaining space after fixed and percentage
+    * children have been placed.
+    */
+  case Weight(weight: Int)

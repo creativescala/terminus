@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Creative Scala
+ * Copyright 2026 Creative Scala
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,17 +14,17 @@
  * limitations under the License.
  */
 
-package terminus.ui
+package terminus.ui.react
 
-/** The size constraint for one axis of a component. */
-enum Constraint:
-  /** Exactly `cells` terminal cells. */
-  case Fixed(cells: Int)
-
-  /** A fraction of the container's size on this axis (0.0–1.0). */
-  case Percentage(percent: Double)
-
-  /** A proportional share of the remaining space after fixed and percentage
-    * children have been placed.
+/** A Listener listens to changes in the reactive state and dependency graph,
+  * and provides the operations necessary to maintain the dependency graph.
+  */
+trait Listener:
+  /** Set the listener's state to stale, and recursively do the same to all its
+    * subscribers.
     */
-  case Weight(weight: Int)
+  def setStale(): Unit
+
+  /** Add an Unsubscribe to this Listener's set of sources.
+    */
+  def addUnsubscribe(unsubscribe: Unsubscribe): Unit

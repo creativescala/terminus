@@ -17,15 +17,18 @@
 package terminus.ui.component
 
 import terminus.Key
-import terminus.ui.AppContext
-import terminus.ui.Buffer
-import terminus.ui.Component
-import terminus.ui.Rect
-import terminus.ui.RenderContext
-import terminus.ui.Signal
-import terminus.ui.Size
+import terminus.ui.layout.Buffer
+import terminus.ui.layout.Component
+import terminus.ui.layout.Rect
+import terminus.ui.react.Reactive
+import terminus.ui.react.Var
+import terminus.ui.react.DefaultReact
+import terminus.ui.layout.Size
 import terminus.ui.style.TextStyle
 import terminus.ui.tool.Box
+import terminus.ui.capability.Event
+import terminus.ui.capability.Layout
+import terminus.ui.capability.React
 
 object Select:
 
@@ -37,7 +40,7 @@ object Select:
     *
     * {{{
     * FocusScope { _ ?=>
-    *   val choice = ctx.createSignal(0)
+    *   val choice = Var(0)
     *   Select(30, 8, items, choice)
     *   Text(30)(_.withBox(_.withoutBorder)) { s"Picked: ${items(choice.get)}" }
     * }
@@ -55,17 +58,17 @@ object Select:
       width: Int,
       height: Int,
       items: Seq[A],
-      selected: Signal[Int],
+      selected: Var[Int],
       style: TextStyle = TextStyle.default,
       label: A => String = (a: A) => a.toString
-  )(using ctx: AppContext): Unit =
+  )(using ctx: Event & Layout): Unit =
     // Compute visible row count from the unfocused box style (border/padding
     // are typically identical between focused and unfocused states).
     val ab = style.box
     val borderOffset = if ab.border.isDefined then 1 else 0
     val visibleRows = (height - 2 * (borderOffset + ab.padding)).max(0)
 
-    val scroll = ctx.createSignal(0)
+    val scroll = Var(0)
 
     def clampSelected(n: Int): Int = n.max(0).min((items.length - 1).max(0))
 
@@ -104,7 +107,7 @@ object Select:
       scrollToShow(last)
     }
 
-    ctx.add(
+    ctx.addComponent(_ =>
       component(width, height, items, selected, scroll, style, label)(using ctx)
     )
 
@@ -112,18 +115,21 @@ object Select:
       width: Int,
       height: Int,
       items: Seq[A],
-      selected: Signal[Int],
-      scroll: Signal[Int],
+      selected: Var[Int],
+      scroll: Var[Int],
       style: TextStyle,
       label: A => String
-  )(using rc: RenderContext): Component =
+  )(using ctx: Event & Layout): Component =
     new Component:
       private def activeBox =
-        if rc.isFocused then style.focus.map(_.box).getOrElse(style.box)
+        if ctx.isFocused then style.focus.map(_.box).getOrElse(style.box)
         else style.box
       private def activeContent =
-        if rc.isFocused then style.focus.map(_.content).getOrElse(style.content)
+        if ctx.isFocused then
+          style.focus.map(_.content).getOrElse(style.content)
         else style.content
+
+      private given react: React = DefaultReact.empty
 
       def size: Size = Size.fixed(width, height)
 
@@ -134,7 +140,7 @@ object Select:
         val inner = Box.innerRect(bounds, ab)
         if inner.width <= 0 || inner.height <= 0 then return
 
-        val sel = selected.get
+        val sel = selected.get()
         val s = scroll.get
 
         var row = 0

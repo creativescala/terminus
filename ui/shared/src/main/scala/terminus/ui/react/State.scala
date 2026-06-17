@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Creative Scala
+ * Copyright 2026 Creative Scala
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,19 +14,11 @@
  * limitations under the License.
  */
 
-package terminus.ui
+package terminus.ui.react
 
-/** The position and size of a component within the terminal grid.
-  *
-  * Coordinates are 0-based, with (0, 0) at the top-left. x increases to the
-  * right, y increases downward. Conversion to 1-based terminal coordinates
-  * happens only at flush time inside [[Buffer.render]].
+/** The state of a Reactive's value: either it needs to be updated (Stale) or it
+  * is current with the latest changes (Fresh).
   */
-final case class Rect(x: Int, y: Int, width: Int, height: Int):
-  def size: Size = Size.fixed(width, height)
-
-  /** Exclusive right edge. */
-  def right: Int = x + width
-
-  /** Exclusive bottom edge. */
-  def bottom: Int = y + height
+private[ui] enum State:
+  case Stale
+  case Fresh
