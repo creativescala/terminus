@@ -42,6 +42,11 @@ object Line:
     */
   def apply(s: String): Line = sanitize(s)
 
+  /** Construct a `Line` without sanitizing it first. Should only be used as a
+    * performance optimization for strings that are known to be safe.
+    */
+  private[text] def unsafe(s: String): Line = s
+
   extension (line: Line)
 
     /** The underlying `String`. Safe to pass to `Buffer.putString`. */
@@ -165,16 +170,16 @@ object Line:
     */
   private def isStripped(c: Char): Boolean =
     val cp = c.toInt
-    cp < 0x20 ||                        // C0 control codes
-      cp == 0x7f ||                     // DEL
-      (cp >= 0x80 && cp <= 0x9f) ||     // C1 control codes
-      (cp >= 0x202a && cp <= 0x202e) || // bidi embeddings / overrides
-      (cp >= 0x2066 && cp <= 0x2069)    // bidi isolates (Trojan Source)
+    cp < 0x20 || // C0 control codes
+    cp == 0x7f || // DEL
+    (cp >= 0x80 && cp <= 0x9f) || // C1 control codes
+    (cp >= 0x202a && cp <= 0x202e) || // bidi embeddings / overrides
+    (cp >= 0x2066 && cp <= 0x2069) // bidi isolates (Trojan Source)
 
   private def isCsiFinal(c: Char): Boolean = c >= '@' && c <= '~'
 
-  /** Given that `s.charAt(start) == ESC`, return the index immediately after the
-    * escape sequence so the whole thing is dropped, not just the ESC byte.
+  /** Given that `s.charAt(start) == ESC`, return the index immediately after
+    * the escape sequence so the whole thing is dropped, not just the ESC byte.
     */
   private def skipEscape(s: String, start: Int): Int =
     var i = start + 1

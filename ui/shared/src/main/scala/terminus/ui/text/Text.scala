@@ -37,13 +37,15 @@ object Text:
   def apply(s: String): Text =
     val normalized = s.replace("\r\n", "\n").replace('\r', '\n')
     // limit -1 keeps trailing empty strings, so blank lines are preserved.
-    normalized.split("\n", -1).iterator.map(Line.apply).toVector
+    // unsafe avoids sanitizing strings that are already sanitized
+    normalized.split("\n", -1).iterator.map(Line.unsafe).toVector
 
   extension (text: Text)
 
     /** The logical lines, with hard breaks preserved and no soft wrapping. */
     def lines: Seq[Line] = text
 
-    /** Reflow every logical line to `width` cells and concatenate the results. */
+    /** Reflow every logical line to `width` cells and concatenate the results.
+      */
     def reflow(width: Int): Seq[Line] =
       text.flatMap(_.reflow(width))
