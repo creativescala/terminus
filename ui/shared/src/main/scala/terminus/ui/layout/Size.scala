@@ -18,29 +18,12 @@ package terminus.ui.layout
 
 /** The layout size of a component: a constraint for each axis.
   *
-  * For components with a known fixed size use [[Size.fixed]]. Percentage and
-  * weight constraints are resolved by the parent layout container at render
-  * time.
+  * For components with a known fixed size use [[Size.fixed]]. Other
+  * measurements are resolved by the layout algorithm at render time.
   */
-final case class Size(width: Constraint, height: Constraint):
-
-  /** Resolve this size to concrete [[Dimensions]].
-    *
-    * Only valid when both constraints are [[Constraint.Fixed]]; non-fixed
-    * constraints resolve to 0 until the layout algorithm is extended to handle
-    * them.
-    */
-  def toDimensions: Dimensions =
-    val w = width match
-      case Constraint.Fixed(n) => n
-      case _                   => 0
-    val h = height match
-      case Constraint.Fixed(n) => n
-      case _                   => 0
-    Dimensions(w, h)
-
+final case class Size(width: Measurement, height: Measurement)
 object Size:
   def fixed(width: Int, height: Int): Size =
-    Size(Constraint.Fixed(width), Constraint.Fixed(height))
+    Size(Measurement.Fixed(width), Measurement.Fixed(height))
 
   val zero: Size = fixed(0, 0)

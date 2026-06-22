@@ -25,7 +25,7 @@ import terminus.ui.react.Var
 import terminus.ui.react.DefaultReact
 import terminus.ui.layout.Size
 import terminus.ui.style.TextStyle
-import terminus.ui.tool.Box
+import terminus.ui.layout.Box
 import terminus.ui.capability.Event
 import terminus.ui.capability.Layout
 import terminus.ui.capability.React

@@ -20,5 +20,37 @@ package terminus.ui.layout
   * participates in layout.
   */
 trait Component:
+  /** Called at the started of a rendering pass, this is the signal to a
+    * component to re-evaluate any reactives it depends on, and perform any
+    * recomputations needed before layout.
+    */
+  def react(): Unit
+
+  /** The amount of space this Component wishes to occupy. */
   def size: Size
+
+  /** Measure this component against a parent-supplied Constraint, returning the
+    * size it wants to occupy. The result MUST satisfy `constraint` (i.e. equal
+    * `constraint.constrain(result)`). Pure: no buffer writes, no mutation — a
+    * parent may call this more than once per layout pass.
+    */
+  def measure(constraint: Constraint): Dimensions
+
+  /** Minimum width at which content still renders correctly, given a height.
+    * `height` may be Infinity ("unbounded").
+    */
+  def minIntrinsicWidth(height: Int | Infinity): Int
+
+  /** Width beyond which the component would not grow, given a height. */
+  def maxIntrinsicWidth(height: Int | Infinity): Int
+
+  /** Minimum height at which content still renders correctly, given a width.
+    * `width` may be Infinity ("unbounded").
+    */
+  def minIntrinsicHeight(width: Int | Infinity): Int
+
+  /** Height beyond which the component would not grow, given a width. */
+  def maxIntrinsicHeight(width: Int | Infinity): Int
+
+  /** Draw the component to the Buffer within the given Rect. */
   def render(bounds: Rect, buf: Buffer): Unit

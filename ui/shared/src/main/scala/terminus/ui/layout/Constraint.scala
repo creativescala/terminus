@@ -16,15 +16,71 @@
 
 package terminus.ui.layout
 
-/** The size constraint for one axis of a component. */
-enum Constraint:
-  /** Exactly `cells` terminal cells. */
-  case Fixed(cells: Int)
+/** Represents an unbounded amount of space in a Constraint. */
+sealed trait Infinity
+object Infinity extends Infinity
 
-  /** A fraction of the container's size on this axis (0.0–1.0). */
-  case Percentage(percent: Double)
+/** A range of acceptable sizes a parent offers a child during measurement.
+  *
+  * `min == max` on an axis is a *tight* constraint ("you must be exactly
+  * this"); `min == 0` is *loose* ("take what you need, up to max"). A `max` of
+  * [[Infinity]] means unbounded — the child may be as large as it likes.
+  */
+final case class Constraint(
+    minWidth: Int,
+    maxWidth: Int | Infinity,
+    minHeight: Int,
+    maxHeight: Int | Infinity
+):
 
-  /** A proportional share of the remaining space after fixed and percentage
-    * children have been placed.
+  /** Clamp a desired size into this range. A child should always return a
+    * Dimensions that satisfies its incoming Constraint; this guarantees it.
     */
-  case Weight(weight: Int)
+  def constrain(d: Dimensions): Dimensions =
+    Dimensions(
+      Constraint.clamp(d.width, minWidth, maxWidth),
+      Constraint.clamp(d.height, minHeight, maxHeight)
+    )
+
+  /** Same range, but with both minimums dropped to 0. Used by wrap-content
+    * parents that want each child at its natural size.
+    */
+  def loosen: Constraint =
+    copy(minWidth = 0, minHeight = 0)
+
+  /** A tight constraint at the given size, clamped into this range. Used to
+    * force a child to fill an allocated slice (e.g. a Weight child, or a
+    * Stretch cross-axis).
+    */
+  def tighten(width: Int, height: Int): Constraint =
+    val w = Constraint.clamp(width, minWidth, maxWidth)
+    val h = Constraint.clamp(height, minHeight, maxHeight)
+    Constraint(w, w, h, h)
+
+object Constraint:
+  /** Clamp `value` to at least `min` and at most `max`. An [[Infinity]] max
+    * imposes no upper bound.
+    */
+  private def clamp(value: Int, min: Int, max: Int | Infinity): Int =
+    val lowerBounded = value.max(min)
+    max match
+      case Infinity => lowerBounded
+      case m: Int   => lowerBounded.min(m)
+
+  /** Loose on both axes, bounded by the given dimensions. */
+  def loose(width: Int | Infinity, height: Int | Infinity): Constraint =
+    Constraint(
+      minWidth = 0,
+      maxWidth = width,
+      minHeight = 0,
+      maxHeight = height
+    )
+
+  /** Tight on both axes. */
+  def tight(width: Int, height: Int): Constraint =
+    Constraint(
+      minWidth = width,
+      maxWidth = width,
+      minHeight = height,
+      maxHeight = height
+    )

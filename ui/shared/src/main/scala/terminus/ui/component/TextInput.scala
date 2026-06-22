@@ -27,7 +27,7 @@ import terminus.ui.RenderContext
 import terminus.ui.Signal
 import terminus.ui.Size
 import terminus.ui.style.TextStyle
-import terminus.ui.tool.Box
+import terminus.ui.layout.Box
 
 object TextInput:
 

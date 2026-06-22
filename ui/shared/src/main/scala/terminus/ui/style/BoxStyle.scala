@@ -16,6 +16,8 @@
 
 package terminus.ui.style
 
+import terminus.ui.layout.Insets
+
 /** The properties that can be set for styling a components box: an optional
   * border, a border style, and padding.
   *
@@ -53,6 +55,13 @@ final case class BoxStyle(
 
   def withBackground(style: CellStyle): BoxStyle =
     this.copy(background = style)
+
+  /** The cells this box occupies around its content: one per side for the
+    * border (if present), plus [[padding]] on every side.
+    */
+  def insets: Insets =
+    val borderInset = if border.isDefined then 1 else 0
+    Insets.all(borderInset + padding)
 
 object BoxStyle:
   val default = BoxStyle()

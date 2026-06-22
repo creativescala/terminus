@@ -34,7 +34,7 @@ import scala.collection.mutable
 final class Row(
     val size: Size,
     layoutStyle: LayoutStyle = LayoutStyle.default,
-    context: DefaultLayout & DefaultEvent
+    context: DefaultEvent & DefaultLayout
 ) extends Component:
 
   def render(bounds: Rect, buf: Buffer): Unit =

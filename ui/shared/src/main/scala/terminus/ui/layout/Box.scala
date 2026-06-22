@@ -16,11 +16,6 @@
 
 package terminus.ui.tool
 
-import terminus.ui.layout.Buffer
-import terminus.ui.layout.Cell
-import terminus.ui.layout.Rect
-import terminus.ui.style.BoxStyle
-
 object Box:
 
   /** The content rect inside a box: bounds shrunk by one cell for the border
