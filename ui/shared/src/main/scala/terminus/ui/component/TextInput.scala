@@ -161,10 +161,10 @@ final class TextInput(
     // the text overflows, and at its natural position otherwise.
     val scroll = (pos - inner.width + 1).max(0)
     val visible =
-      line.value.substring(scroll, (scroll + inner.width).min(text.length))
+      line.substring(scroll, (scroll + inner.width).min(line.length))
     val cursorCol = pos - scroll // always in [0, inner.width)
 
-    buf.putString(inner.x, inner.y, visible, ac)
+    buf.putLine(inner.x, inner.y, visible, ac)
 
     // Draw the cursor by inverting the cell at the cursor column.
     val cursorChar =

@@ -49,7 +49,11 @@ object Line:
 
   extension (line: Line)
 
-    /** The underlying `String`. Safe to pass to `Buffer.putString`. */
+    /** Get the character at the given index. */
+    def apply(idx: Int): Char =
+      line(idx)
+
+    /** The underlying `String`. */
     def value: String = line
 
     /** The display width of this line, in terminal cells (wide characters count
@@ -77,6 +81,13 @@ object Line:
       if pos >= 0 && pos < line.length then
         line.substring(0, pos) ++ c.toString ++ line.substring(pos)
       else line
+
+    /** String.substring, but for a Line. Returns a new Line made up of a
+      * subsequence of this sequence, beginning at the start index (inclusive)
+      * and extending to the end index (exclusive).
+      */
+    def substring(start: Int, end: Int): Line =
+      line.substring(start, end)
 
     /** Greedily word-wrap this line to fit within `width` cells.
       *
