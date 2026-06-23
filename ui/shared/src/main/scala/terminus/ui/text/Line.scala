@@ -57,6 +57,27 @@ object Line:
       */
     def width: Int = displayWidth(line)
 
+    /** The length of this line in terms of characters. See [[width]] for the
+      * display width.
+      */
+    def length: Int = line.length
+
+    /** Delete the character at the given position. If the position is outside
+      * the Line the current Line is returned unchanged.
+      */
+    def delete(pos: Int): Line =
+      if pos >= 0 && pos < line.length then
+        line.substring(0, pos) ++ line.substring(pos + 1)
+      else line
+
+    /** Insert the character at the given position. If the position is outside
+      * the Line the current Line is returned unchanged.
+      */
+    def insert(pos: Int, c: Char): Line =
+      if pos >= 0 && pos < line.length then
+        line.substring(0, pos) ++ c.toString ++ line.substring(pos)
+      else line
+
     /** Greedily word-wrap this line to fit within `width` cells.
       *
       * Words are separated by single spaces (runs of whitespace are collapsed

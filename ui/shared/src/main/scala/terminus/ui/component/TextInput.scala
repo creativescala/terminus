@@ -16,126 +16,169 @@
 
 package terminus.ui.component
 
+import terminus.ui.layout.Buffer
+import terminus.ui.layout.Box
+import terminus.ui.layout.Cell
+import terminus.ui.layout.Component
+import terminus.ui.layout.Constraint
+import terminus.ui.layout.Dimensions
+import terminus.ui.layout.Infinity
+import terminus.ui.layout.Measurement
+import terminus.ui.layout.Rect
+import terminus.ui.layout.Size
+import terminus.ui.event.FocusId
+import terminus.ui.react.Var
+import terminus.ui.capability.Layout
+import terminus.ui.style.BoxStyle
+import terminus.ui.style.CellStyle
+import terminus.ui.style.TextStyle
+import terminus.ui.react.Reactive
+import terminus.ui.event.DefaultEvent
+import terminus.ui.layout.DefaultLayout
+import terminus.ui.capability.Event
+import terminus.ui.capability.Layout
+import terminus.ui.capability.React
+import terminus.ui.text
+import terminus.ui.text.Line
 import terminus.Key
 import terminus.KeyCode
-import terminus.ui.AppContext
-import terminus.ui.Buffer
-import terminus.ui.Cell
-import terminus.ui.Component
-import terminus.ui.Rect
-import terminus.ui.RenderContext
-import terminus.ui.Signal
-import terminus.ui.Size
-import terminus.ui.style.TextStyle
-import terminus.ui.layout.Box
 
-object TextInput:
+/** A single-line text input component.
+  *
+  * Key bindings: printable characters insert at the cursor, Backspace / Delete
+  * delete around the cursor, Left / Right / Home / End move the cursor. Text
+  * longer than the visible area scrolls horizontally to keep the cursor in
+  * view.
+  */
+final class TextInput(
+    val size: Size,
+    style: TextStyle = TextStyle.default,
+    value: Var[Line],
+    context: DefaultEvent
+) extends Component:
+  val cursor = Var(0)
 
-  /** Add a single-line text input component.
-    *
-    * The component must be placed inside a [[terminus.ui.FocusScope]] to
-    * receive keyboard input. Call [[terminus.ui.AppContext.createSignal]] to
-    * create `value` before calling this method:
-    *
-    * {{{
-    * FocusScope { ctx ?=>
-    *   val name = ctx.createSignal("")
-    *   TextInput(30, name)
-    * }
-    * }}}
-    *
-    * Key bindings: printable characters insert at the cursor, Backspace /
-    * Delete delete around the cursor, Left / Right / Home / End move the
-    * cursor. Text longer than the visible area scrolls horizontally to keep the
-    * cursor in view.
-    */
-  def apply(
-      width: Int,
-      value: Signal[String],
-      style: TextStyle = TextStyle.default
-  )(using ctx: AppContext): Unit =
-    val cursor = ctx.createSignal(0)
+  context.onKey(Key.left) {
+    cursor.update(c => (c - 1).max(0))
+  }
 
-    ctx.onKey(Key.left) {
-      cursor.update(c => (c - 1).max(0))
-    }
-    ctx.onKey(Key.right) {
-      cursor.update(c => (c + 1).min(value.peek.length))
-    }
-    ctx.onKey(Key.home) {
-      cursor.set(0)
-    }
-    ctx.onKey(Key.`end`) {
-      cursor.set(value.peek.length)
-    }
-    ctx.onKey(Key.backspace) {
-      val text = value.peek
-      val pos = cursor.peek
-      if pos > 0 then
-        value.set(text.substring(0, pos - 1) + text.substring(pos))
-        cursor.update(_ - 1)
-    }
-    ctx.onKey(Key.delete) {
-      val text = value.peek
-      val pos = cursor.peek
-      if pos < text.length then
-        value.set(text.substring(0, pos) + text.substring(pos + 1))
-    }
-    ctx.onAnyKey { key =>
-      key.code match
-        case KeyCode.Character(c) if !c.isControl =>
-          val text = value.peek
-          val pos = cursor.peek
-          value.set(text.substring(0, pos) + c.toString + text.substring(pos))
-          cursor.update(_ + 1)
-        case _ => ()
-    }
+  context.onKey(Key.right) {
+    cursor.update(c => (c + 1).min(value.peek.length))
+  }
 
-    ctx.add(component(width, value, cursor, style)(using ctx))
+  context.onKey(Key.home) {
+    cursor.set(0)
+  }
 
-  private def component(
-      width: Int,
-      value: Signal[String],
-      cursor: Signal[Int],
-      style: TextStyle
-  )(using rc: RenderContext): Component =
-    new Component:
-      private def activeBox =
-        if rc.isFocused then style.focus.map(_.box).getOrElse(style.box)
-        else style.box
-      private def activeContent =
-        if rc.isFocused then style.focus.map(_.content).getOrElse(style.content)
-        else style.content
+  context.onKey(Key.`end`) {
+    cursor.set(value.peek.length)
+  }
 
-      def size: Size =
-        val ab = activeBox
-        val offset = (if ab.border.isDefined then 1 else 0) + ab.padding
-        Size.fixed(width, 1 + 2 * offset)
+  context.onKey(Key.backspace) {
+    val pos = cursor.peek
+    if pos > 0 then
+      value.update(line => line.delete(pos - 1))
+      cursor.update(_ - 1)
+  }
+  context.onKey(Key.delete) {
+    val pos = cursor.peek
+    value.update(line => line.delete(pos))
+  }
+  context.onAnyKey { key =>
+    key.code match
+      case KeyCode.Character(c) if !c.isControl =>
+        val pos = cursor.peek
+        value.update(line => line.insert(pos, c))
+        cursor.update(_ + 1)
+      case _ => ()
+  }
+  def react(using React): Unit =
+    value.get
+    cursor.get
+    ()
 
-      def render(bounds: Rect, buf: Buffer): Unit =
-        val ab = activeBox
-        val ac = activeContent
-        Box.render(bounds, ab, buf)
-        val inner = Box.innerRect(bounds, ab)
-        if inner.width <= 0 then return
+  def measure(constraint: Constraint): Dimensions =
+    val l = value.peek
+    val insets = activeBoxStyle.insets
+    // The constraint we were given is for the whole box; shrink it to the space
+    // available to the text content.
+    val inner = insets.deflate(constraint)
 
-        val text = value.get
-        val pos = cursor.get
+    val naturalWidth = l.width
+    val targetWidth =
+      size.width match
+        case Measurement.Fixed(cells) => cells - insets.horizontal
+        case Measurement.WrapContent  => naturalWidth
+        case _                        =>
+          // Percentage, Weight and the intrinsics are resolved by the parent
+          // into the incoming constraint, so here we simply fill the width on
+          // offer. When that width is unbounded, fall back to the natural width.
+          inner.maxWidth match
+            case Infinity   => naturalWidth
+            case bound: Int => bound
+    val contentWidth =
+      val lowerBounded = targetWidth.max(inner.minWidth)
+      inner.maxWidth match
+        case Infinity   => lowerBounded
+        case bound: Int => lowerBounded.min(bound)
 
-        // Scroll to keep the cursor in view: cursor sits at the right edge when
-        // the text overflows, and at its natural position otherwise.
-        val scroll = (pos - inner.width + 1).max(0)
-        val visible =
-          text.substring(scroll, (scroll + inner.width).min(text.length))
-        val cursorCol = pos - scroll // always in [0, inner.width)
+    val contentHeight =
+      size.height match
+        case Measurement.Fixed(cells) => cells - insets.vertical
+        case _                        => 1
 
-        buf.putString(inner.x, inner.y, visible, ac)
+    // Grow the content back to the full box, then guarantee the result still
+    // satisfies the original (outer) constraint.
+    constraint.constrain(
+      insets.inflate(Dimensions(contentWidth, contentHeight))
+    )
 
-        // Draw the cursor by inverting the cell at the cursor column.
-        val cursorChar =
-          if cursorCol < visible.length then visible(cursorCol) else ' '
-        buf.put(
-          inner.x + cursorCol,
-          inner.y,
-          Cell(cursorChar.toInt, ac.withInvert)
-        )
+  def minIntrinsicWidth(height: Int | Infinity): Int =
+    maxIntrinsicWidth(height)
+
+  def maxIntrinsicWidth(height: Int | Infinity): Int =
+    // By definition this component is a single line
+    value.peek.width + activeBoxStyle.insets.horizontal
+
+  def minIntrinsicHeight(width: Int | Infinity): Int =
+    maxIntrinsicHeight(width)
+
+  def maxIntrinsicHeight(width: Int | Infinity): Int =
+    activeBoxStyle.insets.vertical + 1
+
+  def render(bounds: Rect, buf: Buffer): Unit =
+    val ab = activeBoxStyle
+    val ac = activeContentStyle
+
+    Box.render(bounds, ab, buf)
+    val inner = Box.innerRect(bounds, ab)
+    if inner.width <= 0 then return
+
+    val line = value.peek
+    val pos = cursor.peek
+
+    // Scroll to keep the cursor in view: cursor sits at the right edge when
+    // the text overflows, and at its natural position otherwise.
+    val scroll = (pos - inner.width + 1).max(0)
+    val visible =
+      line.value.substring(scroll, (scroll + inner.width).min(text.length))
+    val cursorCol = pos - scroll // always in [0, inner.width)
+
+    buf.putString(inner.x, inner.y, visible, ac)
+
+    // Draw the cursor by inverting the cell at the cursor column.
+    val cursorChar =
+      if cursorCol < visible.length then visible(cursorCol) else ' '
+    buf.put(
+      inner.x + cursorCol,
+      inner.y,
+      Cell(cursorChar.toInt, ac.withInvert)
+    )
+
+  private def activeBoxStyle: BoxStyle =
+    if context.hasFocus then style.focus.map(_.box).getOrElse(style.box)
+    else style.box
+
+  private def activeContentStyle =
+    if context.hasFocus then style.focus.map(_.content).getOrElse(style.content)
+    else style.content

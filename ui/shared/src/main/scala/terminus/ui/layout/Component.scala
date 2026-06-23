@@ -16,6 +16,8 @@
 
 package terminus.ui.layout
 
+import terminus.ui.capability.React
+
 /** A component is something that can be rendered to the terminal and
   * participates in layout.
   */
@@ -24,7 +26,7 @@ trait Component:
     * component to re-evaluate any reactives it depends on, and perform any
     * recomputations needed before layout.
     */
-  def react(): Unit
+  def react(using React): Unit
 
   /** The amount of space this Component wishes to occupy. */
   def size: Size

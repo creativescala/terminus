@@ -16,6 +16,7 @@
 
 package terminus.ui.component
 
+import terminus.ui.layout.Box
 import terminus.ui.layout.Buffer
 import terminus.ui.layout.Component
 import terminus.ui.layout.Constraint
@@ -24,11 +25,11 @@ import terminus.ui.layout.Infinity
 import terminus.ui.layout.Measurement
 import terminus.ui.layout.Rect
 import terminus.ui.layout.Size
+import terminus.ui.event.FocusId
 import terminus.ui.capability.Layout
 import terminus.ui.style.BoxStyle
 import terminus.ui.style.CellStyle
 import terminus.ui.style.TextStyle
-import terminus.ui.layout.Box
 import terminus.ui.react.Reactive
 import terminus.ui.event.DefaultEvent
 import terminus.ui.layout.DefaultLayout
@@ -41,16 +42,17 @@ import terminus.ui.text.Line
 final class Text(
     val size: Size,
     style: TextStyle,
-    text: Reactive[text.Text],
-    context: DefaultEvent & DefaultLayout
+    value: Reactive[text.Text],
+    context: DefaultEvent
 ) extends Component:
-  def react(): Unit =
-    text.get(React.empty)
+
+  def react(using React): Unit =
+    value.get
     ()
 
   def measure(constraint: Constraint): Dimensions =
-    val t = text.peek
-    val insets = activeBox.insets
+    val t = value.peek
+    val insets = activeBoxStyle.insets
     // The constraint we were given is for the whole box; shrink it to the space
     // available to the text content.
     val inner = insets.deflate(constraint)
@@ -91,18 +93,18 @@ final class Text(
     // The narrowest the text can be without breaking a word across lines is the
     // width of its widest single word. Height does not affect text width.
     val widestWord =
-      text.peek.lines
+      value.peek.lines
         .flatMap(line => line.value.split(' '))
         .filter(_.nonEmpty)
         .map(word => Line(word).width)
         .maxOption
         .getOrElse(0)
-    widestWord + activeBox.insets.horizontal
+    widestWord + activeBoxStyle.insets.horizontal
 
   def maxIntrinsicWidth(height: Int | Infinity): Int =
     // Text never grows wider than its widest unwrapped line, whatever the
     // available height.
-    naturalContentWidth + activeBox.insets.horizontal
+    naturalContentWidth + activeBoxStyle.insets.horizontal
 
   def minIntrinsicHeight(width: Int | Infinity): Int =
     // Text height is fully determined by width, so the minimum and maximum
@@ -110,64 +112,42 @@ final class Text(
     maxIntrinsicHeight(width)
 
   def maxIntrinsicHeight(width: Int | Infinity): Int =
-    val insets = activeBox.insets
+    val insets = activeBoxStyle.insets
     val lineCount =
       width match
-        case Infinity      => text.peek.lines.length
-        case w: Int        => text.peek.reflow((w - insets.horizontal).max(0)).length
+        case Infinity => value.peek.lines.length
+        case w: Int   =>
+          value.peek.reflow((w - insets.horizontal).max(0)).length
     lineCount + insets.vertical
+
+  def render(bounds: Rect, buf: Buffer): Unit =
+    val ab = activeBoxStyle
+    val ac = activeContentStyle
+
+    Box.render(bounds, ab, buf)
+    val inner = Box.innerRect(bounds, ab)
+
+    ()
 
   /** The width of the widest logical (unwrapped) line of content, in cells. */
   private def naturalContentWidth: Int =
-    text.peek.lines.map(_.width).maxOption.getOrElse(0)
+    value.peek.lines.map(_.width).maxOption.getOrElse(0)
 
-  private def activeBox: BoxStyle =
+  private def activeBoxStyle: BoxStyle =
     if context.hasFocus then style.focus.map(_.box).getOrElse(style.box)
     else style.box
 
-  private def activeContent: CellStyle =
+  private def activeContentStyle: CellStyle =
     if context.hasFocus then style.focus.map(_.content).getOrElse(style.content)
     else style.content
 object Text:
-  /** Create a Text component.
-    *
-    * When `height` is SizeToContent (the default) the height is computed from
-    * the content: the number of `\n`-separated lines plus any border/padding
-    * overhead. Pass an explicit positive `height` to fix the size regardless of
-    * content.
-    *
-    * If `box.focused` is set, that style is used in place of `box` whenever the
-    * component is inside a focused [[terminus.ui.FocusScope]].
-    */
-  def component(
-      width: Int,
-      height: Int | SizeToContent,
-      style: TextStyle,
-      text: LeafContent[String]
-  )(using rc: RenderContext): Component =
-    new Component:
+  def apply(size: Size, style: TextStyle => TextStyle = identity)(
+      body: Event ?=> Reactive[text.Text]
+  )(using ctx: Layout): Unit =
+    ctx.addComponent { runtime =>
+      val focusId = FocusId.next
+      val context = new DefaultEvent(focusId, runtime)
+      val value = body(using context)
 
-      def size: Size =
-        val ab = activeBox
-        height match
-          case SizeToContent =>
-            val offset = (if ab.border.isDefined then 1 else 0) + ab.padding
-            val lineCount = text.split('\n').length.max(1)
-            Size.fixed(width, lineCount + 2 * offset)
-
-          case height: Int => Size.fixed(width, height)
-
-      def render(bounds: Rect, buf: Buffer): Unit =
-        val ab = activeBox
-        Box.render(bounds, ab, buf)
-        val inner = Box.innerRect(bounds, ab)
-        buf.putString(inner.x, inner.y, text, activeContent)
-
-  def apply(
-      width: Int,
-      height: Int | SizeToContent = SizeToContent,
-      style: TextStyle => TextStyle = identity
-  )(
-      text: LeafContent[String]
-  )(using lc: Layout, rc: RenderContext): Unit =
-    lc.add(component(width, height, style(TextStyle.default), text))
+      new Text(size, style(TextStyle.default), value, context)
+    }

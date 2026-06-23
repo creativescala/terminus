@@ -42,6 +42,9 @@ final class Var[A](private var currentValue: A) extends Reactive[A]:
 
   private[ui] val state: State = State.Fresh
 
+  def update(f: A => A): Unit =
+    set(f(currentValue))
+
   def set(newValue: A): Unit =
     if currentValue == newValue then ()
     else
