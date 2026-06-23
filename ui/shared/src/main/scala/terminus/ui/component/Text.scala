@@ -127,7 +127,12 @@ final class Text(
     Box.render(bounds, ab, buf)
     val inner = Box.innerRect(bounds, ab)
 
-    ()
+    val textBuf = buf.view(inner)
+    var row = 0
+    value.peek.reflow(inner.width).foreach { line =>
+      textBuf.putLine(0, row, line, ac)
+      row = row + 1
+    }
 
   /** The width of the widest logical (unwrapped) line of content, in cells. */
   private def naturalContentWidth: Int =
