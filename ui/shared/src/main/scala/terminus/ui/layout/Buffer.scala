@@ -16,10 +16,7 @@
 
 package terminus.ui.layout
 
-import terminus.effect.AnsiCodes
 import terminus.ui.style.CellStyle
-import terminus.ui.style.Color
-import terminus.ui.style.Underline
 import terminus.ui.text.Line
 
 /** Represents a writable two-dimensional array of [[Cell]]. */

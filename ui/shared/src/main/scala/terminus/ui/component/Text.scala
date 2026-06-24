@@ -25,7 +25,6 @@ import terminus.ui.layout.Box
 import terminus.ui.layout.Buffer
 import terminus.ui.layout.Component
 import terminus.ui.layout.Constraint
-import terminus.ui.layout.DefaultLayout
 import terminus.ui.layout.Dimensions
 import terminus.ui.layout.Infinity
 import terminus.ui.layout.Measurement

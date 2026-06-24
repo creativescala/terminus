@@ -31,8 +31,8 @@ final case class Insets(top: Int, right: Int, bottom: Int, left: Int):
   /** Total vertical inset (top + bottom). */
   def vertical: Int = top + bottom
 
-  /** Shrink a Constraint to the space available to content. Mins floor at 0;
-    * an Infinity max stays Infinity (unbounded minus a finite inset is still
+  /** Shrink a Constraint to the space available to content. Mins floor at 0; an
+    * Infinity max stays Infinity (unbounded minus a finite inset is still
     * unbounded).
     */
   def deflate(c: Constraint): Constraint =
@@ -57,8 +57,8 @@ object Insets:
   def symmetric(horizontal: Int, vertical: Int): Insets =
     Insets(vertical, horizontal, vertical, horizontal)
 
-  /** Subtract a finite amount from an `Int | Infinity`, flooring at 0.
-    * Infinity is absorbing: Infinity - n == Infinity.
+  /** Subtract a finite amount from an `Int | Infinity`, flooring at 0. Infinity
+    * is absorbing: Infinity - n == Infinity.
     */
   private def subtract(value: Int | Infinity, n: Int): Int | Infinity =
     value match

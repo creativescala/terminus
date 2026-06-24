@@ -45,7 +45,6 @@ final class CellArrayBuffer(val width: Int, val height: Int) extends Buffer:
   def putLine(x: Int, y: Int, l: Line, style: CellStyle): Unit =
     val s = l.value
     var col = x
-    var row = y
     var i = 0
     var stop = s.length
 
@@ -66,11 +65,11 @@ final class CellArrayBuffer(val width: Int, val height: Int) extends Buffer:
       CharWidth.of(cp) match
         case 0 => () // zero-width: skip
         case 1 =>
-          put(col, row, Cell(cp, style))
+          put(col, y, Cell(cp, style))
           col += 1
         case _ => // 2
-          put(col, row, Cell(cp, style))
-          put(col + 1, row, Cell.continuation)
+          put(col, y, Cell(cp, style))
+          put(col + 1, y, Cell.continuation)
           col += 2
 
   def view(rect: Rect): Buffer =

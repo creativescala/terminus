@@ -51,8 +51,8 @@ final class Runtime private ():
       .getOrElseUpdate(focusId, Runtime.Focusable.empty)
       .addAnyKeyHandler(handler)
 
-  /** Add `focusId` to the tab order the first time it registers a handler,
-    * and focus it immediately if it's the first focusable seen.
+  /** Add `focusId` to the tab order the first time it registers a handler, and
+    * focus it immediately if it's the first focusable seen.
     */
   private def registerFocusable(focusId: FocusId): Unit =
     if !focusablesOrder.contains(focusId) then

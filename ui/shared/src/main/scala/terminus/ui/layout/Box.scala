@@ -17,8 +17,6 @@
 package terminus.ui.layout
 
 import terminus.ui.style.BoxStyle
-import terminus.ui.style.CellStyle
-import terminus.ui.style.TextStyle
 
 object Box:
 

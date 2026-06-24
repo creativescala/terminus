@@ -29,7 +29,6 @@ import terminus.ui.capability.Layout
 import terminus.ui.component.Column
 import terminus.ui.event.DefaultEvent
 import terminus.ui.event.FocusId
-import terminus.ui.layout.Buffer
 import terminus.ui.layout.CellArrayBuffer
 import terminus.ui.layout.Constraint
 import terminus.ui.layout.DefaultLayout

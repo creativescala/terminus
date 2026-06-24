@@ -51,7 +51,7 @@ object Line:
 
     /** Get the character at the given index. */
     def apply(idx: Int): Char =
-      line(idx)
+      line.charAt(idx)
 
     /** The underlying `String`. */
     def value: String = line

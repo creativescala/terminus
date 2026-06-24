@@ -18,7 +18,6 @@ package terminus.ui.component
 
 import terminus.Key
 import terminus.KeyCode
-import terminus.ui.capability.Event
 import terminus.ui.capability.Layout
 import terminus.ui.capability.React
 import terminus.ui.event.DefaultEvent
@@ -28,16 +27,13 @@ import terminus.ui.layout.Buffer
 import terminus.ui.layout.Cell
 import terminus.ui.layout.Component
 import terminus.ui.layout.Constraint
-import terminus.ui.layout.DefaultLayout
 import terminus.ui.layout.Dimensions
 import terminus.ui.layout.Infinity
 import terminus.ui.layout.Measurement
 import terminus.ui.layout.Rect
 import terminus.ui.layout.Size
-import terminus.ui.react.Reactive
 import terminus.ui.react.Var
 import terminus.ui.style.BoxStyle
-import terminus.ui.style.CellStyle
 import terminus.ui.style.TextStyle
 import terminus.ui.text
 import terminus.ui.text.Line

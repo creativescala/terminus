@@ -54,7 +54,7 @@ final class Column(
       size.height match
         case Measurement.Fixed(cells) => cells
         case Measurement.WrapContent  => naturalHeight
-        case _ =>
+        case _                        =>
           constraint.maxHeight match
             case Infinity   => naturalHeight
             case bound: Int => bound
@@ -75,7 +75,7 @@ final class Column(
       size.width match
         case Measurement.Fixed(cells) => cells
         case Measurement.WrapContent  => naturalWidth
-        case _ =>
+        case _                        =>
           constraint.maxWidth match
             case Infinity   => naturalWidth
             case bound: Int => bound
@@ -129,9 +129,9 @@ final class Column(
       y += h + gap
     }
 
-  /** A child's contribution to the main axis before percentage/weight
-    * children divide up what's left: literal cells for [[Measurement.Fixed]],
-    * an intrinsic query for [[Measurement.WrapContent]],
+  /** A child's contribution to the main axis before percentage/weight children
+    * divide up what's left: literal cells for [[Measurement.Fixed]], an
+    * intrinsic query for [[Measurement.WrapContent]],
     * [[Measurement.MaxIntrinsic]] and [[Measurement.MinIntrinsic]] (none of
     * which depend on leftover space), and nothing yet for
     * [[Measurement.Percentage]]/[[Measurement.Weight]].
@@ -141,16 +141,15 @@ final class Column(
       crossExtent: Int | Infinity
   ): Int =
     child.size.height match
-      case Measurement.Fixed(cells) => cells
+      case Measurement.Fixed(cells)                           => cells
       case Measurement.WrapContent | Measurement.MaxIntrinsic =>
         child.maxIntrinsicHeight(crossExtent)
       case Measurement.MinIntrinsic => child.minIntrinsicHeight(crossExtent)
       case Measurement.Percentage(_) | Measurement.Weight(_) => 0
 
   /** Allocate `available` cells across `children` along the main axis: fixed
-    * (and intrinsically-sized) children first, then percentage children
-    * split what's left, then weighted children split whatever remains after
-    * that.
+    * (and intrinsically-sized) children first, then percentage children split
+    * what's left, then weighted children split whatever remains after that.
     */
   private def resolveMainAxis(
       children: Seq[Component],
@@ -176,16 +175,16 @@ final class Column(
     children.indices.map { i =>
       children(i).size.height match
         case Measurement.Percentage(_) => phase2(i)
-        case Measurement.Weight(w) =>
+        case Measurement.Weight(w)     =>
           if totalWeight > 0 then
             (afterPercentage.toDouble * w / totalWeight).toInt
           else 0
         case _ => phase1(i)
     }
 
-  /** The constraint offered to a child on the cross axis (width): tight to
-    * the column's width under [[Align.Stretch]], otherwise loose so the
-    * child can report its own natural width.
+  /** The constraint offered to a child on the cross axis (width): tight to the
+    * column's width under [[Align.Stretch]], otherwise loose so the child can
+    * report its own natural width.
     */
   private def childCrossConstraint(
       height: Int,
