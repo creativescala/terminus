@@ -16,8 +16,8 @@
 
 package terminus.ui.capability
 
-import terminus.ui.runtime.Runtime
 import terminus.ui.layout.Component
+import terminus.ui.runtime.Runtime
 
 /** The capability that builds the component tree.
   *

@@ -25,11 +25,11 @@ import terminus.ui.component.TextInput
 import terminus.ui.layout.Size
 import terminus.ui.react.Reactive
 import terminus.ui.react.Var
-import terminus.ui.text
 import terminus.ui.style.CellStyle
 import terminus.ui.style.Color
 import terminus.ui.style.TextStyle
 import terminus.ui.style.Underline
+import terminus.ui.text
 
 // To build any of these examples, give sbt the command 'nativeLink'. Sbt will
 // then prompt for the demo to build. The executable will

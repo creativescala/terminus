@@ -17,6 +17,10 @@
 package terminus.ui.component
 
 import terminus.Key
+import terminus.ui.capability.Layout
+import terminus.ui.capability.React
+import terminus.ui.event.DefaultEvent
+import terminus.ui.event.FocusId
 import terminus.ui.layout.Box
 import terminus.ui.layout.Buffer
 import terminus.ui.layout.Component
@@ -26,11 +30,7 @@ import terminus.ui.layout.Infinity
 import terminus.ui.layout.Measurement
 import terminus.ui.layout.Rect
 import terminus.ui.layout.Size
-import terminus.ui.event.DefaultEvent
-import terminus.ui.event.FocusId
 import terminus.ui.react.Var
-import terminus.ui.capability.Layout
-import terminus.ui.capability.React
 import terminus.ui.style.BoxStyle
 import terminus.ui.style.CellStyle
 import terminus.ui.style.TextStyle
@@ -47,10 +47,10 @@ import terminus.ui.text.Line
   * Select(Size.fixed(30, 8), items, choice)
   * }}}
   *
-  * Key bindings: Up/Down move one item, PageUp/PageDown move one page,
-  * Home/End jump to first/last item. The viewport scrolls to keep the selected
-  * item visible. The selected item is highlighted by inverting the content
-  * style; all other items use the content style unchanged.
+  * Key bindings: Up/Down move one item, PageUp/PageDown move one page, Home/End
+  * jump to first/last item. The viewport scrolls to keep the selected item
+  * visible. The selected item is highlighted by inverting the content style;
+  * all other items use the content style unchanged.
   */
 final class Select[A](
     val size: Size,
@@ -63,12 +63,14 @@ final class Select[A](
 
   private val scroll = Var(0)
 
-  private def clampSelected(n: Int): Int = n.max(0).min((items.length - 1).max(0))
+  private def clampSelected(n: Int): Int =
+    n.max(0).min((items.length - 1).max(0))
 
   private def visibleRows: Int =
     size.height match
-      case Measurement.Fixed(cells) => (cells - activeBoxStyle.insets.vertical).max(0)
-      case _                        => 0
+      case Measurement.Fixed(cells) =>
+        (cells - activeBoxStyle.insets.vertical).max(0)
+      case _ => 0
 
   private def scrollToShow(sel: Int): Unit =
     val vr = visibleRows
@@ -119,7 +121,7 @@ final class Select[A](
       size.width match
         case Measurement.Fixed(cells) => cells - insets.horizontal
         case Measurement.WrapContent  => naturalWidth
-        case _ =>
+        case _                        =>
           inner.maxWidth match
             case Infinity   => naturalWidth
             case bound: Int => bound
@@ -134,7 +136,9 @@ final class Select[A](
         case Measurement.Fixed(cells) => cells - insets.vertical
         case _                        => items.length
 
-    constraint.constrain(insets.inflate(Dimensions(contentWidth, contentHeight)))
+    constraint.constrain(
+      insets.inflate(Dimensions(contentWidth, contentHeight))
+    )
 
   def minIntrinsicWidth(height: Int | Infinity): Int =
     naturalWidth + activeBoxStyle.insets.horizontal
@@ -193,6 +197,13 @@ object Select:
   )(using ctx: Layout): Unit =
     ctx.addComponent { runtime =>
       val focusId = FocusId.next
-      val context = new DefaultEvent(focusId, runtime)
-      new Select(size, style(TextStyle.default), items, selected, label, context)
+      val context = new DefaultEvent(focusId, runtime) {}
+      new Select(
+        size,
+        style(TextStyle.default),
+        items,
+        selected,
+        label,
+        context
+      )
     }

@@ -3,7 +3,10 @@ package terminus.ui.layout
 import terminus.effect.AnsiCodes
 import terminus.effect.Cursor
 import terminus.effect.Writer
+import terminus.ui.style.CellStyle
 import terminus.ui.style.Color
+import terminus.ui.style.Underline
+import terminus.ui.text.Line
 
 /** A [[Buffer]] that renders in an array on [[Cell]]. */
 final class CellArrayBuffer(val width: Int, val height: Int) extends Buffer:
@@ -109,7 +112,7 @@ final class CellArrayBuffer(val width: Int, val height: Int) extends Buffer:
     * modified; callers are responsible for swapping or copying buffers between
     * frames.
     */
-  def renderDiff(previous: Buffer)(using t: Cursor & Writer): Unit =
+  def renderDiff(previous: CellArrayBuffer)(using t: Cursor & Writer): Unit =
     require(
       width == previous.width && height == previous.height,
       s"Buffer dimensions must match for diff render: ${width}x${height} vs ${previous.width}x${previous.height}"
@@ -145,7 +148,7 @@ final class CellArrayBuffer(val width: Int, val height: Int) extends Buffer:
     * and return [[to]] as the new current style.
     */
   private def emitStyle(from: CellStyle, to: CellStyle)(using
-      t: Terminal
+      t: Writer
   ): CellStyle =
     if to != from then
       if to.fg != from.fg then t.write(fgCode(to.fg))

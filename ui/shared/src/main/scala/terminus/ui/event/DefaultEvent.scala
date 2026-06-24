@@ -1,8 +1,8 @@
 package terminus.ui.event
 
-import terminus.ui.runtime.Runtime
-import terminus.ui.capability.Event
 import terminus.Key
+import terminus.ui.capability.Event
+import terminus.ui.runtime.Runtime
 
 /** The default implementation of the [[terminus.ui.capability.Event]]
   * capability, which defers to [[terminus.ui.runtime.Runtime]] for its

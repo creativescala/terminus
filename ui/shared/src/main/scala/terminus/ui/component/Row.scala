@@ -16,9 +16,15 @@
 
 package terminus.ui.component
 
+import terminus.ui.capability.Event
+import terminus.ui.capability.Layout
+import terminus.ui.capability.React
+import terminus.ui.event.DefaultEvent
+import terminus.ui.event.FocusId
 import terminus.ui.layout.Buffer
 import terminus.ui.layout.Component
 import terminus.ui.layout.Constraint
+import terminus.ui.layout.DefaultLayout
 import terminus.ui.layout.Dimensions
 import terminus.ui.layout.Infinity
 import terminus.ui.layout.Measurement
@@ -27,12 +33,6 @@ import terminus.ui.layout.Size
 import terminus.ui.style.Align
 import terminus.ui.style.Justify
 import terminus.ui.style.LayoutStyle
-import terminus.ui.event.DefaultEvent
-import terminus.ui.layout.DefaultLayout
-import terminus.ui.capability.Event
-import terminus.ui.capability.Layout
-import terminus.ui.capability.React
-import terminus.ui.event.FocusId
 
 import scala.collection.Seq
 

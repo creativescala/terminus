@@ -16,26 +16,25 @@
 
 package terminus.ui.component
 
+import terminus.ui.capability.Event
+import terminus.ui.capability.Layout
+import terminus.ui.capability.React
+import terminus.ui.event.DefaultEvent
+import terminus.ui.event.FocusId
 import terminus.ui.layout.Box
 import terminus.ui.layout.Buffer
 import terminus.ui.layout.Component
 import terminus.ui.layout.Constraint
+import terminus.ui.layout.DefaultLayout
 import terminus.ui.layout.Dimensions
 import terminus.ui.layout.Infinity
 import terminus.ui.layout.Measurement
 import terminus.ui.layout.Rect
 import terminus.ui.layout.Size
-import terminus.ui.event.FocusId
-import terminus.ui.capability.Layout
+import terminus.ui.react.Reactive
 import terminus.ui.style.BoxStyle
 import terminus.ui.style.CellStyle
 import terminus.ui.style.TextStyle
-import terminus.ui.react.Reactive
-import terminus.ui.event.DefaultEvent
-import terminus.ui.layout.DefaultLayout
-import terminus.ui.capability.Event
-import terminus.ui.capability.Layout
-import terminus.ui.capability.React
 import terminus.ui.text
 import terminus.ui.text.Line
 
@@ -151,7 +150,7 @@ object Text:
   )(using ctx: Layout): Unit =
     ctx.addComponent { runtime =>
       val focusId = FocusId.next
-      val context = new DefaultEvent(focusId, runtime)
+      val context = new DefaultEvent(focusId, runtime) {}
       val value = body(using context)
 
       new Text(size, style(TextStyle.default), value, context)

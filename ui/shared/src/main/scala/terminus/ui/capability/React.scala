@@ -16,10 +16,10 @@
 
 package terminus.ui.capability
 
-import scala.annotation.implicitNotFound
-
-import scala.collection.mutable
 import terminus.ui.react.Listener
+
+import scala.annotation.implicitNotFound
+import scala.collection.mutable
 
 /** Reactive scope for a component render pass.
   *

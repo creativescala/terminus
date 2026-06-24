@@ -16,37 +16,35 @@
 
 package terminus.ui.component
 
-import terminus.ui.layout.Buffer
+import terminus.Key
+import terminus.KeyCode
+import terminus.ui.capability.Event
+import terminus.ui.capability.Layout
+import terminus.ui.capability.React
+import terminus.ui.event.DefaultEvent
+import terminus.ui.event.FocusId
 import terminus.ui.layout.Box
+import terminus.ui.layout.Buffer
 import terminus.ui.layout.Cell
 import terminus.ui.layout.Component
 import terminus.ui.layout.Constraint
+import terminus.ui.layout.DefaultLayout
 import terminus.ui.layout.Dimensions
 import terminus.ui.layout.Infinity
 import terminus.ui.layout.Measurement
 import terminus.ui.layout.Rect
 import terminus.ui.layout.Size
-import terminus.ui.event.FocusId
+import terminus.ui.react.Reactive
 import terminus.ui.react.Var
-import terminus.ui.capability.Layout
 import terminus.ui.style.BoxStyle
 import terminus.ui.style.CellStyle
 import terminus.ui.style.TextStyle
-import terminus.ui.react.Reactive
-import terminus.ui.event.DefaultEvent
-import terminus.ui.layout.DefaultLayout
-import terminus.ui.capability.Event
-import terminus.ui.capability.Layout
-import terminus.ui.capability.React
 import terminus.ui.text
 import terminus.ui.text.Line
-import terminus.Key
-import terminus.KeyCode
 
 /** A single-line text input component.
   *
-  * The caller owns `value` and can read it to react to what the user has
-  * typed:
+  * The caller owns `value` and can read it to react to what the user has typed:
   *
   * {{{
   * val name = Var(Line(""))
@@ -199,6 +197,6 @@ object TextInput:
   )(using ctx: Layout): Unit =
     ctx.addComponent { runtime =>
       val focusId = FocusId.next
-      val context = new DefaultEvent(focusId, runtime)
+      val context = new DefaultEvent(focusId, runtime) {}
       new TextInput(size, style(TextStyle.default), value, context)
     }

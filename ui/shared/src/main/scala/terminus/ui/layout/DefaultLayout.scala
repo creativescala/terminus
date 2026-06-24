@@ -2,6 +2,7 @@ package terminus.ui.layout
 
 import terminus.ui.capability.Layout
 import terminus.ui.runtime.Runtime
+
 import scala.collection.mutable
 
 /** The default implementation of [[terminus.ui.capability.Layout]]. */

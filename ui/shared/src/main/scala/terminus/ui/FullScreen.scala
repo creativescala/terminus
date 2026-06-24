@@ -25,18 +25,19 @@ import terminus.KeyReader
 import terminus.RawMode
 import terminus.Writer
 import terminus.effect
-import terminus.ui.event.DefaultEvent
-import terminus.ui.layout.DefaultLayout
-import terminus.ui.layout.Rect
-import terminus.ui.layout.Buffer
-import terminus.ui.event.FocusId
+import terminus.ui.capability.Layout
 import terminus.ui.component.Column
+import terminus.ui.event.DefaultEvent
+import terminus.ui.event.FocusId
+import terminus.ui.layout.Buffer
+import terminus.ui.layout.CellArrayBuffer
+import terminus.ui.layout.Constraint
+import terminus.ui.layout.DefaultLayout
+import terminus.ui.layout.Measurement
+import terminus.ui.layout.Rect
+import terminus.ui.layout.Size
 import terminus.ui.react.DefaultReact
 import terminus.ui.runtime.Runtime
-import terminus.ui.capability.Layout
-import terminus.ui.layout.Size
-import terminus.ui.layout.Measurement
-import terminus.ui.layout.Constraint
 import terminus.ui.style.LayoutStyle
 
 /** The root of a component tree. Acts as a column and renders into the
@@ -44,12 +45,12 @@ import terminus.ui.style.LayoutStyle
   */
 class FullScreen(runtime: Runtime, column: Column):
 
-  private[ui] def toBuffer()(using dims: effect.Dimensions): Buffer =
+  private[ui] def toBuffer()(using dims: effect.Dimensions): CellArrayBuffer =
     column.react(using DefaultReact.empty)
     val terminalSize = dims.getDimensions
     val constraint = Constraint.tight(terminalSize.columns, terminalSize.rows)
     val contentDimensions = column.measure(constraint)
-    val buf = Buffer(contentDimensions.width, contentDimensions.height)
+    val buf = CellArrayBuffer(contentDimensions.width, contentDimensions.height)
     column.render(
       Rect(0, 0, contentDimensions.width, contentDimensions.height),
       buf
