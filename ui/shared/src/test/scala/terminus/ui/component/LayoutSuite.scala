@@ -19,12 +19,21 @@ package terminus.ui.component
 import munit.FunSuite
 import terminus.StringBuilderTerminal
 import terminus.effect.AnsiCodes
-import terminus.ui.Buffer
-import terminus.ui.Cell
-import terminus.ui.Component
-import terminus.ui.Constraint
-import terminus.ui.Rect
-import terminus.ui.Size
+import terminus.ui.capability.React
+import terminus.ui.event.DefaultEvent
+import terminus.ui.event.FocusId
+import terminus.ui.layout.Buffer
+import terminus.ui.layout.Cell
+import terminus.ui.layout.CellArrayBuffer
+import terminus.ui.layout.Component
+import terminus.ui.layout.Constraint
+import terminus.ui.layout.DefaultLayout
+import terminus.ui.layout.Dimensions
+import terminus.ui.layout.Infinity
+import terminus.ui.layout.Measurement
+import terminus.ui.layout.Rect
+import terminus.ui.layout.Size
+import terminus.ui.runtime.Runtime
 import terminus.ui.style.Align
 import terminus.ui.style.CellStyle
 import terminus.ui.style.Justify
@@ -32,34 +41,76 @@ import terminus.ui.style.LayoutStyle
 
 class LayoutSuite extends FunSuite:
 
+  /** A leaf component with the given size. Its natural dimensions are the fixed
+    * cells on each axis (zero on a flexible axis), and it draws via `draw`.
+    */
+  def component(sz: Size)(draw: (Rect, Buffer) => Unit): Component =
+    new Component:
+      val size: Size = sz
+      private val natWidth = sz.width match
+        case Measurement.Fixed(cells) => cells
+        case _                        => 0
+      private val natHeight = sz.height match
+        case Measurement.Fixed(cells) => cells
+        case _                        => 0
+
+      def react(using React): Unit = ()
+      def measure(constraint: Constraint): Dimensions =
+        constraint.constrain(Dimensions(natWidth, natHeight))
+      def minIntrinsicWidth(height: Int | Infinity): Int = natWidth
+      def maxIntrinsicWidth(height: Int | Infinity): Int = natWidth
+      def minIntrinsicHeight(width: Int | Infinity): Int = natHeight
+      def maxIntrinsicHeight(width: Int | Infinity): Int = natHeight
+      def render(bounds: Rect, buf: Buffer): Unit = draw(bounds, buf)
+
   /** A minimal component that writes a single character at its origin. */
   def cell(char: Char, width: Int = 1, height: Int = 1): Component =
-    new Component:
-      val size: Size = Size.fixed(width, height)
-      def render(bounds: Rect, buf: Buffer): Unit =
-        buf.put(bounds.x, bounds.y, Cell(char.toInt, CellStyle.default))
+    component(Size.fixed(width, height)) { (bounds, buf) =>
+      buf.put(bounds.x, bounds.y, Cell(char.toInt, CellStyle.default))
+    }
 
   /** A component that fills its entire allocated bounds with a single
     * character.
     */
   def filledCell(char: Char, sz: Size = Size.fixed(1, 1)): Component =
-    new Component:
-      val size: Size = sz
-      def render(bounds: Rect, buf: Buffer): Unit =
-        val c = Cell(char.toInt, CellStyle.default)
-        var y = bounds.y
-        while y < bounds.bottom do
-          var x = bounds.x
-          while x < bounds.right do
-            buf.put(x, y, c)
-            x += 1
-          y += 1
+    component(sz) { (bounds, buf) =>
+      val c = Cell(char.toInt, CellStyle.default)
+      var y = bounds.y
+      while y < bounds.bottom do
+        var x = bounds.x
+        while x < bounds.right do
+          buf.put(x, y, c)
+          x += 1
+        y += 1
+    }
+
+  /** Build a context populated with the given child components, as a parent
+    * layout container would after evaluating its body.
+    */
+  def contextOf(children: Component*): DefaultEvent & DefaultLayout =
+    val runtime = Runtime.empty
+    val ctx =
+      new DefaultEvent(FocusId.next, runtime) with DefaultLayout(runtime) {}
+    children.foreach(child => ctx.addComponent(_ => child))
+    ctx
+
+  /** Construct a [[Row]] containing the given children. */
+  def row(size: Size, style: LayoutStyle = LayoutStyle.default)(
+      children: Component*
+  ): Row =
+    new Row(size, style, contextOf(children*))
+
+  /** Construct a [[Column]] containing the given children. */
+  def column(size: Size, style: LayoutStyle = LayoutStyle.default)(
+      children: Component*
+  ): Column =
+    new Column(size, style, contextOf(children*))
 
   /** Render a component into a buffer of the given size and return terminal
     * output.
     */
   def renderToString(component: Component, width: Int, height: Int): String =
-    val buf = Buffer(width, height)
+    val buf = CellArrayBuffer(width, height)
     component.render(Rect(0, 0, width, height), buf)
     val t = StringBuilderTerminal()
     buf.render(using t)
@@ -67,7 +118,7 @@ class LayoutSuite extends FunSuite:
 
   /** Render a fixed-size component into a buffer matching its size. */
   def renderToString(component: Component): String =
-    val dims = component.size.toDimensions
+    val dims = component.measure(Constraint.loose(Infinity, Infinity))
     renderToString(component, dims.width, dims.height)
 
   val reset: String = AnsiCodes.sgr("0")
@@ -78,34 +129,29 @@ class LayoutSuite extends FunSuite:
   // ---------------------------------------------------------------------------
 
   test("Row places a single child at the origin") {
-    val row = new Row(Size.fixed(1, 1))
-    row.add(cell('A'))
-    val out = renderToString(row)
+    val r = row(Size.fixed(1, 1))(cell('A'))
+    val out = renderToString(r)
     assertEquals(out, reset + moveTo(1, 1) + "A" + reset)
   }
 
   test("Row places two fixed children left to right") {
-    val row = new Row(Size.fixed(2, 1))
-    row.add(cell('A'))
-    row.add(cell('B'))
-    val out = renderToString(row)
+    val r = row(Size.fixed(2, 1))(cell('A'), cell('B'))
+    val out = renderToString(r)
     assertEquals(out, reset + moveTo(1, 1) + "A" + "B" + reset)
   }
 
   test("Row places three fixed children left to right") {
-    val row = new Row(Size.fixed(3, 1))
-    row.add(cell('A'))
-    row.add(cell('B'))
-    row.add(cell('C'))
-    val out = renderToString(row)
+    val r = row(Size.fixed(3, 1))(cell('A'), cell('B'), cell('C'))
+    val out = renderToString(r)
     assertEquals(out, reset + moveTo(1, 1) + "A" + "B" + "C" + reset)
   }
 
   test("Row respects child width when advancing x offset") {
-    val row = new Row(Size.fixed(6, 1))
-    row.add(filledCell('A', Size.fixed(3, 1)))
-    row.add(filledCell('B', Size.fixed(3, 1)))
-    val out = renderToString(row)
+    val r = row(Size.fixed(6, 1))(
+      filledCell('A', Size.fixed(3, 1)),
+      filledCell('B', Size.fixed(3, 1))
+    )
+    val out = renderToString(r)
     assertEquals(out, reset + moveTo(1, 1) + "AAA" + "BBB" + reset)
   }
 
@@ -114,19 +160,21 @@ class LayoutSuite extends FunSuite:
   // ---------------------------------------------------------------------------
 
   test("Row distributes remaining width equally to equal-weight children") {
-    val row = new Row(Size.fixed(6, 1))
-    row.add(filledCell('A', Size(Constraint.Weight(1), Constraint.Fixed(1))))
-    row.add(filledCell('B', Size(Constraint.Weight(1), Constraint.Fixed(1))))
-    row.add(filledCell('C', Size(Constraint.Weight(1), Constraint.Fixed(1))))
-    val out = renderToString(row)
+    val r = row(Size.fixed(6, 1))(
+      filledCell('A', Size(Measurement.Weight(1), Measurement.Fixed(1))),
+      filledCell('B', Size(Measurement.Weight(1), Measurement.Fixed(1))),
+      filledCell('C', Size(Measurement.Weight(1), Measurement.Fixed(1)))
+    )
+    val out = renderToString(r)
     assertEquals(out, reset + moveTo(1, 1) + "AA" + "BB" + "CC" + reset)
   }
 
   test("Row gives remaining width after fixed child to weight child") {
-    val row = new Row(Size.fixed(6, 1))
-    row.add(filledCell('A', Size.fixed(2, 1)))
-    row.add(filledCell('B', Size(Constraint.Weight(1), Constraint.Fixed(1))))
-    val out = renderToString(row)
+    val r = row(Size.fixed(6, 1))(
+      filledCell('A', Size.fixed(2, 1)),
+      filledCell('B', Size(Measurement.Weight(1), Measurement.Fixed(1)))
+    )
+    val out = renderToString(r)
     assertEquals(out, reset + moveTo(1, 1) + "AA" + "BBBB" + reset)
   }
 
@@ -135,25 +183,19 @@ class LayoutSuite extends FunSuite:
   // ---------------------------------------------------------------------------
 
   test("Column places a single child at the origin") {
-    val col = new Column(Size.fixed(1, 1))
-    col.add(cell('A'))
+    val col = column(Size.fixed(1, 1))(cell('A'))
     val out = renderToString(col)
     assertEquals(out, reset + moveTo(1, 1) + "A" + reset)
   }
 
   test("Column places two fixed children top to bottom") {
-    val col = new Column(Size.fixed(1, 2))
-    col.add(cell('A'))
-    col.add(cell('B'))
+    val col = column(Size.fixed(1, 2))(cell('A'), cell('B'))
     val out = renderToString(col)
     assertEquals(out, reset + moveTo(1, 1) + "A" + moveTo(1, 2) + "B" + reset)
   }
 
   test("Column places three fixed children top to bottom") {
-    val col = new Column(Size.fixed(1, 3))
-    col.add(cell('A'))
-    col.add(cell('B'))
-    col.add(cell('C'))
+    val col = column(Size.fixed(1, 3))(cell('A'), cell('B'), cell('C'))
     val out = renderToString(col)
     assertEquals(
       out,
@@ -165,9 +207,10 @@ class LayoutSuite extends FunSuite:
   }
 
   test("Column respects child height when advancing y offset") {
-    val col = new Column(Size.fixed(1, 6))
-    col.add(filledCell('A', Size.fixed(1, 3)))
-    col.add(filledCell('B', Size.fixed(1, 3)))
+    val col = column(Size.fixed(1, 6))(
+      filledCell('A', Size.fixed(1, 3)),
+      filledCell('B', Size.fixed(1, 3))
+    )
     val out = renderToString(col)
     assertEquals(
       out,
@@ -187,10 +230,11 @@ class LayoutSuite extends FunSuite:
   // ---------------------------------------------------------------------------
 
   test("Column distributes remaining height equally to equal-weight children") {
-    val col = new Column(Size.fixed(1, 6))
-    col.add(filledCell('A', Size(Constraint.Fixed(1), Constraint.Weight(1))))
-    col.add(filledCell('B', Size(Constraint.Fixed(1), Constraint.Weight(1))))
-    col.add(filledCell('C', Size(Constraint.Fixed(1), Constraint.Weight(1))))
+    val col = column(Size.fixed(1, 6))(
+      filledCell('A', Size(Measurement.Fixed(1), Measurement.Weight(1))),
+      filledCell('B', Size(Measurement.Fixed(1), Measurement.Weight(1))),
+      filledCell('C', Size(Measurement.Fixed(1), Measurement.Weight(1)))
+    )
     val out = renderToString(col)
     assertEquals(
       out,
@@ -206,9 +250,10 @@ class LayoutSuite extends FunSuite:
   }
 
   test("Column gives remaining height after fixed child to weight child") {
-    val col = new Column(Size.fixed(1, 6))
-    col.add(filledCell('A', Size.fixed(1, 2)))
-    col.add(filledCell('B', Size(Constraint.Fixed(1), Constraint.Weight(1))))
+    val col = column(Size.fixed(1, 6))(
+      filledCell('A', Size.fixed(1, 2)),
+      filledCell('B', Size(Measurement.Fixed(1), Measurement.Weight(1)))
+    )
     val out = renderToString(col)
     assertEquals(
       out,
@@ -229,24 +274,22 @@ class LayoutSuite extends FunSuite:
 
   test("Row: percentage(1.0) fills all space remaining after fixed child") {
     // 10 wide, fixed child takes 2, percentage(1.0) gets remaining 8
-    val row = new Row(Size.fixed(10, 1))
-    row.add(filledCell('A', Size.fixed(2, 1)))
-    row.add(
-      filledCell('B', Size(Constraint.Percentage(1.0), Constraint.Fixed(1)))
+    val r = row(Size.fixed(10, 1))(
+      filledCell('A', Size.fixed(2, 1)),
+      filledCell('B', Size(Measurement.Percentage(1.0), Measurement.Fixed(1)))
     )
-    val out = renderToString(row)
+    val out = renderToString(r)
     assertEquals(out, reset + moveTo(1, 1) + "AA" + "BBBBBBBB" + reset)
   }
 
   test("Row: fixed, then percentage, then weight share space in three phases") {
     // 10 wide: fixed takes 2, percentage(0.5) gets 50% of remaining 8 = 4, weight gets last 4
-    val row = new Row(Size.fixed(10, 1))
-    row.add(filledCell('A', Size.fixed(2, 1)))
-    row.add(
-      filledCell('B', Size(Constraint.Percentage(0.5), Constraint.Fixed(1)))
+    val r = row(Size.fixed(10, 1))(
+      filledCell('A', Size.fixed(2, 1)),
+      filledCell('B', Size(Measurement.Percentage(0.5), Measurement.Fixed(1))),
+      filledCell('C', Size(Measurement.Weight(1), Measurement.Fixed(1)))
     )
-    row.add(filledCell('C', Size(Constraint.Weight(1), Constraint.Fixed(1))))
-    val out = renderToString(row)
+    val out = renderToString(r)
     assertEquals(out, reset + moveTo(1, 1) + "AA" + "BBBB" + "CCCC" + reset)
   }
 
@@ -258,12 +301,11 @@ class LayoutSuite extends FunSuite:
     "Column: fixed, then percentage, then weight share space in three phases"
   ) {
     // 10 tall: fixed takes 2, percentage(0.5) gets 50% of remaining 8 = 4, weight gets last 4
-    val col = new Column(Size.fixed(1, 10))
-    col.add(filledCell('A', Size.fixed(1, 2)))
-    col.add(
-      filledCell('B', Size(Constraint.Fixed(1), Constraint.Percentage(0.5)))
+    val col = column(Size.fixed(1, 10))(
+      filledCell('A', Size.fixed(1, 2)),
+      filledCell('B', Size(Measurement.Fixed(1), Measurement.Percentage(0.5))),
+      filledCell('C', Size(Measurement.Fixed(1), Measurement.Weight(1)))
     )
-    col.add(filledCell('C', Size(Constraint.Fixed(1), Constraint.Weight(1))))
     val out = renderToString(col)
     assertEquals(
       out,
@@ -282,15 +324,10 @@ class LayoutSuite extends FunSuite:
   // ---------------------------------------------------------------------------
 
   test("Column containing a Row: children laid out correctly") {
-    val col = new Column(Size.fixed(2, 2))
-    val top = new Row(Size.fixed(2, 1))
-    top.add(cell('A'))
-    top.add(cell('B'))
-    val bot = new Row(Size.fixed(2, 1))
-    bot.add(cell('C'))
-    bot.add(cell('D'))
-    col.add(top)
-    col.add(bot)
+    val col = column(Size.fixed(2, 2))(
+      row(Size.fixed(2, 1))(cell('A'), cell('B')),
+      row(Size.fixed(2, 1))(cell('C'), cell('D'))
+    )
     val out = renderToString(col)
     assertEquals(
       out,
@@ -299,16 +336,11 @@ class LayoutSuite extends FunSuite:
   }
 
   test("Row containing a Column: children laid out correctly") {
-    val row = new Row(Size.fixed(2, 2))
-    val left = new Column(Size.fixed(1, 2))
-    left.add(cell('A'))
-    left.add(cell('C'))
-    val right = new Column(Size.fixed(1, 2))
-    right.add(cell('B'))
-    right.add(cell('D'))
-    row.add(left)
-    row.add(right)
-    val out = renderToString(row)
+    val r = row(Size.fixed(2, 2))(
+      column(Size.fixed(1, 2))(cell('A'), cell('C')),
+      column(Size.fixed(1, 2))(cell('B'), cell('D'))
+    )
+    val out = renderToString(r)
     assertEquals(
       out,
       reset + moveTo(1, 1) + "A" + "B" + moveTo(1, 2) + "C" + "D" + reset
@@ -323,43 +355,45 @@ class LayoutSuite extends FunSuite:
   test("Row Justify.End packs children at the right") {
     // 6 wide, 2 × filledCell(2,1) → freeSpace=2, startOffset=2
     // cells: "  AABB"
-    val row = new Row(Size.fixed(6, 1), LayoutStyle(justify = Justify.End))
-    row.add(filledCell('A', Size.fixed(2, 1)))
-    row.add(filledCell('B', Size.fixed(2, 1)))
-    val out = renderToString(row)
+    val r = row(Size.fixed(6, 1), LayoutStyle(justify = Justify.End))(
+      filledCell('A', Size.fixed(2, 1)),
+      filledCell('B', Size.fixed(2, 1))
+    )
+    val out = renderToString(r)
     assertEquals(out, reset + moveTo(1, 1) + "  AABB" + reset)
   }
 
   test("Row Justify.Center centers children") {
     // 6 wide, 2 × filledCell(1,1) → freeSpace=4, startOffset=2
     // cells: "  AB  "
-    val row = new Row(Size.fixed(6, 1), LayoutStyle(justify = Justify.Center))
-    row.add(filledCell('A', Size.fixed(1, 1)))
-    row.add(filledCell('B', Size.fixed(1, 1)))
-    val out = renderToString(row)
+    val r = row(Size.fixed(6, 1), LayoutStyle(justify = Justify.Center))(
+      filledCell('A', Size.fixed(1, 1)),
+      filledCell('B', Size.fixed(1, 1))
+    )
+    val out = renderToString(r)
     assertEquals(out, reset + moveTo(1, 1) + "  AB  " + reset)
   }
 
   test("Row Justify.SpaceBetween distributes space between children") {
     // 9 wide, 3 × filledCell(1,1) → freeSpace=6, gap=3
     // cells: "A   B   C"
-    val row =
-      new Row(Size.fixed(9, 1), LayoutStyle(justify = Justify.SpaceBetween))
-    row.add(filledCell('A', Size.fixed(1, 1)))
-    row.add(filledCell('B', Size.fixed(1, 1)))
-    row.add(filledCell('C', Size.fixed(1, 1)))
-    val out = renderToString(row)
+    val r = row(Size.fixed(9, 1), LayoutStyle(justify = Justify.SpaceBetween))(
+      filledCell('A', Size.fixed(1, 1)),
+      filledCell('B', Size.fixed(1, 1)),
+      filledCell('C', Size.fixed(1, 1))
+    )
+    val out = renderToString(r)
     assertEquals(out, reset + moveTo(1, 1) + "A   B   C" + reset)
   }
 
   test("Row Justify.SpaceEvenly distributes space evenly including edges") {
     // 8 wide, 2 × filledCell(1,1) → freeSpace=6, n+1=3 gaps, gap=2
     // cells: "  A  B  "
-    val row =
-      new Row(Size.fixed(8, 1), LayoutStyle(justify = Justify.SpaceEvenly))
-    row.add(filledCell('A', Size.fixed(1, 1)))
-    row.add(filledCell('B', Size.fixed(1, 1)))
-    val out = renderToString(row)
+    val r = row(Size.fixed(8, 1), LayoutStyle(justify = Justify.SpaceEvenly))(
+      filledCell('A', Size.fixed(1, 1)),
+      filledCell('B', Size.fixed(1, 1))
+    )
+    val out = renderToString(r)
     assertEquals(out, reset + moveTo(1, 1) + "  A  B  " + reset)
   }
 
@@ -369,9 +403,8 @@ class LayoutSuite extends FunSuite:
 
   test("Row Align.Start positions child at top of cross axis") {
     // Row 1 wide, 3 tall. Child 1x1. Start → y=0, rows 1-2 empty.
-    val row = new Row(Size.fixed(1, 3), LayoutStyle(align = Align.Start))
-    row.add(cell('A'))
-    val out = renderToString(row)
+    val r = row(Size.fixed(1, 3), LayoutStyle(align = Align.Start))(cell('A'))
+    val out = renderToString(r)
     assertEquals(
       out,
       reset + moveTo(1, 1) + "A" + moveTo(1, 2) + " " + moveTo(
@@ -383,9 +416,8 @@ class LayoutSuite extends FunSuite:
 
   test("Row Align.Center positions child in middle of cross axis") {
     // Row 1 wide, 3 tall. Child 1x1. Center → y=(3-1)/2=1.
-    val row = new Row(Size.fixed(1, 3), LayoutStyle(align = Align.Center))
-    row.add(cell('A'))
-    val out = renderToString(row)
+    val r = row(Size.fixed(1, 3), LayoutStyle(align = Align.Center))(cell('A'))
+    val out = renderToString(r)
     assertEquals(
       out,
       reset + moveTo(1, 1) + " " + moveTo(1, 2) + "A" + moveTo(
@@ -397,9 +429,8 @@ class LayoutSuite extends FunSuite:
 
   test("Row Align.End positions child at bottom of cross axis") {
     // Row 1 wide, 3 tall. Child 1x1. End → y=3-1=2.
-    val row = new Row(Size.fixed(1, 3), LayoutStyle(align = Align.End))
-    row.add(cell('A'))
-    val out = renderToString(row)
+    val r = row(Size.fixed(1, 3), LayoutStyle(align = Align.End))(cell('A'))
+    val out = renderToString(r)
     assertEquals(
       out,
       reset + moveTo(1, 1) + " " + moveTo(1, 2) + " " + moveTo(
@@ -416,9 +447,10 @@ class LayoutSuite extends FunSuite:
   test("Column Justify.End packs children at the bottom") {
     // 6 tall, 2 × cell(1 tall) → freeSpace=4, startOffset=4
     // rows 1-4 empty, rows 5-6 have A/B
-    val col = new Column(Size.fixed(1, 6), LayoutStyle(justify = Justify.End))
-    col.add(cell('A'))
-    col.add(cell('B'))
+    val col = column(Size.fixed(1, 6), LayoutStyle(justify = Justify.End))(
+      cell('A'),
+      cell('B')
+    )
     val out = renderToString(col)
     assertEquals(
       out,
@@ -435,10 +467,10 @@ class LayoutSuite extends FunSuite:
   test("Column Justify.Center centers children") {
     // 6 tall, 2 × cell(1 tall) → freeSpace=4, startOffset=2
     // rows 1-2 empty, rows 3-4 have A/B, rows 5-6 empty
-    val col =
-      new Column(Size.fixed(1, 6), LayoutStyle(justify = Justify.Center))
-    col.add(cell('A'))
-    col.add(cell('B'))
+    val col = column(Size.fixed(1, 6), LayoutStyle(justify = Justify.Center))(
+      cell('A'),
+      cell('B')
+    )
     val out = renderToString(col)
     assertEquals(
       out,
@@ -456,16 +488,17 @@ class LayoutSuite extends FunSuite:
 
   test("Column Align.Center positions child in middle of cross axis") {
     // Column 3 wide, 1 tall. Child 1x1. Center → x=(3-1)/2=1. cells: " A "
-    val col = new Column(Size.fixed(3, 1), LayoutStyle(align = Align.Center))
-    col.add(cell('A'))
+    val col = column(Size.fixed(3, 1), LayoutStyle(align = Align.Center))(
+      cell('A')
+    )
     val out = renderToString(col)
     assertEquals(out, reset + moveTo(1, 1) + " A " + reset)
   }
 
   test("Column Align.End positions child at right of cross axis") {
     // Column 3 wide, 1 tall. Child 1x1. End → x=3-1=2. cells: "  A"
-    val col = new Column(Size.fixed(3, 1), LayoutStyle(align = Align.End))
-    col.add(cell('A'))
+    val col =
+      column(Size.fixed(3, 1), LayoutStyle(align = Align.End))(cell('A'))
     val out = renderToString(col)
     assertEquals(out, reset + moveTo(1, 1) + "  A" + reset)
   }

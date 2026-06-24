@@ -165,7 +165,10 @@ class LineSuite extends FunSuite:
   }
 
   test("reflow hard-breaks a word longer than the width") {
-    assertEquals(reflow("supercalifragilistic", 7), Seq("superca", "lifragi", "listic"))
+    assertEquals(
+      reflow("supercalifragilistic", 7),
+      Seq("superca", "lifragi", "listic")
+    )
   }
 
   test("reflow lets a following word continue after a hard-broken word") {
