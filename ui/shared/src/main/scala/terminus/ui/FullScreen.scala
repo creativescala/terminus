@@ -26,30 +26,32 @@ import terminus.RawMode
 import terminus.Writer
 import terminus.effect
 import terminus.ui.event.DefaultEvent
-import terminus.ui.layout.Dimensions
 import terminus.ui.layout.DefaultLayout
 import terminus.ui.layout.Rect
 import terminus.ui.layout.Buffer
 import terminus.ui.event.FocusId
 import terminus.ui.component.Column
+import terminus.ui.react.DefaultReact
 import terminus.ui.runtime.Runtime
 import terminus.ui.capability.Layout
 import terminus.ui.layout.Size
+import terminus.ui.layout.Measurement
 import terminus.ui.layout.Constraint
 import terminus.ui.style.LayoutStyle
-
-import scala.collection.mutable
 
 /** The root of a component tree. Acts as a column and renders into the
   * alternate screen of the terminal.
   */
 class FullScreen(runtime: Runtime, column: Column):
 
-  private[ui] def toBuffer(): Buffer =
-    val currentDimensions = column.size.toDimensions
-    val buf = Buffer(currentDimensions.width, currentDimensions.height)
+  private[ui] def toBuffer()(using dims: effect.Dimensions): Buffer =
+    column.react(using DefaultReact.empty)
+    val terminalSize = dims.getDimensions
+    val constraint = Constraint.tight(terminalSize.columns, terminalSize.rows)
+    val contentDimensions = column.measure(constraint)
+    val buf = Buffer(contentDimensions.width, contentDimensions.height)
     column.render(
-      Rect(0, 0, currentDimensions.width, currentDimensions.height),
+      Rect(0, 0, contentDimensions.width, contentDimensions.height),
       buf
     )
     buf
@@ -92,8 +94,8 @@ class FullScreen(runtime: Runtime, column: Column):
 
 object FullScreen:
   type InteractiveTerminal = effect.AlternateScreenMode & effect.Erase &
-    effect.Cursor & effect.Writer & effect.AlternateScreenMode &
-    effect.KeyReader & effect.RawMode
+    effect.Cursor & effect.Writer & effect.KeyReader & effect.RawMode &
+    effect.Dimensions
   object InteractiveTerminal
       extends AlternateScreenMode,
         Cursor,
@@ -110,7 +112,7 @@ object FullScreen:
     // Evaluate body here so we do not retain a reference to it and it can be garbage collected.
     body(using context)
     val column = new Column(
-      Size(Constraint.Percentage(1.0), Constraint.Percentage(1.0)),
+      Size(Measurement.Percentage(1.0), Measurement.Percentage(1.0)),
       LayoutStyle.default,
       context
     )

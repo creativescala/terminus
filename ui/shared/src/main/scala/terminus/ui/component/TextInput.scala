@@ -45,6 +45,14 @@ import terminus.KeyCode
 
 /** A single-line text input component.
   *
+  * The caller owns `value` and can read it to react to what the user has
+  * typed:
+  *
+  * {{{
+  * val name = Var(Line(""))
+  * TextInput(Size.fixed(30, 1), name)
+  * }}}
+  *
   * Key bindings: printable characters insert at the cursor, Backspace / Delete
   * delete around the cursor, Left / Right / Home / End move the cursor. Text
   * longer than the visible area scrolls horizontally to keep the cursor in
@@ -56,7 +64,7 @@ final class TextInput(
     value: Var[Line],
     context: DefaultEvent
 ) extends Component:
-  val cursor = Var(0)
+  private val cursor = Var(0)
 
   context.onKey(Key.left) {
     cursor.update(c => (c - 1).max(0))
@@ -182,3 +190,15 @@ final class TextInput(
   private def activeContentStyle =
     if context.hasFocus then style.focus.map(_.content).getOrElse(style.content)
     else style.content
+
+object TextInput:
+  def apply(
+      size: Size,
+      value: Var[Line],
+      style: TextStyle => TextStyle = identity
+  )(using ctx: Layout): Unit =
+    ctx.addComponent { runtime =>
+      val focusId = FocusId.next
+      val context = new DefaultEvent(focusId, runtime)
+      new TextInput(size, style(TextStyle.default), value, context)
+    }

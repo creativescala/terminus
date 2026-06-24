@@ -1,7 +1,9 @@
 package terminus.ui.layout
 
+import terminus.effect.AnsiCodes
 import terminus.effect.Cursor
 import terminus.effect.Writer
+import terminus.ui.style.Color
 
 /** A [[Buffer]] that renders in an array on [[Cell]]. */
 final class CellArrayBuffer(val width: Int, val height: Int) extends Buffer:

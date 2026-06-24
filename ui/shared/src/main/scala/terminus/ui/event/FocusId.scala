@@ -18,9 +18,11 @@ package terminus.ui.event
 
 import java.util.concurrent.atomic.AtomicInteger
 
-/** Opaque token identifying a focusable component, returned by
-  * [[capability.Event.registerFocusable]]. Used by [[FocusScope]] to gate key
-  * handlers on whether this scope is currently focused.
+/** Opaque token identifying a focusable component. Each component gets its
+  * own id from [[FocusId.next]] when it builds its [[DefaultEvent]]. A
+  * component becomes part of the tab order the first time it registers a
+  * handler via [[capability.Event.onKey]]/[[capability.Event.onAnyKey]] — see
+  * [[terminus.ui.runtime.Runtime.registerFocusable]].
   */
 opaque type FocusId = Int
 

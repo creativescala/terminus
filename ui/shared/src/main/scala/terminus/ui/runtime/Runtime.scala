@@ -37,6 +37,7 @@ final class Runtime private ():
       key: Key,
       handler: () => Unit
   ): Unit =
+    registerFocusable(focusId)
     focusables
       .getOrElseUpdate(focusId, Runtime.Focusable.empty)
       .addKeyHandler(key, handler)
@@ -45,9 +46,18 @@ final class Runtime private ():
       focusId: FocusId,
       handler: Key => Unit
   ): Unit =
+    registerFocusable(focusId)
     focusables
       .getOrElseUpdate(focusId, Runtime.Focusable.empty)
       .addAnyKeyHandler(handler)
+
+  /** Add `focusId` to the tab order the first time it registers a handler,
+    * and focus it immediately if it's the first focusable seen.
+    */
+  private def registerFocusable(focusId: FocusId): Unit =
+    if !focusablesOrder.contains(focusId) then
+      focusablesOrder += focusId
+      if currentFocus == FocusId.zero then currentFocus = focusId
 
   def nextFocus(): Unit =
     if focusablesOrder.size == 0 then ()
@@ -88,7 +98,10 @@ object Runtime:
       anyKeyHandlers.foreach(f => f(key))
 
   object Focusable:
-    val empty: Focusable =
+    // A def, not a val: each focusId needs its own handler tables, not a
+    // shared mutable instance aliased across every focusId that hits this
+    // default.
+    def empty: Focusable =
       Focusable(mutable.Map.empty, mutable.ArrayBuffer.empty)
 
   def empty: Runtime = new Runtime()

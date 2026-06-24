@@ -16,14 +16,16 @@
 
 package terminus.ui
 
-import terminus.Key
+import terminus.NativeTerminal
 import terminus.Terminal
 import terminus.ui.component.Column
 import terminus.ui.component.Row
-import terminus.ui.component.Select
 import terminus.ui.component.Text
 import terminus.ui.component.TextInput
-import terminus.ui.style.Border
+import terminus.ui.layout.Size
+import terminus.ui.react.Reactive
+import terminus.ui.react.Var
+import terminus.ui.text
 import terminus.ui.style.CellStyle
 import terminus.ui.style.Color
 import terminus.ui.style.TextStyle
@@ -33,123 +35,81 @@ import terminus.ui.style.Underline
 // then prompt for the demo to build. The executable will
 // 'ui/native/target/scala-<version>/terminus-ui'
 
+/** Wrap unchanging text as a [[terminus.ui.react.Reactive]], which is what
+  * [[Text]] requires as content.
+  */
+private def staticText(s: String) = Var(text.Text(s))
+
 @main def demo(): Unit =
-  val program: FullScreen.Program[Unit] =
-    FullScreen {
+  val fullScreen = FullScreen {
 
-      // Row 1: text style attributes
-      Row(Size.fixed(72, 3)) {
-        Text(24, 3, _.withContent(_.withBold))(
-          "Bold 💪"
-        )
-        Text(24, 3, _.withContent(_.withItalic))(
-          "Italic ✨"
-        )
-        Text(24, 3, _.withContent(_.withStrikethrough))(
-          "Strikethrough ❌"
-        )
+    // Row 1: text style attributes
+    Row(Size.fixed(72, 3)) {
+      Text(Size.fixed(24, 3), _.withContent(_.withBold)) {
+        staticText("Bold 💪")
       }
-
-      // Row 2: underline variants and invert
-      Row(Size.fixed(72, 3)) {
-        Text(24, 3, _.withContent(_.withUnderline(Underline.Straight)))(
-          "Straight underline"
-        )
-        Text(24, 3, _.withContent(_.withUnderline(Underline.Curly)))(
-          "Curly underline"
-        )
-        Text(24, 3, _.withContent(_.withInvert))(
-          "Inverted 🔄"
-        )
+      Text(Size.fixed(24, 3), _.withContent(_.withItalic)) {
+        staticText("Italic ✨")
       }
-
-      // Row 3: component styling — coloured borders and background fill
-      Row(Size.fixed(48, 9)) {
-        Column(Size.fixed(24, 9)) {
-          Text(
-            24,
-            3,
-            _.withBox(_.withBorderStyle(CellStyle(fg = Color.Red)))
-              .withContent(CellStyle(fg = Color.Red, bold = true))
-          )("🔴 Red — 红色")
-          Text(
-            24,
-            3,
-            _.withBox(_.withBorderStyle(CellStyle(fg = Color.Green)))
-              .withContent(CellStyle(fg = Color.Green, bold = true))
-          )("🟢 Green — 緑")
-          Text(
-            24,
-            3,
-            _.withBox(_.withBorderStyle(CellStyle(fg = Color.Blue)))
-              .withContent(CellStyle(fg = Color.Blue, bold = true))
-          )("🔵 Blue — 青色")
-        }
-        Text(
-          24,
-          9,
-          _.withBox(_.withBorderStyle(CellStyle(fg = Color.Yellow)))
-            .withContent(CellStyle(fg = Color.Yellow, bold = true))
-        )("Column on the left\nhas coloured\nborders.")
+      Text(Size.fixed(24, 3), _.withContent(_.withStrikethrough)) {
+        staticText("Strikethrough ❌")
       }
     }
 
-  Terminal.run {
-    program
-    Terminal.newline
+    // Row 2: underline variants and invert
+    Row(Size.fixed(72, 3)) {
+      Text(
+        Size.fixed(24, 3),
+        _.withContent(_.withUnderline(Underline.Straight))
+      ) {
+        staticText("Straight underline")
+      }
+      Text(Size.fixed(24, 3), _.withContent(_.withUnderline(Underline.Curly))) {
+        staticText("Curly underline")
+      }
+      Text(Size.fixed(24, 3), _.withContent(_.withInvert)) {
+        staticText("Inverted 🔄")
+      }
+    }
+
+    // Row 3: component styling — coloured borders and background fill
+    Row(Size.fixed(48, 9)) {
+      Column(Size.fixed(24, 9)) {
+        Text(
+          Size.fixed(24, 3),
+          _.withBox(_.withBorderStyle(CellStyle(fg = Color.Red)))
+            .withContent(CellStyle(fg = Color.Red, bold = true))
+        ) { staticText("🔴 Red — 红色") }
+        Text(
+          Size.fixed(24, 3),
+          _.withBox(_.withBorderStyle(CellStyle(fg = Color.Green)))
+            .withContent(CellStyle(fg = Color.Green, bold = true))
+        ) { staticText("🟢 Green — 緑") }
+        Text(
+          Size.fixed(24, 3),
+          _.withBox(_.withBorderStyle(CellStyle(fg = Color.Blue)))
+            .withContent(CellStyle(fg = Color.Blue, bold = true))
+        ) { staticText("🔵 Blue — 青色") }
+      }
+      Text(
+        Size.fixed(24, 9),
+        _.withBox(_.withBorderStyle(CellStyle(fg = Color.Yellow)))
+          .withContent(CellStyle(fg = Color.Yellow, bold = true))
+      ) { staticText("Column on the left\nhas coloured\nborders.") }
+    }
   }
 
-@main def interactiveDemo(): Unit =
-  val focusableBox = TextStyle.default
-    .withBox(
-      _.withBorderStyle(CellStyle(fg = Color.BrightBlack))
-    )
-    .withFocus(
-      _.withBox(_.withBorderStyle(CellStyle(fg = Color.White, bold = true)))
-    )
+  // FullScreen always runs the full interactive loop (alternate screen, raw
+  // mode, key-read loop) — there is no longer a render-once mode. Ctrl+Q quits.
+  fullScreen.run(NativeTerminal)
 
-  val program: FullScreen.InteractiveProgram[Unit] =
-    FullScreen.run { ctx ?=>
-      val countA = ctx.createSignal(0)
-      val countB = ctx.createSignal(0)
-
-      ctx.onKey(Key('q')) { ctx.stop() }
-      ctx.onKey(Key.controlC) { ctx.stop() }
-
-      Column(Size.fixed(50, 9)) {
-        Text(50, 3, _.withBox(_.withBorder(Border.empty)))(
-          "Tab to switch focus, ↑/↓ to change, q to quit"
-        )
-
-        FocusScope { ctx ?=>
-          ctx.onKey(Key.up) { countA.update(_ + 1) }
-          ctx.onKey(Key.down) { countA.update(_ - 1) }
-          Text(50, style = _ => focusableBox) {
-            val count = countA.get
-            val footer =
-              if count == 0 then ""
-              else if count < 0 then "\nNegative"
-              else "\nPositive"
-            s"Counter A: ${count}${footer}"
-          }
-        }
-
-        FocusScope { ctx ?=>
-          ctx.onKey(Key.up) { countB.update(_ + 1) }
-          ctx.onKey(Key.down) { countB.update(_ - 1) }
-          Text(50, style = _ => focusableBox) {
-            val count = countB.get
-            val footer =
-              if count == 0 then ""
-              else if count < 0 then "\nNegative"
-              else "\nPositive"
-            s"Counter B: ${count}${footer}"
-          }
-        }
-      }
-    }
-
-  Terminal.run(program)
+// TODO: port to the new component APIs. No longer blocked on FocusScope (not
+// needed — each component is independently focusable) or Runtime focus
+// registration (fixed). Just needs rewriting: the old ctx.createSignal/
+// ctx.onKey/ctx.stop() API doesn't exist; use Var for the counters and
+// register onKey directly in each Column's body (Event & Layout ?=> Unit),
+// which makes that Column focusable and part of the tab order.
+@main def interactiveDemo(): Unit = ???
 
 @main def textInputDemo(): Unit =
   val inputStyle = TextStyle.default
@@ -158,76 +118,28 @@ import terminus.ui.style.Underline
       _.withBox(_.withBorderStyle(CellStyle(fg = Color.White, bold = true)))
     )
 
-  val program: FullScreen.InteractiveProgram[Unit] =
-    FullScreen.run { ctx ?=>
-      val name = ctx.createSignal("")
-      val greeting = ctx.createSignal("")
+  val fullScreen = FullScreen {
+    val name = Var(text.Line(""))
 
-      ctx.onKey(Key('q')) { ctx.stop() }
-      ctx.onKey(Key.controlC) { ctx.stop() }
-      ctx.onKey(Key.enter) { greeting.set(name.peek) }
-      ctx.onKey(Key.newLine) { greeting.set(name.peek) }
-
-      Column(Size.fixed(50, 5)) {
-        Text(50, 1, _.withBox(_.withoutBorder))(
-          "Type a name and press Enter. q to quit."
-        )
-        FocusScope {
-          TextInput(50, name, inputStyle)
-        }
-        Text(50, style = _.withBox(_.withoutBorder)) {
-          val g = greeting.get
-          if g.isEmpty then "" else s"Hello, $g!"
+    Column(Size.fixed(50, 5)) {
+      Text(Size.fixed(50, 1), _.withBox(_.withoutBorder)) {
+        staticText("Type a name. Ctrl+Q to quit.")
+      }
+      TextInput(Size.fixed(50, 1), name, _ => inputStyle)
+      Text(Size.fixed(50, 1), _.withBox(_.withoutBorder)) {
+        Reactive {
+          val typed = name.get.value
+          text.Text(if typed.isEmpty then "" else s"Hello, $typed!")
         }
       }
     }
+  }
 
-  Terminal.run(program)
+  fullScreen.run(NativeTerminal)
 
-@main def selectDemo(): Unit =
-  val fruits = Vector(
-    "Apple",
-    "Banana",
-    "Cherry",
-    "Date",
-    "Elderberry",
-    "Fig",
-    "Grape",
-    "Honeydew",
-    "Kiwi",
-    "Lemon",
-    "Mango",
-    "Nectarine",
-    "Orange",
-    "Papaya",
-    "Quince"
-  )
-
-  val listStyle = TextStyle.default
-    .withBox(_.withBorderStyle(_.withForeground(Color.BrightBlack)))
-    .withFocus(
-      _.withBox(_.withBorderStyle(_.withForeground(Color.White).withBold))
-    )
-
-  val program: FullScreen.InteractiveProgram[Unit] =
-    FullScreen.run { ctx ?=>
-      val choice = ctx.createSignal(0)
-
-      ctx.onKey(Key('q')) { ctx.stop() }
-      ctx.onKey(Key.controlC) { ctx.stop() }
-
-      Column(Size.fixed(30, 10)) {
-        Text(30, 1, _.withBox(_.withoutBorder))("Pick a fruit. q to quit.")
-        FocusScope { _ ?=>
-          Select(30, 8, fruits, choice, listStyle)
-        }
-        Text(30, style = _.withBox(_.withoutBorder)) {
-          s"Selected: ${fruits(choice.get)}"
-        }
-      }
-    }
-
-  Terminal.run(program)
+// TODO: port to the new component APIs (Select already has apply — this one
+// is no longer blocked, just not yet rewritten).
+@main def selectDemo(): Unit = ???
 
 @main def terminalDimensionsDemo(): Unit =
   Terminal.run {

@@ -94,7 +94,7 @@ final class Computed[A](thunk: React ?=> A) extends Reactive[A], Listener:
   def peek: A =
     cachedValue
 
-  def value(using ctx: React): A =
+  def get(using ctx: React): A =
     ctx.stack.headOption.foreach { handle =>
       subscribers += handle
       handle.addUnsubscribe(Unsubscribe(handle, subscribers))

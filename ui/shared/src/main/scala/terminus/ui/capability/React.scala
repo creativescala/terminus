@@ -44,4 +44,5 @@ code, use signal.peek instead."""
 trait React:
   val stack: mutable.Stack[Listener]
 object React:
-  def empty: React = new React {}
+  def empty: React = new React:
+    val stack: mutable.Stack[Listener] = mutable.Stack.empty
