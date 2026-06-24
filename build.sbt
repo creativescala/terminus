@@ -80,9 +80,7 @@ lazy val commonSettings = Seq(
     munitScalaCheck.value
   ),
   startYear := Some(2024),
-  licenses := List(
-    "Apache-2.0" -> url("http://www.apache.org/licenses/LICENSE-2.0.txt")
-  )
+  licenses := Seq(License.Apache2)
 )
 
 lazy val root = tlCrossRootProject.aggregate(core, ui, unidocs)

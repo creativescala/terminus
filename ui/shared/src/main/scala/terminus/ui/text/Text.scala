@@ -38,7 +38,7 @@ object Text:
     val normalized = s.replace("\r\n", "\n").replace('\r', '\n')
     // limit -1 keeps trailing empty strings, so blank lines are preserved.
     // unsafe avoids sanitizing strings that are already sanitized
-    normalized.split("\n", -1).iterator.map(Line.unsafe).toVector
+    normalized.split("\n", -1).iterator.map(Line.apply).toVector
 
   extension (text: Text)
 
