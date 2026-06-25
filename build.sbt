@@ -33,15 +33,16 @@ ThisBuild / developers := List(
   tlGitHubDev("noelwelsh", "Noel Welsh")
 )
 
-lazy val scala3 = "3.3.4"
+lazy val scala3 = "3.8.4"
 
 ThisBuild / crossScalaVersions := List(scala3)
-ThisBuild / githubWorkflowJavaVersions := List(JavaSpec.temurin("11"))
+ThisBuild / githubWorkflowJavaVersions := List(JavaSpec.temurin("17"))
 ThisBuild / scalaVersion := scala3
 ThisBuild / useSuperShell := false
 ThisBuild / semanticdbEnabled := true
 ThisBuild / semanticdbVersion := scalafixSemanticdb.revision
 ThisBuild / tlSitePublishBranch := Some("main")
+ThisBuild / tlJdkRelease := Some(17)
 
 // Run this (build) to do everything involved in building the project
 commands += Command.command("build") { state =>
