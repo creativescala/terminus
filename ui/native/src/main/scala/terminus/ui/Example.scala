@@ -128,17 +128,17 @@ private def staticText(s: String) = Var(text.Text(s))
   val fullScreen = FullScreen {
     Column(Size.fixed(40, channels.size + 4)) {
       val events = summon[Event]
-      events.onKey(Key.left) {
+      events.onKey(Key.up) {
         selected.update(s => (s - 1 + channels.size) % channels.size)
       }
-      events.onKey(Key.right) {
+      events.onKey(Key.down) {
         selected.update(s => (s + 1) % channels.size)
       }
-      events.onKey(Key.up) {
+      events.onKey(Key.right) {
         val i = selected.peek
         levels.update(ls => ls.updated(i, (ls(i) + 1).min(maxLevel)))
       }
-      events.onKey(Key.down) {
+      events.onKey(Key.left) {
         val i = selected.peek
         levels.update(ls => ls.updated(i, (ls(i) - 1).max(0)))
       }
@@ -180,7 +180,7 @@ private def staticText(s: String) = Var(text.Text(s))
       }
 
       Text(Size.fixed(40, 1), _.withBox(_.withoutBorder)) {
-        staticText("←/→ pick · ↑/↓ adjust · Ctrl+Q quit")
+        staticText("←/→ adjust · ↑/↓ pick · Ctrl+Q quit")
       }
     }
   }
