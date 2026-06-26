@@ -64,7 +64,7 @@ commands += Command.command("build") { state =>
 
 val catsCore = Def.setting("org.typelevel" %%% "cats-core" % "2.13.0")
 
-val jline = Def.setting("org.jline" % "jline" % "4.0.12")
+val jline = Def.setting("org.jline" % "jline" % "4.2.1")
 
 val scalajsDom = Def.setting("org.scala-js" %%% "scalajs-dom" % "2.8.1")
 
