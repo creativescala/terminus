@@ -58,6 +58,18 @@ class Termios[T](using accessor: TermiosAccess[T]):
   def setRawMode(): Unit =
     Zone {
       val attrs = accessor.get
-      attrs.removeLocalFlags(posix.termios.ECHO | posix.termios.ICANON)
+      // Input flags: IXON disables XON/XOFF software flow control, so Ctrl-S
+      // (0x13) and Ctrl-Q (0x11) reach us as bytes instead of being eaten by
+      // the tty driver; ICRNL stops CR being translated to NL so Enter is
+      // reported as carriage return.
+      attrs.removeInputFlags(posix.termios.IXON | posix.termios.ICRNL)
+      // Local flags: ECHO/ICANON give us unbuffered, un-echoed input; ISIG
+      // delivers Ctrl-C/Z/\ as bytes rather than signals; IEXTEN disables
+      // implementation-defined input processing such as Ctrl-V/Ctrl-O.
+      // Output post-processing (OPOST) is intentionally left enabled.
+      attrs.removeLocalFlags(
+        posix.termios.ECHO | posix.termios.ICANON |
+          posix.termios.ISIG | posix.termios.IEXTEN
+      )
       accessor.set(attrs)
     }
