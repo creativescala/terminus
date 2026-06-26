@@ -46,8 +46,8 @@ import scala.collection.mutable
   */
 class ColumnSuite extends FunSuite:
 
-  /** A leaf component that records every bounds it is rendered into. Its natural
-    * size is the fixed cells on each axis (0 on a flexible axis).
+  /** A leaf component that records every bounds it is rendered into. Its
+    * natural size is the fixed cells on each axis (0 on a flexible axis).
     */
   final class Recorder(val size: Size) extends Component:
     val rects: mutable.ArrayBuffer[Rect] = mutable.ArrayBuffer.empty
@@ -298,7 +298,8 @@ class ColumnSuite extends FunSuite:
     val b = weight(1)
     val col = column(Size.fixed(1, 10))(a, b)
     val measured = col.measure(Constraint.tight(1, 10))
-    val rects = renderRects(col, Rect(0, 0, measured.width, measured.height), a, b)
+    val rects =
+      renderRects(col, Rect(0, 0, measured.width, measured.height), a, b)
     assertEquals(measured.height, 10)
     assertEquals(rects.map(_.height).sum, 10)
     assertWithin(Rect(0, 0, measured.width, measured.height), rects)

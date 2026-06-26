@@ -125,7 +125,9 @@ final class Row(
       // advances by the child's full slot so the others stay correctly placed.
       val clampedWidth = w.min((bounds.right - x).max(0))
       if clampedWidth > 0 then
-        val h = child.measure(childCrossConstraint(clampedWidth, bounds.height)).height
+        val h = child
+          .measure(childCrossConstraint(clampedWidth, bounds.height))
+          .height
         val y = layoutStyle.align match
           case Align.Stretch => bounds.y
           case Align.Start   => bounds.y

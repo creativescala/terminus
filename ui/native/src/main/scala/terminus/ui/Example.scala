@@ -17,7 +17,6 @@
 package terminus.ui
 
 import terminus.NativeTerminal
-import terminus.Terminal
 import terminus.ui.component.Column
 import terminus.ui.component.Row
 import terminus.ui.component.Text
