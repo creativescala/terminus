@@ -16,7 +16,9 @@
 
 package terminus.ui
 
+import terminus.Key
 import terminus.NativeTerminal
+import terminus.ui.capability.Event
 import terminus.ui.component.Column
 import terminus.ui.component.Row
 import terminus.ui.component.Text
@@ -101,13 +103,89 @@ private def staticText(s: String) = Var(text.Text(s))
   // mode, key-read loop) — there is no longer a render-once mode. Ctrl+Q quits.
   fullScreen.run(NativeTerminal)
 
-// TODO: port to the new component APIs. No longer blocked on FocusScope (not
-// needed — each component is independently focusable) or Runtime focus
-// registration (fixed). Just needs rewriting: the old ctx.createSignal/
-// ctx.onKey/ctx.stop() API doesn't exist; use Var for the counters and
-// register onKey directly in each Column's body (Event & Layout ?=> Unit),
-// which makes that Column focusable and part of the tab order.
-@main def interactiveDemo(): Unit = ???
+/** A little graphic equalizer, showing off reactive content and the layout
+  * system. The arrow keys mutate plain [[Var]]s; each bar is a [[Text]] whose
+  * content is a [[Reactive]] derived from those Vars, so it redraws itself when
+  * they change. The whole screen is a single focusable [[Column]] that owns the
+  * key handling — registering `onKey` in its body makes it focusable, and as
+  * the only focusable element it receives keys immediately.
+  */
+@main def interactiveDemo(): Unit =
+  val maxLevel = 16
+  val channels = Vector(
+    "Bass" -> Color.Red,
+    "Low-Mid" -> Color.Yellow,
+    "Mid" -> Color.Green,
+    "High-Mid" -> Color.Cyan,
+    "Treble" -> Color.Magenta
+  )
+
+  // levels(i) is the height of channel i's bar; selected is the channel the
+  // arrow keys currently act on.
+  val levels = Var(Vector.fill(channels.size)(maxLevel / 2))
+  val selected = Var(0)
+
+  val fullScreen = FullScreen {
+    Column(Size.fixed(40, channels.size + 4)) {
+      val events = summon[Event]
+      events.onKey(Key.left) {
+        selected.update(s => (s - 1 + channels.size) % channels.size)
+      }
+      events.onKey(Key.right) {
+        selected.update(s => (s + 1) % channels.size)
+      }
+      events.onKey(Key.up) {
+        val i = selected.peek
+        levels.update(ls => ls.updated(i, (ls(i) + 1).min(maxLevel)))
+      }
+      events.onKey(Key.down) {
+        val i = selected.peek
+        levels.update(ls => ls.updated(i, (ls(i) - 1).max(0)))
+      }
+
+      Text(
+        Size.fixed(40, 1),
+        _.withBox(_.withoutBorder).withContent(_.withBold)
+      ) {
+        staticText("🎛  Equalizer")
+      }
+
+      channels.zipWithIndex.foreach { case ((name, colour), i) =>
+        Row(Size.fixed(40, 1)) {
+          // Channel name, with a marker on the selected channel.
+          Text(Size.fixed(12, 1), _.withBox(_.withoutBorder)) {
+            Reactive {
+              val marker = if selected.get == i then "▶ " else "  "
+              text.Text(marker + name)
+            }
+          }
+          // The bar itself: filled blocks up to the level, light shade beyond.
+          Text(
+            Size.fixed(maxLevel, 1),
+            _.withBox(_.withoutBorder).withContent(CellStyle(fg = colour))
+          ) {
+            Reactive {
+              val n = levels.get.apply(i)
+              text.Text(("█" * n) + ("░" * (maxLevel - n)))
+            }
+          }
+          // Numeric value.
+          Text(Size.fixed(4, 1), _.withBox(_.withoutBorder)) {
+            Reactive {
+              val n = levels.get.apply(i)
+              text.Text(f" $n%2d")
+            }
+          }
+        }
+      }
+
+      Text(Size.fixed(40, 1), _.withBox(_.withoutBorder)) {
+        staticText("←/→ pick · ↑/↓ adjust · Ctrl+Q quit")
+      }
+    }
+  }
+
+  fullScreen.run(NativeTerminal)
 
 @main def textInputDemo(): Unit =
   val inputStyle = TextStyle.default
