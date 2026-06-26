@@ -124,7 +124,7 @@ private def staticText(s: String) = Var(text.Text(s))
       Text(Size.fixed(50, 1), _.withBox(_.withoutBorder)) {
         staticText("Type a name. Ctrl+Q to quit.")
       }
-      TextInput(Size.fixed(50, 1), name, _ => inputStyle)
+      TextInput(Size.fixed(50, 1), _ => inputStyle, name)
       Text(Size.fixed(50, 1), _.withBox(_.withoutBorder)) {
         Reactive {
           val typed = name.get.value

@@ -190,9 +190,9 @@ object Select:
     */
   def apply[A](
       size: Size,
+      style: TextStyle => TextStyle = identity,
       items: Seq[A],
       selected: Var[Int],
-      style: TextStyle => TextStyle = identity,
       label: A => String = (a: A) => a.toString
   )(using ctx: Layout): Unit =
     ctx.addComponent { runtime =>

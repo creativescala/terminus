@@ -188,8 +188,8 @@ final class TextInput(
 object TextInput:
   def apply(
       size: Size,
-      value: Var[Line],
-      style: TextStyle => TextStyle = identity
+      style: TextStyle => TextStyle = identity,
+      value: Var[Line]
   )(using ctx: Layout): Unit =
     ctx.addComponent { runtime =>
       val focusId = FocusId.next
