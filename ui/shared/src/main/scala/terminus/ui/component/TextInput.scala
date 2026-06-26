@@ -100,13 +100,13 @@ final class TextInput(
     ()
 
   def measure(constraint: Constraint): Dimensions =
-    val l = value.peek
+    val line = value.peek
     val insets = activeBoxStyle.insets
     // The constraint we were given is for the whole box; shrink it to the space
     // available to the text content.
     val inner = insets.deflate(constraint)
 
-    val naturalWidth = l.width
+    val naturalWidth = line.width
     val targetWidth =
       size.width match
         case Measurement.Fixed(cells) => cells - insets.horizontal

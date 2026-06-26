@@ -74,11 +74,12 @@ object Line:
         line.substring(0, pos) ++ line.substring(pos + 1)
       else line
 
-    /** Insert the character at the given position. If the position is outside
-      * the Line the current Line is returned unchanged.
+    /** Insert the character at the given position. `pos == length` appends to
+      * the end of the Line. If the position is outside the Line the current
+      * Line is returned unchanged.
       */
     def insert(pos: Int, c: Char): Line =
-      if pos >= 0 && pos < line.length then
+      if pos >= 0 && pos <= line.length then
         line.substring(0, pos) ++ c.toString ++ line.substring(pos)
       else line
 

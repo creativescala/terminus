@@ -124,7 +124,7 @@ private def staticText(s: String) = Var(text.Text(s))
       Text(Size.fixed(50, 1), _.withBox(_.withoutBorder)) {
         staticText("Type a name. Ctrl+Q to quit.")
       }
-      TextInput(Size.fixed(50, 1), _ => inputStyle, name)
+      TextInput(Size.fixed(50, 3), _ => inputStyle, name)
       Text(Size.fixed(50, 1), _.withBox(_.withoutBorder)) {
         Reactive {
           val typed = name.get.value
@@ -139,10 +139,3 @@ private def staticText(s: String) = Var(text.Text(s))
 // TODO: port to the new component APIs (Select already has apply — this one
 // is no longer blocked, just not yet rewritten).
 @main def selectDemo(): Unit = ???
-
-@main def terminalDimensionsDemo(): Unit =
-  Terminal.run {
-    val dimensions = Terminal.dimensions.get
-    Terminal.write(s"Dimensions: $dimensions\n")
-    Terminal.flush()
-  }

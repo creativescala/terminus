@@ -119,13 +119,19 @@ final class Column(
 
     var y = bounds.y + startOffset
     children.zip(mainHeights).foreach { (child, h) =>
-      val w = child.measure(childCrossConstraint(h, bounds.width)).width
-      val x = layoutStyle.align match
-        case Align.Stretch => bounds.x
-        case Align.Start   => bounds.x
-        case Align.End     => bounds.x + bounds.width - w
-        case Align.Center  => bounds.x + (bounds.width - w) / 2
-      child.render(Rect(x, y, w, h), buf)
+      // Clamp to the space remaining in the column: a child must never be drawn
+      // past bounds.bottom, or it lands on whatever sits below the column (for a
+      // nested column, that is a sibling in the enclosing layout). `y` still
+      // advances by the child's full slot so the others stay correctly placed.
+      val clampedHeight = h.min((bounds.bottom - y).max(0))
+      if clampedHeight > 0 then
+        val w = child.measure(childCrossConstraint(clampedHeight, bounds.width)).width
+        val x = layoutStyle.align match
+          case Align.Stretch => bounds.x
+          case Align.Start   => bounds.x
+          case Align.End     => bounds.x + bounds.width - w
+          case Align.Center  => bounds.x + (bounds.width - w) / 2
+        child.render(Rect(x, y, w, clampedHeight), buf)
       y += h + gap
     }
 

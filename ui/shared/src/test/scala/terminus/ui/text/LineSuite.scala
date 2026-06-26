@@ -197,4 +197,94 @@ class LineSuite extends FunSuite:
     assertEquals(reflow("anything goes", 0), Seq("anything goes"))
   }
 
+  // ---------------------------------------------------------------------------
+  // apply / length — character indexing (not display cells)
+  // ---------------------------------------------------------------------------
+
+  test("apply returns the character at an index") {
+    assertEquals(Line("abc")(0), 'a')
+    assertEquals(Line("abc")(2), 'c')
+  }
+
+  test("length counts characters, not display cells") {
+    // "漢字" is 2 characters but 4 cells (see width tests above).
+    assertEquals(Line("漢字").length, 2)
+    assertEquals(Line("漢字").width, 4)
+  }
+
+  test("length of the empty line is zero") {
+    assertEquals(Line("").length, 0)
+  }
+
+  // ---------------------------------------------------------------------------
+  // substring
+  // ---------------------------------------------------------------------------
+
+  test("substring returns the requested character range") {
+    assertEquals(Line("hello").substring(1, 4).value, "ell")
+  }
+
+  test("substring of an empty range is the empty line") {
+    assertEquals(Line("hello").substring(2, 2).value, "")
+  }
+
+  test("substring covering the whole line returns the whole line") {
+    assertEquals(Line("hello").substring(0, 5).value, "hello")
+  }
+
+  // ---------------------------------------------------------------------------
+  // delete
+  // ---------------------------------------------------------------------------
+
+  test("delete removes the character at a position") {
+    assertEquals(Line("abc").delete(1).value, "ac")
+  }
+
+  test("delete at the first position removes the first character") {
+    assertEquals(Line("abc").delete(0).value, "bc")
+  }
+
+  test("delete at the last position removes the last character") {
+    assertEquals(Line("abc").delete(2).value, "ab")
+  }
+
+  test("delete at the length (past the end) leaves the line unchanged") {
+    assertEquals(Line("abc").delete(3).value, "abc")
+  }
+
+  test("delete at a negative position leaves the line unchanged") {
+    assertEquals(Line("abc").delete(-1).value, "abc")
+  }
+
+  // ---------------------------------------------------------------------------
+  // insert
+  // ---------------------------------------------------------------------------
+
+  test("insert places a character in the middle") {
+    assertEquals(Line("ac").insert(1, 'b').value, "abc")
+  }
+
+  test("insert at the start prepends a character") {
+    assertEquals(Line("bc").insert(0, 'a').value, "abc")
+  }
+
+  test("insert at the length appends a character") {
+    // Appending at the end is the common text-input case: the cursor sits at
+    // position == length, and inserting there must extend the line.
+    assertEquals(Line("ab").insert(2, 'c').value, "abc")
+  }
+
+  test("insert into an empty line at position 0 yields a one-character line") {
+    // The first keystroke in an empty TextInput: cursor at 0, length 0.
+    assertEquals(Line("").insert(0, 'x').value, "x")
+  }
+
+  test("insert past the end (beyond the length) leaves the line unchanged") {
+    assertEquals(Line("ab").insert(3, 'c').value, "ab")
+  }
+
+  test("insert at a negative position leaves the line unchanged") {
+    assertEquals(Line("ab").insert(-1, 'c').value, "ab")
+  }
+
 end LineSuite

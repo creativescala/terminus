@@ -119,13 +119,19 @@ final class Row(
 
     var x = bounds.x + startOffset
     children.zip(mainWidths).foreach { (child, w) =>
-      val h = child.measure(childCrossConstraint(w, bounds.height)).height
-      val y = layoutStyle.align match
-        case Align.Stretch => bounds.y
-        case Align.Start   => bounds.y
-        case Align.End     => bounds.y + bounds.height - h
-        case Align.Center  => bounds.y + (bounds.height - h) / 2
-      child.render(Rect(x, y, w, h), buf)
+      // Clamp to the space remaining in the row: a child must never be drawn
+      // past bounds.right, or it lands on whatever sits beside the row (for a
+      // nested row, that is a sibling in the enclosing layout). `x` still
+      // advances by the child's full slot so the others stay correctly placed.
+      val clampedWidth = w.min((bounds.right - x).max(0))
+      if clampedWidth > 0 then
+        val h = child.measure(childCrossConstraint(clampedWidth, bounds.height)).height
+        val y = layoutStyle.align match
+          case Align.Stretch => bounds.y
+          case Align.Start   => bounds.y
+          case Align.End     => bounds.y + bounds.height - h
+          case Align.Center  => bounds.y + (bounds.height - h) / 2
+        child.render(Rect(x, y, clampedWidth, h), buf)
       x += w + gap
     }
 
