@@ -64,7 +64,7 @@ class JLineTerminal(terminal: JTerminal) extends Terminal, TerminalKeyReader:
     TerminalDimensions(size.getColumns, size.getRows)
 
   def setDimensions(dimensions: TerminalDimensions): Unit =
-    terminal.setSize(Size(dimensions.columns, dimensions.rows))
+    terminal.setSize(Size.of(dimensions.columns, dimensions.rows))
 
   def application[A](f: () => A): A =
     try
