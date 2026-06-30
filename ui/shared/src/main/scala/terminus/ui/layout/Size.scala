@@ -16,7 +16,7 @@
 
 package terminus.ui.layout
 
-/** The layout size of a component: a constraint for each axis.
+/** The layout size of a component: a measurement for each axis.
   *
   * For components with a known fixed size use [[Size.fixed]]. Other
   * measurements are resolved by the layout algorithm at render time.
