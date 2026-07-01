@@ -118,10 +118,13 @@ final class Text(
           value.peek.reflow((w - insets.horizontal).max(0)).length
     lineCount + insets.vertical
 
-  def render(bounds: Rect, buf: Buffer): Unit =
+  def render(dimensions: Dimensions, buf: Buffer): Unit =
     val ab = activeBoxStyle
     val ac = activeContentStyle
 
+    // The component draws from its own origin; the incoming buffer is already a
+    // view clipped to this component's slot.
+    val bounds = Rect(0, 0, dimensions.width, dimensions.height)
     Box.render(bounds, ab, buf)
     val inner = Box.innerRect(bounds, ab)
 

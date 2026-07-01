@@ -99,10 +99,11 @@ final class Row(
   def maxIntrinsicHeight(width: Int | Infinity): Int =
     context.components.map(_.maxIntrinsicHeight(width)).maxOption.getOrElse(0)
 
-  def render(bounds: Rect, buf: Buffer): Unit =
+  def render(dimensions: Dimensions, buf: Buffer): Unit =
     val children = context.components
-    val mainWidths = resolveMainAxis(children, bounds.width, bounds.height)
-    val freeSpace = (bounds.width - mainWidths.sum).max(0)
+    val mainWidths =
+      resolveMainAxis(children, dimensions.width, dimensions.height)
+    val freeSpace = (dimensions.width - mainWidths.sum).max(0)
     val n = children.size
 
     val (startOffset, gap) = layoutStyle.justify match
@@ -117,23 +118,20 @@ final class Row(
         val space = if n > 0 then freeSpace / (n + 1) else 0
         (space, space)
 
-    var x = bounds.x + startOffset
+    var x = startOffset
     children.zip(mainWidths).foreach { (child, w) =>
-      // Clamp to the space remaining in the row: a child must never be drawn
-      // past bounds.right, or it lands on whatever sits beside the row (for a
-      // nested row, that is a sibling in the enclosing layout). `x` still
-      // advances by the child's full slot so the others stay correctly placed.
-      val clampedWidth = w.min((bounds.right - x).max(0))
-      if clampedWidth > 0 then
-        val h = child
-          .measure(childCrossConstraint(clampedWidth, bounds.height))
-          .height
+      if w > 0 then
+        val h = child.measure(childCrossConstraint(w, dimensions.height)).height
         val y = layoutStyle.align match
-          case Align.Stretch => bounds.y
-          case Align.Start   => bounds.y
-          case Align.End     => bounds.y + bounds.height - h
-          case Align.Center  => bounds.y + (bounds.height - h) / 2
-        child.render(Rect(x, y, clampedWidth, h), buf)
+          case Align.Stretch => 0
+          case Align.Start   => 0
+          case Align.End     => dimensions.height - h
+          case Align.Center  => (dimensions.height - h) / 2
+        // The child renders from its own origin into a view clipped to its
+        // slot; anything past the row's bounds is discarded by the view rather
+        // than spilling onto whatever sits beside it. `x` still advances by the
+        // full slot so the remaining children stay correctly placed.
+        child.render(Dimensions(w, h), buf.view(Rect(x, y, w, h)))
       x += w + gap
     }
 
@@ -155,9 +153,14 @@ final class Row(
       case Measurement.MinIntrinsic => child.minIntrinsicWidth(crossExtent)
       case Measurement.Percentage(_) | Measurement.Weight(_) => 0
 
-  /** Allocate `available` cells across `children` along the main axis: fixed
-    * (and intrinsically-sized) children first, then percentage children split
-    * what's left, then weighted children split whatever remains after that.
+  /** Allocate `available` cells across `children` along the main axis in three
+    * phases against a shrinking pool: fixed (and intrinsically-sized) children
+    * take their natural widths first; then percentage children each take their
+    * fraction of what's left (an absolute share of that pool, so they may leave
+    * a gap, and are scaled down to fit if they oversubscribe it); then weighted
+    * children split whatever remains after that as relative shares. Percentages
+    * are thus fractions of the *remaining* space, not of `available` — see
+    * [[Measurement.Percentage]].
     */
   private def resolveMainAxis(
       children: Seq[Component],
@@ -167,11 +170,21 @@ final class Row(
     val phase1 = children.map(nonFlexibleWidth(_, crossExtent))
     val afterFixed = (available - phase1.sum).max(0)
 
-    val phase2 = children.map { child =>
+    // Percentage children draw from what's left after fixed/intrinsic children.
+    // When their shares sum to no more than the available pool they take their
+    // literal percentages, leaving the remainder for weighted children. When
+    // they oversubscribe (sum > 100% of the pool) we scale them down to fit
+    // exactly, so no child is clipped and none falls off the row's edge; there
+    // is no remainder in that case, so weighted children get nothing.
+    val rawPercentage = children.map { child =>
       child.size.width match
-        case Measurement.Percentage(p) => (afterFixed * p).toInt
-        case _                         => 0
+        case Measurement.Percentage(p) => afterFixed * p
+        case _                         => 0.0
     }
+    val percentageSum = rawPercentage.sum
+    val percentageScale =
+      if percentageSum > afterFixed then afterFixed / percentageSum else 1.0
+    val phase2 = rawPercentage.map(px => (px * percentageScale).toInt)
     val afterPercentage = (afterFixed - phase2.sum).max(0)
 
     val totalWeight = children.map { child =>

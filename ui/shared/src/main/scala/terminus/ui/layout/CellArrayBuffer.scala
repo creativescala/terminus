@@ -34,8 +34,13 @@ final class CellArrayBuffer(val width: Int, val height: Int) extends Buffer:
     if x >= 0 && x < width && y >= 0 && y < height then
       cells(y * width + x) = cell
 
+  /** Read the cell at (x, y). Out-of-bounds reads return [[Cell.empty]]. */
+  def get(x: Int, y: Int): Cell =
+    if x >= 0 && x < width && y >= 0 && y < height then cells(y * width + x)
+    else Cell.empty
+
   /** Fill a rectangular region with a cell. Clips to buffer bounds. */
-  def fill(rect: Rect, cell: Cell): Unit =
+  override def fill(rect: Rect, cell: Cell): Unit =
     val x0 = rect.x.max(0)
     val y0 = rect.y.max(0)
     val x1 = rect.right.min(width)
@@ -58,7 +63,7 @@ final class CellArrayBuffer(val width: Int, val height: Int) extends Buffer:
     * marks, variation selectors, ZWJ) are skipped; full grapheme cluster
     * composition is not currently supported. Clips to buffer bounds.
     */
-  def putLine(x: Int, y: Int, l: Line, style: CellStyle): Unit =
+  override def putLine(x: Int, y: Int, l: Line, style: CellStyle): Unit =
     val s = l.value
     var col = x
     var i = 0

@@ -21,11 +21,31 @@ import terminus.ui.text.Line
 
 /** Represents a writable two-dimensional array of [[Cell]]. */
 trait Buffer:
-  /** Write a single cell at (x, y). Out-of-bounds writes are ignored. */
+  /** Write a single cell at (x, y). Out-of-bounds writes are ignored.
+    *
+    * This is the primitive from which [[fill]] and [[putLine]] are built: any
+    * clipping and coordinate translation a Buffer performs (see [[view]]) lives
+    * here, and the higher-level operations inherit it automatically.
+    */
   def put(x: Int, y: Int, cell: Cell): Unit
 
-  /** Fill a rectangular region with a cell. Clips to buffer bounds. */
-  def fill(rect: Rect, cell: Cell): Unit
+  /** Fill a rectangular region with a cell. Clips to buffer bounds.
+    *
+    * Defined in terms of [[put]] so it inherits the same clipping and
+    * translation. Implementations may override for efficiency but must preserve
+    * these semantics.
+    */
+  def fill(rect: Rect, cell: Cell): Unit =
+    var y = rect.y.max(0)
+    val yEnd = rect.bottom
+    val xStart = rect.x.max(0)
+    val xEnd = rect.right
+    while y < yEnd do
+      var x = xStart
+      while x < xEnd do
+        put(x, y, cell)
+        x += 1
+      y += 1
 
   /** Write a [[terminus.ui.text.Line]] starting at (x, y).
     *
@@ -35,15 +55,38 @@ trait Buffer:
     * left cell holds the character and the right cell holds
     * [[Cell.continuation]] as a sentinel. Zero-width code points (combining
     * marks, variation selectors, ZWJ) are skipped; full grapheme cluster
-    * composition is not currently supported. Clips to buffer bounds.
+    * composition is not currently supported.
+    *
+    * Defined in terms of [[put]] so it inherits the same clipping and
+    * translation. Implementations may override for efficiency but must preserve
+    * these semantics.
     */
-  def putLine(x: Int, y: Int, l: Line, style: CellStyle): Unit
+  def putLine(x: Int, y: Int, l: Line, style: CellStyle): Unit =
+    val s = l.value
+    var col = x
+    var i = 0
+    val stop = s.length
+    while i < stop do
+      val cp = Character.codePointAt(s, i)
+      i += Character.charCount(cp)
+      CharWidth.of(cp) match
+        case 0 => () // zero-width: skip
+        case 1 =>
+          put(col, y, Cell(cp, style))
+          col += 1
+        case _ => // 2
+          put(col, y, Cell(cp, style))
+          put(col + 1, y, Cell.continuation)
+          col += 2
 
-  /** Construct a Buffer that writes to the same place as this Buffer, but
-    * restricts writes to [[rect]]. Additionally, the returned Buffer resets the
-    * coordinate system so that write to the origin write to the top-left corner
-    * of [[rect]]. The returned Buffer truncates to the bounds of the underlying
-    * Buffer, so writes to any parts of [[rect]] that are outside those bounds
-    * will be silently ignored.
+  /** Construct a Buffer that writes through to this Buffer, but restricts
+    * writes to [[rect]] and resets the coordinate system so that a write to the
+    * origin lands at the top-left corner of [[rect]].
+    *
+    * Writes outside `rect` (local coordinates outside `[0, rect.width) × [0,
+    * rect.height)`) are ignored, so a component drawn through the view cannot
+    * spill onto whatever sits beside it. Views compose: taking a view of a view
+    * clips against both rectangles, and writes are ultimately truncated to the
+    * bounds of the underlying Buffer.
     */
   def view(rect: Rect): Buffer

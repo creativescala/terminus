@@ -20,6 +20,16 @@ import terminus.ui.capability.React
 
 /** A component is something that can be rendered to the terminal and
   * participates in layout.
+  *
+  * The protocol for calling the methods on Component is:
+  *
+  *   - Methods are only called once per rendering loop, except size and the
+  *     intrinsic methods which may be called multiple times.
+  *   - Methods are called in the order:
+  *     - react, which indicates the start of a rendering loop
+  *     - size (intrinsic methods may also be called here)
+  *     - measure (intrinsic methods may also be called here)
+  *     - render
   */
 trait Component:
   /** Called at the started of a rendering pass, this is the signal to a
@@ -54,5 +64,7 @@ trait Component:
   /** Height beyond which the component would not grow, given a width. */
   def maxIntrinsicHeight(width: Int | Infinity): Int
 
-  /** Draw the component to the Buffer within the given Rect. */
-  def render(bounds: Rect, buf: Buffer): Unit
+  /** Draw the component to the Buffer with the given Dimensions. The component
+    * should always start at (0, 0).
+    */
+  def render(dimensions: Dimensions, buf: Buffer): Unit

@@ -99,10 +99,11 @@ final class Column(
   def maxIntrinsicHeight(width: Int | Infinity): Int =
     context.components.map(_.maxIntrinsicHeight(width)).sum
 
-  def render(bounds: Rect, buf: Buffer): Unit =
+  def render(dimensions: Dimensions, buf: Buffer): Unit =
     val children = context.components
-    val mainHeights = resolveMainAxis(children, bounds.height, bounds.width)
-    val freeSpace = (bounds.height - mainHeights.sum).max(0)
+    val mainHeights =
+      resolveMainAxis(children, dimensions.height, dimensions.width)
+    val freeSpace = (dimensions.height - mainHeights.sum).max(0)
     val n = children.size
 
     val (startOffset, gap) = layoutStyle.justify match
@@ -117,22 +118,20 @@ final class Column(
         val space = if n > 0 then freeSpace / (n + 1) else 0
         (space, space)
 
-    var y = bounds.y + startOffset
+    var y = startOffset
     children.zip(mainHeights).foreach { (child, h) =>
-      // Clamp to the space remaining in the column: a child must never be drawn
-      // past bounds.bottom, or it lands on whatever sits below the column (for a
-      // nested column, that is a sibling in the enclosing layout). `y` still
-      // advances by the child's full slot so the others stay correctly placed.
-      val clampedHeight = h.min((bounds.bottom - y).max(0))
-      if clampedHeight > 0 then
-        val w =
-          child.measure(childCrossConstraint(clampedHeight, bounds.width)).width
+      if h > 0 then
+        val w = child.measure(childCrossConstraint(h, dimensions.width)).width
         val x = layoutStyle.align match
-          case Align.Stretch => bounds.x
-          case Align.Start   => bounds.x
-          case Align.End     => bounds.x + bounds.width - w
-          case Align.Center  => bounds.x + (bounds.width - w) / 2
-        child.render(Rect(x, y, w, clampedHeight), buf)
+          case Align.Stretch => 0
+          case Align.Start   => 0
+          case Align.End     => dimensions.width - w
+          case Align.Center  => (dimensions.width - w) / 2
+        // The child renders from its own origin into a view clipped to its
+        // slot; anything past the column's bounds is discarded by the view
+        // rather than spilling onto whatever sits below. `y` still advances by
+        // the full slot so the remaining children stay correctly placed.
+        child.render(Dimensions(w, h), buf.view(Rect(x, y, w, h)))
       y += h + gap
     }
 
@@ -166,11 +165,21 @@ final class Column(
     val phase1 = children.map(nonFlexibleHeight(_, crossExtent))
     val afterFixed = (available - phase1.sum).max(0)
 
-    val phase2 = children.map { child =>
+    // Percentage children draw from what's left after fixed/intrinsic children.
+    // When their shares sum to no more than the available pool they take their
+    // literal percentages, leaving the remainder for weighted children. When
+    // they oversubscribe (sum > 100% of the pool) we scale them down to fit
+    // exactly, so no child is clipped and none falls past the column's edge;
+    // there is no remainder in that case, so weighted children get nothing.
+    val rawPercentage = children.map { child =>
       child.size.height match
-        case Measurement.Percentage(p) => (afterFixed * p).toInt
-        case _                         => 0
+        case Measurement.Percentage(p) => afterFixed * p
+        case _                         => 0.0
     }
+    val percentageSum = rawPercentage.sum
+    val percentageScale =
+      if percentageSum > afterFixed then afterFixed / percentageSum else 1.0
+    val phase2 = rawPercentage.map(px => (px * percentageScale).toInt)
     val afterPercentage = (afterFixed - phase2.sum).max(0)
 
     val totalWeight = children.map { child =>

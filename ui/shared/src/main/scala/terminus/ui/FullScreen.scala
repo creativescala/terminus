@@ -33,7 +33,6 @@ import terminus.ui.layout.CellArrayBuffer
 import terminus.ui.layout.Constraint
 import terminus.ui.layout.DefaultLayout
 import terminus.ui.layout.Measurement
-import terminus.ui.layout.Rect
 import terminus.ui.layout.Size
 import terminus.ui.react.DefaultReact
 import terminus.ui.runtime.Runtime
@@ -50,10 +49,7 @@ class FullScreen(runtime: Runtime, column: Column):
     val constraint = Constraint.tight(terminalSize.columns, terminalSize.rows)
     val contentDimensions = column.measure(constraint)
     val buf = CellArrayBuffer(contentDimensions.width, contentDimensions.height)
-    column.render(
-      Rect(0, 0, contentDimensions.width, contentDimensions.height),
-      buf
-    )
+    column.render(contentDimensions, buf)
     buf
 
   def run(terminal: FullScreen.InteractiveTerminal): Unit =

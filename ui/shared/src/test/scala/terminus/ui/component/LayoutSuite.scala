@@ -61,7 +61,10 @@ class LayoutSuite extends FunSuite:
       def maxIntrinsicWidth(height: Int | Infinity): Int = natWidth
       def minIntrinsicHeight(width: Int | Infinity): Int = natHeight
       def maxIntrinsicHeight(width: Int | Infinity): Int = natHeight
-      def render(bounds: Rect, buf: Buffer): Unit = draw(bounds, buf)
+      def render(dimensions: Dimensions, buf: Buffer): Unit =
+        // The component draws from its own origin into the view it is given, so
+        // the bounds handed to `draw` are anchored at (0, 0).
+        draw(Rect(0, 0, dimensions.width, dimensions.height), buf)
 
   /** A minimal component that writes a single character at its origin. */
   def cell(char: Char, width: Int = 1, height: Int = 1): Component =
@@ -111,7 +114,7 @@ class LayoutSuite extends FunSuite:
     */
   def renderToString(component: Component, width: Int, height: Int): String =
     val buf = CellArrayBuffer(width, height)
-    component.render(Rect(0, 0, width, height), buf)
+    component.render(Dimensions(width, height), buf)
     val t = StringBuilderTerminal()
     buf.render(using t)
     t.result()

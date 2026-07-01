@@ -24,7 +24,20 @@ enum Measurement:
   /** Exactly `cells` */
   case Fixed(cells: Int)
 
-  /** A fraction of the parent container's size on this axis (0.0–1.0). */
+  /** A fraction (0.0–1.0) of the *remaining* space on this axis — what is left
+    * after fixed and intrinsically-sized children have been placed — not a
+    * fraction of the parent's total size. So `Fixed(10)` beside two
+    * `Percentage(0.5)` children yields the fixed 10 cells and an even split of
+    * everything else, and this is why `Fixed(10) + Percentage(0.5) +
+    * Percentage(0.5)` fits rather than overflowing (contrast CSS, where `width:
+    * 50%` is a fraction of the container and the two would overflow).
+    *
+    * Unlike [[Weight]], a percentage is an absolute share of that remaining
+    * pool: it can under-fill, leaving a genuine gap. A lone `Percentage(0.3)`
+    * occupies 30% and leaves 70% empty, whereas a lone [[Weight]] always fills
+    * the pool. Percentages that together oversubscribe the pool (sum > 100%)
+    * are scaled down proportionally to fit, so no child is clipped.
+    */
   case Percentage(percent: Double)
 
   /** A proportional share of the parent's remaining space after fixed and
