@@ -112,13 +112,22 @@ private def staticText(s: String) = Var(text.Text(s))
   */
 @main def interactiveDemo(): Unit =
   val maxLevel = 16
-  val channels = Vector(
-    "Bass" -> Color.Red,
-    "Low-Mid" -> Color.Yellow,
-    "Mid" -> Color.Green,
-    "High-Mid" -> Color.Cyan,
-    "Treble" -> Color.Magenta
+  // A warm-to-cool spectrum across the frequency bands, using 24-bit colours.
+  val channels: Vector[(String, Color.Rgb)] = Vector(
+    "Bass" -> Color.Rgb(255, 59, 48),
+    "Low-Mid" -> Color.Rgb(255, 149, 0),
+    "Mid" -> Color.Rgb(52, 199, 89),
+    "High-Mid" -> Color.Rgb(50, 173, 230),
+    "Treble" -> Color.Rgb(175, 82, 222)
   )
+
+  // Interpolate cell `j` of a bar from a dim version of the channel colour (at
+  // the left) to full brightness (at the right), giving each bar a smooth
+  // 24-bit gradient along its length.
+  def shade(base: Color.Rgb, j: Int): Color.Rgb =
+    val t = if maxLevel <= 1 then 1.0 else j.toDouble / (maxLevel - 1)
+    def lerp(channel: Int): Int = ((channel * (0.25 + 0.75 * t)).round).toInt
+    Color.Rgb(lerp(base.r), lerp(base.g), lerp(base.b))
 
   // levels(i) is the height of channel i's bar; selected is the channel the
   // arrow keys currently act on.
@@ -159,14 +168,22 @@ private def staticText(s: String) = Var(text.Text(s))
               text.Text(marker + name)
             }
           }
-          // The bar itself: filled blocks up to the level, light shade beyond.
-          Text(
-            Size.fixed(maxLevel, 1),
-            _.withBox(_.withoutBorder).withContent(CellStyle(fg = colour))
-          ) {
-            Reactive {
-              val n = levels.get.apply(i)
-              text.Text(("█" * n) + ("░" * (maxLevel - n)))
+          // The bar itself: one cell per level, each with its own gradient
+          // colour. A cell is a filled block up to the current level, and a
+          // light shade beyond, so the gradient is always faintly visible and
+          // fills in solidly as the level rises.
+          Row(Size.fixed(maxLevel, 1)) {
+            (0 until maxLevel).foreach { j =>
+              Text(
+                Size.fixed(1, 1),
+                _.withBox(_.withoutBorder)
+                  .withContent(CellStyle(fg = shade(colour, j)))
+              ) {
+                Reactive {
+                  val n = levels.get.apply(i)
+                  text.Text(if j < n then "█" else "░")
+                }
+              }
             }
           }
           // Numeric value.

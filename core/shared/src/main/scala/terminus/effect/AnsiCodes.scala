@@ -45,6 +45,10 @@ object AnsiCodes:
   def sgr(n: String): String =
     csi("m", n)
 
+  /** Clamp a color channel to the valid 0 to 255 range. */
+  private def clamp(channel: Int): Int =
+    math.max(0, math.min(255, channel))
+
   /** Codes for manipulating the cursor */
   object cursor:
 
@@ -219,6 +223,12 @@ object AnsiCodes:
 
   /** Set foreground color. */
   object foreground:
+    /** Set a 24-bit true color foreground. Each channel is clamped to the 0 to
+      * 255 range.
+      */
+    def rgb(r: Int, g: Int, b: Int): String =
+      sgr(s"38;2;${clamp(r)};${clamp(g)};${clamp(b)}")
+
     val default: String = sgr("39")
     val black: String = sgr("30")
     val red: String = sgr("31")
@@ -239,6 +249,12 @@ object AnsiCodes:
 
   /** Set background color. */
   object background:
+    /** Set a 24-bit true color background. Each channel is clamped to the 0 to
+      * 255 range.
+      */
+    def rgb(r: Int, g: Int, b: Int): String =
+      sgr(s"48;2;${clamp(r)};${clamp(g)};${clamp(b)}")
+
     val default: String = sgr("49")
     val black: String = sgr("40")
     val red: String = sgr("41")

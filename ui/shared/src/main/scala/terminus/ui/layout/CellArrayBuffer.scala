@@ -220,6 +220,7 @@ final class CellArrayBuffer(val width: Int, val height: Int) extends Buffer:
       case Color.BrightMagenta => AnsiCodes.foreground.brightMagenta
       case Color.BrightCyan    => AnsiCodes.foreground.brightCyan
       case Color.BrightWhite   => AnsiCodes.foreground.brightWhite
+      case Color.Rgb(r, g, b)  => AnsiCodes.foreground.rgb(r, g, b)
 
   private def bgCode(color: Color): String =
     color match
@@ -240,3 +241,4 @@ final class CellArrayBuffer(val width: Int, val height: Int) extends Buffer:
       case Color.BrightMagenta => AnsiCodes.background.brightMagenta
       case Color.BrightCyan    => AnsiCodes.background.brightCyan
       case Color.BrightWhite   => AnsiCodes.background.brightWhite
+      case Color.Rgb(r, g, b)  => AnsiCodes.background.rgb(r, g, b)

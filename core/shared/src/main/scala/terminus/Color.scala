@@ -18,6 +18,11 @@ package terminus
 
 trait Color:
   object foreground:
+    def rgb[F, A](r: Int, g: Int, b: Int)(
+        f: F ?=> A
+    ): (F & effect.Color) ?=> A =
+      effect ?=> effect.foreground.rgb(r, g, b)(() => f(using effect))
+
     def default[F, A](
         f: F ?=> A
     ): (F & effect.Color) ?=> A =
@@ -104,6 +109,11 @@ trait Color:
       effect ?=> effect.foreground.brightWhite(() => f(using effect))
 
   object background:
+    def rgb[F, A](r: Int, g: Int, b: Int)(
+        f: F ?=> A
+    ): (F & effect.Color) ?=> A =
+      effect ?=> effect.background.rgb(r, g, b)(() => f(using effect))
+
     def default[F, A](
         f: F ?=> A
     ): (F & effect.Color) ?=> A =

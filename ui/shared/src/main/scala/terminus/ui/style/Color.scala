@@ -35,3 +35,6 @@ enum Color:
   case BrightMagenta
   case BrightCyan
   case BrightWhite
+
+  /** A 24-bit true color, with each channel in the 0 to 255 range. */
+  case Rgb(r: Int, g: Int, b: Int)

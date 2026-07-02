@@ -25,10 +25,12 @@ package terminus.ui.style
   * the start. Mirrors CSS flexbox `justify-content`.
   */
 enum Justify:
-  /** Pack children against the start of the axis; all free space follows them. */
+  /** Pack children against the start of the axis; all free space follows them.
+    */
   case Start
 
-  /** Pack children against the end of the axis; all free space precedes them. */
+  /** Pack children against the end of the axis; all free space precedes them.
+    */
   case End
 
   /** Pack children together in the centre, with half the free space on each

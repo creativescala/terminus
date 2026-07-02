@@ -37,3 +37,30 @@ class ColorSuite extends FunSuite:
       s"${AnsiCodes.foreground.blue}Blue ${AnsiCodes.foreground.red}Red ${AnsiCodes.foreground.blue}Blue ${AnsiCodes.foreground.default}"
     )
   }
+
+  test("Foreground rgb code emits a 24-bit true color SGR sequence") {
+    val result =
+      StringBuilderTerminal.run { t ?=>
+        t.foreground.rgb(255, 128, 0) { () => t.write("Orange") }
+      }
+
+    assertEquals(
+      result,
+      s"${AnsiCodes.foreground.rgb(255, 128, 0)}Orange${AnsiCodes.foreground.default}"
+    )
+    assertEquals(
+      AnsiCodes.foreground.rgb(255, 128, 0),
+      s"${Ascii.ESC}[38;2;255;128;0m"
+    )
+  }
+
+  test("rgb channels are clamped to the 0 to 255 range") {
+    assertEquals(
+      AnsiCodes.foreground.rgb(-10, 300, 128),
+      s"${Ascii.ESC}[38;2;0;255;128m"
+    )
+    assertEquals(
+      AnsiCodes.background.rgb(-10, 300, 128),
+      s"${Ascii.ESC}[48;2;0;255;128m"
+    )
+  }

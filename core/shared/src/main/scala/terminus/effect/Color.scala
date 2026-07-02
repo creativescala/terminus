@@ -21,6 +21,9 @@ trait Color extends WithStack:
   object foreground:
     private val foregroundStack: Stack = Stack(AnsiCodes.foreground.default)
 
+    def rgb[A](r: Int, g: Int, b: Int)(f: () => A): A =
+      withStack(foregroundStack, AnsiCodes.foreground.rgb(r, g, b))(f)
+
     def default[A](f: () => A): A =
       withStack(foregroundStack, AnsiCodes.foreground.default)(f)
 
@@ -73,6 +76,9 @@ trait Color extends WithStack:
 
   object background:
     private val backgroundStack: Stack = Stack(AnsiCodes.background.default)
+
+    def rgb[A](r: Int, g: Int, b: Int)(f: () => A): A =
+      withStack(backgroundStack, AnsiCodes.background.rgb(r, g, b))(f)
 
     def default[A](f: () => A): A =
       withStack(backgroundStack, AnsiCodes.background.default)(f)
