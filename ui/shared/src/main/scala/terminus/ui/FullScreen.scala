@@ -59,7 +59,6 @@ class FullScreen(runtime: Runtime, column: Column):
       InteractiveTerminal.cursor.hidden {
         InteractiveTerminal.raw {
           InteractiveTerminal.alternateScreen {
-            InteractiveTerminal.erase.screen()
 
             var quit = false
 
@@ -72,16 +71,31 @@ class FullScreen(runtime: Runtime, column: Column):
               )
             )
 
-            def renderFrame(): Unit =
+            def renderFrame(prev: CellArrayBuffer): CellArrayBuffer =
               val buf = toBuffer()
-              InteractiveTerminal.erase.screen()
-              buf.render
+              if prev.width == buf.width && prev.height == buf.height then
+                buf.renderDiff(prev)
+              else
+                InteractiveTerminal.erase.screen()
+                buf.render
 
-            while !quit do
-              renderFrame()
-              InteractiveTerminal.readKey() match
-                case terminus.Eof => quit = true
-                case key: Key     => runtime.dispatch(key)
+              buf
+
+            def loop(prev: CellArrayBuffer): Unit =
+              if quit then ()
+              else
+                val buf = renderFrame(prev)
+                InteractiveTerminal.readKey() match
+                  case terminus.Eof => quit = true
+                  case key: Key     => runtime.dispatch(key)
+                loop(buf)
+
+            loop {
+              InteractiveTerminal.erase.screen()
+              val buf = toBuffer()
+              buf.render
+              buf
+            }
           }
         }
       }
