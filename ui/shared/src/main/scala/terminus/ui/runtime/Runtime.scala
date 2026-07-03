@@ -28,7 +28,7 @@ final class Runtime private ():
   private var currentFocus: FocusId = FocusId.zero
   private var focusListIdx: Int = 0
 
-  // The root handlers gets to handle events before the focused element. If they
+  // The root handlers get to handle events before the focused element. If they
   // handle an event it is *not* passed to the focused element.
   private var rootHandlers: Map[Key, Seq[() => Unit]] =
     Map.empty
@@ -41,7 +41,24 @@ final class Runtime private ():
   private val focusables: mutable.Map[FocusId, Runtime.Focusable] =
     mutable.Map.empty
 
+  // Per-focusable predicate deciding whether it can currently be focused. A
+  // focusable with no registered predicate is always enabled. Predicates are
+  // read (not cached) at traversal and dispatch time so a reactive enabled
+  // state takes effect immediately.
+  private val enabledPredicates: mutable.Map[FocusId, () => Boolean] =
+    mutable.Map.empty
+
   def currentFocusId: FocusId = currentFocus
+
+  /** Register the predicate that decides whether `focusId` can be focused. */
+  def setEnabled(focusId: FocusId, predicate: () => Boolean): Unit =
+    enabledPredicates(focusId) = predicate
+
+  /** Whether `focusId` is currently enabled. Defaults to enabled when no
+    * predicate has been registered.
+    */
+  def enabled(focusId: FocusId): Boolean =
+    enabledPredicates.get(focusId).forall(_())
 
   def addRootHandlers(
       handlers: Map[Key, Seq[() => Unit]]
@@ -75,28 +92,41 @@ final class Runtime private ():
       focusablesOrder += focusId
       if currentFocus == FocusId.zero then currentFocus = focusId
 
-  def nextFocus(): Unit =
-    if focusablesOrder.size == 0 then ()
-    else
-      focusListIdx = (focusListIdx + 1) % focusablesOrder.size
-      currentFocus = focusablesOrder(focusListIdx)
+  def nextFocus(): Unit = moveFocus(1)
 
-  def prevFocus(): Unit =
-    if focusablesOrder.size == 0 then ()
+  def prevFocus(): Unit = moveFocus(-1)
+
+  /** Move focus to the next enabled focusable `step` positions away (positive
+    * is forward, negative is backward), skipping disabled ones. If no other
+    * focusable is enabled the current focus is left unchanged.
+    */
+  private def moveFocus(step: Int): Unit =
+    val n = focusablesOrder.size
+    if n == 0 then ()
     else
-      focusListIdx =
-        if focusListIdx == 0 then focusablesOrder.size - 1 else focusListIdx - 1
-      currentFocus = focusablesOrder(focusListIdx)
+      var offset = 1
+      var found = -1
+      while offset <= n && found < 0 do
+        val idx = Math.floorMod(focusListIdx + step * offset, n)
+        if enabled(focusablesOrder(idx)) then found = idx
+        offset += 1
+      if found >= 0 then
+        focusListIdx = found
+        currentFocus = focusablesOrder(found)
 
   def dispatch(key: Key): Unit =
     rootHandlers.get(key) match
-      case None =>
-        focusables.get(currentFocus) match
-          case None            => ()
-          case Some(focusable) => focusable.handle(key)
       case Some(handlers) => handlers.foreach(f => f())
+      case None           =>
+        // A disabled focusable swallows the key: it neither handles the event
+        // itself nor lets it fall through to anything else.
+        if enabled(currentFocus) then
+          focusables.get(currentFocus) match
+            case None            => ()
+            case Some(focusable) => focusable.handle(key)
 
 object Runtime:
+  /** Store event handlers associated with a focusable component. */
   case class Focusable(
       keyHandlers: mutable.Map[Key, mutable.ArrayBuffer[() => Unit]],
       anyKeyHandlers: mutable.ArrayBuffer[Key => Unit]

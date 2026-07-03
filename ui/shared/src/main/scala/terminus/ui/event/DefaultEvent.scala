@@ -17,7 +17,11 @@
 package terminus.ui.event
 
 import terminus.Key
+import terminus.ui.capability.Availability
 import terminus.ui.capability.Event
+import terminus.ui.react.Constant
+import terminus.ui.react.Reactive
+import terminus.ui.react.Var
 import terminus.ui.runtime.Runtime
 
 /** The default implementation of the [[terminus.ui.capability.Event]]
@@ -37,3 +41,18 @@ trait DefaultEvent(focusId: FocusId, runtime: Runtime) extends Event:
   def prevFocus(): Unit = runtime.prevFocus()
 
   def hasFocus: Boolean = runtime.currentFocusId == focusId
+
+  // The current enabled condition. A Var of a Reactive so that enabledWhen can
+  // switch the source; enabled flattens through it.
+  private val availability: Var[Reactive[Boolean]] = Var(Constant(true))
+
+  def enabledWhen(condition: Reactive[Boolean]): Unit =
+    availability.set(condition)
+
+  val enabled: Reactive[Availability] = availability.flatten.map(b =>
+    if b then Availability.Enabled else Availability.Disabled
+  )
+
+  // The runtime consults this predicate at focus traversal and key dispatch
+  // time, outside any React context, hence peek.
+  runtime.setEnabled(focusId, () => enabled.peek == Availability.Enabled)
