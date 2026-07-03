@@ -25,8 +25,9 @@ import scala.compiletime.uninitialized
 sealed trait Reactive[A]:
   private[ui] def state: State
 
-  /** Read the reactive's current value without registering a dependency or
-    * recomputing.
+  /** Read the reactive's current value without registering a dependency. The
+    * value is current: a stale [[Computed]] recomputes before answering, but
+    * the caller is not subscribed to future changes.
     */
   def peek: A
 
@@ -34,8 +35,16 @@ sealed trait Reactive[A]:
     * as a subscriber and recomputing if necessary.
     */
   def get(using ctx: React): A
+
+  def map[B](f: A => B): Reactive[B] =
+    Reactive { f(this.get) }
+
 object Reactive:
   def apply[A](thunk: React ?=> A): Reactive[A] = Computed(thunk)
+
+  extension [A](nested: Reactive[Reactive[A]])
+    def flatten: Reactive[A] =
+      Reactive { nested.get.get }
 
 final class Var[A](private var currentValue: A) extends Reactive[A]:
   val subscribers: mutable.Set[Listener] = mutable.Set.empty
@@ -62,6 +71,15 @@ final class Var[A](private var currentValue: A) extends Reactive[A]:
     currentValue
 object Var:
   def apply[A](initial: A): Var[A] = new Var(initial)
+
+/** A Reactive value that never changes. */
+final class Constant[A](val peek: A) extends Reactive[A]:
+  private[ui] def state: State = State.Fresh
+
+  def get(using ctx: React): A =
+    peek
+object Constant:
+  def apply[A](value: A): Reactive[A] = new Constant(value)
 
 final class Computed[A](thunk: React ?=> A) extends Reactive[A], Listener:
   private val subscribers: mutable.Set[Listener] = mutable.Set.empty
@@ -92,6 +110,11 @@ final class Computed[A](thunk: React ?=> A) extends Reactive[A], Listener:
     ()
 
   def peek: A =
+    // Recompute if stale so peek never observes an uninitialized or outdated
+    // cache. The empty React context means the caller is not subscribed, but
+    // this Computed still tracks its own sources (update pushes it onto the
+    // stack it is given).
+    if state == State.Stale then update()(using React.empty)
     cachedValue
 
   def get(using ctx: React): A =
