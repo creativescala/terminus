@@ -35,15 +35,18 @@ final class TextStyle()
     extends BoxStyleProps[TextStyle],
       ContentStyleProps[TextStyle],
       FocusStyleProps[BaseTextStyle, TextStyle](BaseTextStyle()),
+      DisabledStyleProps[BaseTextStyle, TextStyle](BaseTextStyle()),
       WithCopy[TextStyle]:
   // IMPORTANT: copy() must mirror every mixin field. If a new mixin is added to
   // TextStyle, add the corresponding assignment here or withBox/withContent/
-  // withFocus calls on copies will silently share state with the original.
+  // withFocus/withDisabled calls on copies will silently share state with the
+  // original.
   def copy(): TextStyle =
     val copy = TextStyle()
     copy.boxStyle = this.boxStyle
     copy.contentStyle = this.contentStyle
     copy.focusStyle = this.focusStyle.map(_.copy())
+    copy.disabledStyle = this.disabledStyle.map(_.copy())
     copy
 
 object TextStyle:

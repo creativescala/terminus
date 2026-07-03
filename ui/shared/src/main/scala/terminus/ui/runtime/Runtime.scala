@@ -18,6 +18,8 @@ package terminus.ui.runtime
 
 import terminus.Key
 import terminus.ui.event.FocusId
+import terminus.ui.react.Reactive
+import terminus.ui.react.Var
 
 import scala.collection.mutable
 
@@ -25,8 +27,9 @@ import scala.collection.mutable
   * used by the application programmer.
   */
 final class Runtime private ():
-  private var currentFocus: FocusId = FocusId.zero
-  private var focusListIdx: Int = 0
+  // The single source of truth for focus. A Var so that components can derive
+  // reactive focus state from it; see [[event.DefaultEvent.focus]].
+  private val currentFocus: Var[FocusId] = Var(FocusId.zero)
 
   // The root handlers get to handle events before the focused element. If they
   // handle an event it is *not* passed to the focused element.
@@ -48,7 +51,10 @@ final class Runtime private ():
   private val enabledPredicates: mutable.Map[FocusId, () => Boolean] =
     mutable.Map.empty
 
-  def currentFocusId: FocusId = currentFocus
+  def currentFocusId: FocusId = currentFocus.peek
+
+  /** The focused component's id, as a reactive value. */
+  def focusedId: Reactive[FocusId] = currentFocus
 
   /** Register the predicate that decides whether `focusId` can be focused. */
   def setEnabled(focusId: FocusId, predicate: () => Boolean): Unit =
@@ -90,7 +96,7 @@ final class Runtime private ():
   private def registerFocusable(focusId: FocusId): Unit =
     if !focusablesOrder.contains(focusId) then
       focusablesOrder += focusId
-      if currentFocus == FocusId.zero then currentFocus = focusId
+      if currentFocus.peek == FocusId.zero then currentFocus.set(focusId)
 
   def nextFocus(): Unit = moveFocus(1)
 
@@ -104,15 +110,16 @@ final class Runtime private ():
     val n = focusablesOrder.size
     if n == 0 then ()
     else
+      // The traversal position is derived from the Var rather than cached, so
+      // the Var remains the single source of truth for focus.
+      val start = focusablesOrder.indexOf(currentFocus.peek).max(0)
       var offset = 1
       var found = -1
       while offset <= n && found < 0 do
-        val idx = Math.floorMod(focusListIdx + step * offset, n)
+        val idx = Math.floorMod(start + step * offset, n)
         if enabled(focusablesOrder(idx)) then found = idx
         offset += 1
-      if found >= 0 then
-        focusListIdx = found
-        currentFocus = focusablesOrder(found)
+      if found >= 0 then currentFocus.set(focusablesOrder(found))
 
   def dispatch(key: Key): Unit =
     rootHandlers.get(key) match
@@ -120,8 +127,9 @@ final class Runtime private ():
       case None           =>
         // A disabled focusable swallows the key: it neither handles the event
         // itself nor lets it fall through to anything else.
-        if enabled(currentFocus) then
-          focusables.get(currentFocus) match
+        val focused = currentFocus.peek
+        if enabled(focused) then
+          focusables.get(focused) match
             case None            => ()
             case Some(focusable) => focusable.handle(key)
 

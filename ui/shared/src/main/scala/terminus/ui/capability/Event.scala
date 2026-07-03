@@ -60,4 +60,9 @@ trait Event:
   def enabledWhen(condition: Reactive[Boolean]): Unit
 
   /** A reactive variable that reflects this component's availability. */
-  def enabled: Reactive[Availability]
+  def availability: Reactive[Availability]
+
+  /** A reactive variable that reflects whether this component holds the
+    * keyboard focus.
+    */
+  def focus: Reactive[Focus]

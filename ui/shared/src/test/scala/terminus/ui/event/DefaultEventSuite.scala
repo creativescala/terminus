@@ -19,6 +19,7 @@ package terminus.ui.event
 import munit.FunSuite
 import terminus.Key
 import terminus.ui.capability.Availability
+import terminus.ui.capability.Focus
 import terminus.ui.react.Reactive
 import terminus.ui.react.Var
 import terminus.ui.runtime.Runtime
@@ -37,10 +38,12 @@ class DefaultEventSuite extends FunSuite:
   test("components are enabled by default") {
     val runtime = Runtime.empty
     val event = focusable(runtime)
-    assertEquals(event.enabled.peek, Availability.Enabled)
+    assertEquals(event.availability.peek, Availability.Enabled)
   }
 
-  test("enabled follows a reactive condition, including through a Computed") {
+  test(
+    "availability follows a reactive condition, including through a Computed"
+  ) {
     val runtime = Runtime.empty
     val event = focusable(runtime)
 
@@ -49,9 +52,9 @@ class DefaultEventSuite extends FunSuite:
     // chain and peek-on-stale recomputation.
     event.enabledWhen(Reactive { condition.get })
 
-    assertEquals(event.enabled.peek, Availability.Disabled)
+    assertEquals(event.availability.peek, Availability.Disabled)
     condition.set(true)
-    assertEquals(event.enabled.peek, Availability.Enabled)
+    assertEquals(event.availability.peek, Availability.Enabled)
   }
 
   test("focus traversal skips a component whose condition is false") {
@@ -63,13 +66,46 @@ class DefaultEventSuite extends FunSuite:
     val bEnabled = Var(false)
     b.enabledWhen(Reactive { bEnabled.get })
 
-    assert(a.hasFocus, "first focusable starts focused")
+    assertEquals(a.focus.peek, Focus.Focused, "first focusable starts focused")
     runtime.nextFocus()
-    assert(c.hasFocus, "b is disabled and skipped")
+    assertEquals(c.focus.peek, Focus.Focused, "b is disabled and skipped")
+    assertEquals(a.focus.peek, Focus.Unfocused)
 
     bEnabled.set(true)
     runtime.prevFocus()
-    assert(b.hasFocus, "b rejoins the focus order when its condition changes")
+    assertEquals(
+      b.focus.peek,
+      Focus.Focused,
+      "b rejoins the focus order when its condition changes"
+    )
+  }
+
+  test("focus is reactive: a Computed over it updates as focus moves") {
+    val runtime = Runtime.empty
+    val a = focusable(runtime)
+    val b = focusable(runtime)
+
+    val label = Reactive {
+      if a.focus.get == Focus.Focused then "a" else "b"
+    }
+
+    assertEquals(label.peek, "a")
+    runtime.nextFocus()
+    assertEquals(label.peek, "b")
+    runtime.nextFocus()
+    assertEquals(label.peek, "a", "wraps around")
+    assertEquals(b.focus.peek, Focus.Unfocused)
+  }
+
+  test("an unfocusable component is never focused") {
+    val runtime = Runtime.empty
+    val unfocusable = new DefaultEvent(FocusId.next, runtime) {}
+    val a = focusable(runtime)
+
+    assertEquals(unfocusable.focus.peek, Focus.Unfocused)
+    runtime.nextFocus()
+    assertEquals(unfocusable.focus.peek, Focus.Unfocused)
+    assertEquals(a.focus.peek, Focus.Focused)
   }
 
   test("dispatch does not deliver to a component whose condition is false") {

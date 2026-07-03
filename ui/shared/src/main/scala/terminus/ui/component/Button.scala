@@ -19,6 +19,7 @@ package terminus.ui.component
 import terminus.Key
 import terminus.ui.capability.Availability
 import terminus.ui.capability.Event
+import terminus.ui.capability.Focus
 import terminus.ui.capability.Layout
 import terminus.ui.capability.React
 import terminus.ui.capability.Submit
@@ -43,8 +44,8 @@ import terminus.ui.text.Line
 
 /** A single-line button, activated with Enter or Space.
   *
-  * The body registers a submit handler and, optionally, an enabled condition,
-  * then returns the button's label:
+  * The body registers a submit handler and, optionally, an availability
+  * condition, then returns the button's label:
   *
   * {{{
   * Button(Size.fixed(12, 3)) { ctx ?=>
@@ -67,7 +68,8 @@ final class Button(
 
   def react(using React): Unit =
     label.get
-    context.enabled.get
+    context.availability.get
+    context.focus.get
     ()
 
   def measure(constraint: Constraint): Dimensions =
@@ -127,21 +129,23 @@ final class Button(
   private def naturalWidth: Int = label.peek.width
 
   private def activeBoxStyle: BoxStyle =
-    context.enabled.peek match
+    context.availability.peek match
       case Availability.Disabled =>
         style.disabled.map(_.box).getOrElse(style.box)
       case Availability.Enabled =>
-        if context.hasFocus then style.focus.map(_.box).getOrElse(style.box)
-        else style.box
+        context.focus.peek match
+          case Focus.Focused   => style.focus.map(_.box).getOrElse(style.box)
+          case Focus.Unfocused => style.box
 
   private def activeContentStyle: CellStyle =
-    context.enabled.peek match
+    context.availability.peek match
       case Availability.Disabled =>
         style.disabled.map(_.content).getOrElse(style.content)
       case Availability.Enabled =>
-        if context.hasFocus then
-          style.focus.map(_.content).getOrElse(style.content)
-        else style.content
+        context.focus.peek match
+          case Focus.Focused =>
+            style.focus.map(_.content).getOrElse(style.content)
+          case Focus.Unfocused => style.content
 
 object Button:
   def apply(size: Size, style: TextStyle => TextStyle = identity)(
