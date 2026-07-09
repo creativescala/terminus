@@ -19,6 +19,14 @@ package terminus.ui.style
 final case class LayoutProps(
     justify: Justify = Justify.Start,
     align: Align = Align.Stretch
-)
+):
+  /** Replace the main-axis distribution of free space. */
+  def withJustify(justify: Justify): LayoutProps =
+    copy(justify = justify)
+
+  /** Replace the cross-axis placement of children. */
+  def withAlign(align: Align): LayoutProps =
+    copy(align = align)
+
 object LayoutProps:
   val default: LayoutProps = LayoutProps()

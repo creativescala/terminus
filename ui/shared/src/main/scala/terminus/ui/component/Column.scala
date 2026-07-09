@@ -66,8 +66,13 @@ final class Column(
 
     val mainHeights =
       resolveMainAxis(children, contentHeight, constraint.maxWidth)
+    // Children are measured loose on the cross axis so a WrapContent column
+    // sizes itself to its widest child's natural width (fit-content). Under
+    // Align.Stretch children are widened at render time against the column's
+    // *resolved* width; stretching here, against the incoming bound, would
+    // inflate the natural width and make wrap-content impossible.
     val childDimensions = children.zip(mainHeights).map { (child, h) =>
-      child.measure(childCrossConstraint(h, constraint.maxWidth))
+      child.measure(Constraint(0, constraint.maxWidth, h, h))
     }
 
     val naturalWidth = childDimensions.map(_.width).maxOption.getOrElse(0)
@@ -121,7 +126,7 @@ final class Column(
     var y = startOffset
     children.zip(mainHeights).foreach { (child, h) =>
       if h > 0 then
-        val w = child.measure(childCrossConstraint(h, dimensions.width)).width
+        val w = child.measure(renderCrossConstraint(h, dimensions.width)).width
         val x = layoutProps.align match
           case Align.Stretch => 0
           case Align.Start   => 0
@@ -198,11 +203,13 @@ final class Column(
         case _ => phase1(i)
     }
 
-  /** The constraint offered to a child on the cross axis (width): tight to the
-    * column's width under [[Align.Stretch]], otherwise loose so the child can
-    * report its own natural width.
+  /** The constraint offered to a child on the cross axis (width) at render
+    * time: tight to the column's resolved width under [[Align.Stretch]], so
+    * children stretch to match the column, otherwise loose so the child takes
+    * its natural width. During measurement children are always offered a loose
+    * cross constraint — see [[measure]].
     */
-  private def childCrossConstraint(
+  private def renderCrossConstraint(
       height: Int,
       crossBound: Int | Infinity
   ): Constraint =

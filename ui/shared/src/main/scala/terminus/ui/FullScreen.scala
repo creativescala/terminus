@@ -115,6 +115,21 @@ object FullScreen:
         Writer
 
   def apply(body: Layout ?=> Unit): FullScreen =
+    withLayout(identity)(ctx ?=> body(using ctx))
+
+  /** As [[apply]], but also configures the layout of the root column that holds
+    * the component tree. The root column always fills the terminal; `style`
+    * controls how children are placed within it (e.g.
+    * `_.withAlign(Align.Start)` lets children take their natural width instead
+    * of being stretched to the terminal's).
+    *
+    * This is a separate method rather than an overload of [[apply]] because
+    * overloading would stop `FullScreen { ... }` blocks being adapted to the
+    * `Layout ?=> Unit` context function type.
+    */
+  def withLayout(style: LayoutProps => LayoutProps)(
+      body: Layout ?=> Unit
+  ): FullScreen =
     val focusId = FocusId.next
     val runtime = Runtime.empty
     val context = new DefaultEvent(focusId, runtime)
@@ -123,7 +138,7 @@ object FullScreen:
     body(using context)
     val column = new Column(
       Size(Measurement.Percentage(1.0), Measurement.Percentage(1.0)),
-      LayoutProps.default,
+      style(LayoutProps.default),
       context
     )
     val fullScreen = new FullScreen(runtime, column)

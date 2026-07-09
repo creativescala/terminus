@@ -28,6 +28,7 @@ import terminus.ui.component.TextInput
 import terminus.ui.layout.Measurement
 import terminus.ui.layout.Size
 import terminus.ui.react.Reactive
+import terminus.ui.style.Align
 import terminus.ui.react.Var
 import terminus.ui.style.BoxProps
 import terminus.ui.style.ButtonStyle
@@ -256,12 +257,16 @@ private def staticText(s: String) = Var(text.Text(s))
         .withContent(_.withForeground(Color.BrightBlack))
     )
 
-  val fullScreen = FullScreen {
+  // Align.Start on the root lets the column below take its natural width
+  // (the width of the input + button row) instead of being stretched to the
+  // full terminal width. The column's own default Align.Stretch then widens
+  // the Line to match.
+  val fullScreen = FullScreen.withLayout(_.withAlign(Align.Start)) {
     val action = Reactive.variable(text.Line(""))
     val enabled = action.map(_.isNonEmpty)
     val output = Reactive.variable(text.Line(""))
 
-    Column(Size(Measurement.MinIntrinsic, Measurement.MaxIntrinsic)) {
+    Column(Size.wrapContent) {
       Row(Size.wrapContent) {
         TextInput(
           Size(Measurement.Fixed(25), Measurement.WrapContent),

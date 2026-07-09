@@ -350,6 +350,32 @@ class ColumnSuite extends FunSuite:
     )
   }
 
+  test(
+    "a WrapContent column under Stretch sizes to its widest child, not the offered bound"
+  ) {
+    val a = fixed(4, 1)
+    val b = fixed(2, 1)
+    val col = column(Size(Measurement.WrapContent, Measurement.WrapContent))(
+      a,
+      b
+    )
+    val dims = col.measure(Constraint(0, 10, 0, 10))
+    assertEquals(dims, Dimensions(4, 2))
+  }
+
+  test("Align.Stretch widens children to the resolved width when rendering") {
+    // The narrow child stretches to match the widest sibling, not the
+    // (larger) space the column was offered when it was measured.
+    val a = fixed(4, 1)
+    val b = fixed(2, 1)
+    val col = column(Size(Measurement.WrapContent, Measurement.WrapContent))(
+      a,
+      b
+    )
+    render(col, Rect(0, 0, 4, 2))
+    assertEquals(b.rendered, Some(Dimensions(4, 1)))
+  }
+
   // ---------------------------------------------------------------------------
   // measure / render agreement
   // ---------------------------------------------------------------------------
