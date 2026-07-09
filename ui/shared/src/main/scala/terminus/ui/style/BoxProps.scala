@@ -25,35 +25,35 @@ import terminus.ui.layout.Insets
   *   The border to draw around the component. [[None]] means no border. Use
   *   [[Border.empty]] if you want a border that takes up space but doesn't
   *   render any characters.
-  * @param borderStyle
+  * @param borderProps
   *   Cell-level style applied to border characters.
   * @param background
   *   Cell-level style used to fill the interior (empty cells get this style).
   * @param padding
   *   Number of cells between the border and the content on each side.
   */
-final case class BoxStyle(
+final case class BoxProps(
     border: Option[Border] = Some(Border.single),
-    borderStyle: CellStyle = CellStyle.default,
+    borderProps: CellProps = CellProps.default,
     padding: Int = 0,
-    background: CellStyle = CellStyle.default
+    background: CellProps = CellProps.default
 ):
-  def withBorder(border: Border): BoxStyle =
+  def withBorder(border: Border): BoxProps =
     this.copy(border = Some(border))
 
-  def withoutBorder: BoxStyle =
+  def withoutBorder: BoxProps =
     this.copy(border = None)
 
-  def withBorderStyle(style: CellStyle): BoxStyle =
-    this.copy(borderStyle = style)
+  def withBorderProps(style: CellProps): BoxProps =
+    this.copy(borderProps = style)
 
-  def withBorderStyle(update: CellStyle => CellStyle): BoxStyle =
-    this.copy(borderStyle = update(borderStyle))
+  def withBorderProps(update: CellProps => CellProps): BoxProps =
+    this.copy(borderProps = update(borderProps))
 
-  def withPadding(padding: Int): BoxStyle =
+  def withPadding(padding: Int): BoxProps =
     this.copy(padding = padding)
 
-  def withBackground(style: CellStyle): BoxStyle =
+  def withBackground(style: CellProps): BoxProps =
     this.copy(background = style)
 
   /** The cells this box occupies around its content: one per side for the
@@ -63,5 +63,5 @@ final case class BoxStyle(
     val borderInset = if border.isDefined then 1 else 0
     Insets.all(borderInset + padding)
 
-object BoxStyle:
-  val default = BoxStyle()
+object BoxProps:
+  val default = BoxProps()

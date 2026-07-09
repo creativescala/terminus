@@ -35,9 +35,9 @@ import terminus.ui.layout.Rect
 import terminus.ui.layout.Size
 import terminus.ui.runtime.Runtime
 import terminus.ui.style.Align
-import terminus.ui.style.CellStyle
+import terminus.ui.style.CellProps
 import terminus.ui.style.Justify
-import terminus.ui.style.LayoutStyle
+import terminus.ui.style.LayoutProps
 
 class LayoutSuite extends FunSuite:
 
@@ -69,7 +69,7 @@ class LayoutSuite extends FunSuite:
   /** A minimal component that writes a single character at its origin. */
   def cell(char: Char, width: Int = 1, height: Int = 1): Component =
     component(Size.fixed(width, height)) { (bounds, buf) =>
-      buf.put(bounds.x, bounds.y, Cell(char.toInt, CellStyle.default))
+      buf.put(bounds.x, bounds.y, Cell(char.toInt, CellProps.default))
     }
 
   /** A component that fills its entire allocated bounds with a single
@@ -77,7 +77,7 @@ class LayoutSuite extends FunSuite:
     */
   def filledCell(char: Char, sz: Size = Size.fixed(1, 1)): Component =
     component(sz) { (bounds, buf) =>
-      val c = Cell(char.toInt, CellStyle.default)
+      val c = Cell(char.toInt, CellProps.default)
       var y = bounds.y
       while y < bounds.bottom do
         var x = bounds.x
@@ -98,13 +98,13 @@ class LayoutSuite extends FunSuite:
     ctx
 
   /** Construct a [[Row]] containing the given children. */
-  def row(size: Size, style: LayoutStyle = LayoutStyle.default)(
+  def row(size: Size, style: LayoutProps = LayoutProps.default)(
       children: Component*
   ): Row =
     new Row(size, style, contextOf(children*))
 
   /** Construct a [[Column]] containing the given children. */
-  def column(size: Size, style: LayoutStyle = LayoutStyle.default)(
+  def column(size: Size, style: LayoutProps = LayoutProps.default)(
       children: Component*
   ): Column =
     new Column(size, style, contextOf(children*))
@@ -358,7 +358,7 @@ class LayoutSuite extends FunSuite:
   test("Row Justify.End packs children at the right") {
     // 6 wide, 2 × filledCell(2,1) → freeSpace=2, startOffset=2
     // cells: "  AABB"
-    val r = row(Size.fixed(6, 1), LayoutStyle(justify = Justify.End))(
+    val r = row(Size.fixed(6, 1), LayoutProps(justify = Justify.End))(
       filledCell('A', Size.fixed(2, 1)),
       filledCell('B', Size.fixed(2, 1))
     )
@@ -369,7 +369,7 @@ class LayoutSuite extends FunSuite:
   test("Row Justify.Center centers children") {
     // 6 wide, 2 × filledCell(1,1) → freeSpace=4, startOffset=2
     // cells: "  AB  "
-    val r = row(Size.fixed(6, 1), LayoutStyle(justify = Justify.Center))(
+    val r = row(Size.fixed(6, 1), LayoutProps(justify = Justify.Center))(
       filledCell('A', Size.fixed(1, 1)),
       filledCell('B', Size.fixed(1, 1))
     )
@@ -380,7 +380,7 @@ class LayoutSuite extends FunSuite:
   test("Row Justify.SpaceBetween distributes space between children") {
     // 9 wide, 3 × filledCell(1,1) → freeSpace=6, gap=3
     // cells: "A   B   C"
-    val r = row(Size.fixed(9, 1), LayoutStyle(justify = Justify.SpaceBetween))(
+    val r = row(Size.fixed(9, 1), LayoutProps(justify = Justify.SpaceBetween))(
       filledCell('A', Size.fixed(1, 1)),
       filledCell('B', Size.fixed(1, 1)),
       filledCell('C', Size.fixed(1, 1))
@@ -392,7 +392,7 @@ class LayoutSuite extends FunSuite:
   test("Row Justify.SpaceEvenly distributes space evenly including edges") {
     // 8 wide, 2 × filledCell(1,1) → freeSpace=6, n+1=3 gaps, gap=2
     // cells: "  A  B  "
-    val r = row(Size.fixed(8, 1), LayoutStyle(justify = Justify.SpaceEvenly))(
+    val r = row(Size.fixed(8, 1), LayoutProps(justify = Justify.SpaceEvenly))(
       filledCell('A', Size.fixed(1, 1)),
       filledCell('B', Size.fixed(1, 1))
     )
@@ -406,7 +406,7 @@ class LayoutSuite extends FunSuite:
 
   test("Row Align.Start positions child at top of cross axis") {
     // Row 1 wide, 3 tall. Child 1x1. Start → y=0, rows 1-2 empty.
-    val r = row(Size.fixed(1, 3), LayoutStyle(align = Align.Start))(cell('A'))
+    val r = row(Size.fixed(1, 3), LayoutProps(align = Align.Start))(cell('A'))
     val out = renderToString(r)
     assertEquals(
       out,
@@ -419,7 +419,7 @@ class LayoutSuite extends FunSuite:
 
   test("Row Align.Center positions child in middle of cross axis") {
     // Row 1 wide, 3 tall. Child 1x1. Center → y=(3-1)/2=1.
-    val r = row(Size.fixed(1, 3), LayoutStyle(align = Align.Center))(cell('A'))
+    val r = row(Size.fixed(1, 3), LayoutProps(align = Align.Center))(cell('A'))
     val out = renderToString(r)
     assertEquals(
       out,
@@ -432,7 +432,7 @@ class LayoutSuite extends FunSuite:
 
   test("Row Align.End positions child at bottom of cross axis") {
     // Row 1 wide, 3 tall. Child 1x1. End → y=3-1=2.
-    val r = row(Size.fixed(1, 3), LayoutStyle(align = Align.End))(cell('A'))
+    val r = row(Size.fixed(1, 3), LayoutProps(align = Align.End))(cell('A'))
     val out = renderToString(r)
     assertEquals(
       out,
@@ -450,7 +450,7 @@ class LayoutSuite extends FunSuite:
   test("Column Justify.End packs children at the bottom") {
     // 6 tall, 2 × cell(1 tall) → freeSpace=4, startOffset=4
     // rows 1-4 empty, rows 5-6 have A/B
-    val col = column(Size.fixed(1, 6), LayoutStyle(justify = Justify.End))(
+    val col = column(Size.fixed(1, 6), LayoutProps(justify = Justify.End))(
       cell('A'),
       cell('B')
     )
@@ -470,7 +470,7 @@ class LayoutSuite extends FunSuite:
   test("Column Justify.Center centers children") {
     // 6 tall, 2 × cell(1 tall) → freeSpace=4, startOffset=2
     // rows 1-2 empty, rows 3-4 have A/B, rows 5-6 empty
-    val col = column(Size.fixed(1, 6), LayoutStyle(justify = Justify.Center))(
+    val col = column(Size.fixed(1, 6), LayoutProps(justify = Justify.Center))(
       cell('A'),
       cell('B')
     )
@@ -491,7 +491,7 @@ class LayoutSuite extends FunSuite:
 
   test("Column Align.Center positions child in middle of cross axis") {
     // Column 3 wide, 1 tall. Child 1x1. Center → x=(3-1)/2=1. cells: " A "
-    val col = column(Size.fixed(3, 1), LayoutStyle(align = Align.Center))(
+    val col = column(Size.fixed(3, 1), LayoutProps(align = Align.Center))(
       cell('A')
     )
     val out = renderToString(col)
@@ -501,7 +501,7 @@ class LayoutSuite extends FunSuite:
   test("Column Align.End positions child at right of cross axis") {
     // Column 3 wide, 1 tall. Child 1x1. End → x=3-1=2. cells: "  A"
     val col =
-      column(Size.fixed(3, 1), LayoutStyle(align = Align.End))(cell('A'))
+      column(Size.fixed(3, 1), LayoutProps(align = Align.End))(cell('A'))
     val out = renderToString(col)
     assertEquals(out, reset + moveTo(1, 1) + "  A" + reset)
   }

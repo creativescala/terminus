@@ -16,9 +16,13 @@
 
 package terminus.ui.style
 
-final case class LayoutStyle(
-    justify: Justify = Justify.Start,
-    align: Align = Align.Stretch
-)
-object LayoutStyle:
-  val default: LayoutStyle = LayoutStyle()
+import terminus.ui.capability.ComponentState
+
+/** Styling for [[terminus.ui.component.TextInput]]: a [[Style]] selecting
+  * [[TextInputProps]] from the component's
+  * [[terminus.ui.capability.ComponentState]].
+  */
+type TextInputStyle = Style[ComponentState, TextInputProps]
+
+object TextInputStyle:
+  val default: TextInputStyle = Style(TextInputProps.default)

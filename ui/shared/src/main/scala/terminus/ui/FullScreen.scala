@@ -36,7 +36,7 @@ import terminus.ui.layout.Measurement
 import terminus.ui.layout.Size
 import terminus.ui.react.DefaultReact
 import terminus.ui.runtime.Runtime
-import terminus.ui.style.LayoutStyle
+import terminus.ui.style.LayoutProps
 
 /** The root of a component tree. Acts as a column and renders into the
   * alternate screen of the terminal.
@@ -123,7 +123,7 @@ object FullScreen:
     body(using context)
     val column = new Column(
       Size(Measurement.Percentage(1.0), Measurement.Percentage(1.0)),
-      LayoutStyle.default,
+      LayoutProps.default,
       context
     )
     val fullScreen = new FullScreen(runtime, column)

@@ -39,8 +39,8 @@ class TextStyleSuite extends FunSuite:
     assertEquals(style(disabled), TextProps.default)
   }
 
-  test("withBox(BoxStyle) replaces the base box style") {
-    val noBorder = BoxStyle.default.withoutBorder
+  test("withBox(BoxProps) replaces the base box style") {
+    val noBorder = BoxProps.default.withoutBorder
     val style = TextStyle.default.withBox(noBorder)
     assertEquals(style(unfocused).box, noBorder)
   }
@@ -50,8 +50,8 @@ class TextStyleSuite extends FunSuite:
     assertEquals(style(unfocused).box.padding, 2)
   }
 
-  test("withContent(CellStyle) replaces the base content style") {
-    val bold = CellStyle.default.withBold
+  test("withContent(CellProps) replaces the base content style") {
+    val bold = CellProps.default.withBold
     val style = TextStyle.default.withContent(bold)
     assertEquals(style(unfocused).content, bold)
   }

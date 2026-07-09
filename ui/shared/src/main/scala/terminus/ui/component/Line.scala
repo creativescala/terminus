@@ -31,9 +31,8 @@ import terminus.ui.layout.Measurement
 import terminus.ui.layout.Rect
 import terminus.ui.layout.Size
 import terminus.ui.react.Reactive
-import terminus.ui.style.BoxStyle
-import terminus.ui.style.CellStyle
-import terminus.ui.style.TextStyle
+import terminus.ui.style.LineProps
+import terminus.ui.style.LineStyle
 import terminus.ui.text
 
 /** A component that displays a single line of text. The text is never wrapped,
@@ -42,7 +41,7 @@ import terminus.ui.text
   */
 final class Line(
     val size: Size,
-    style: TextStyle,
+    style: LineStyle,
     value: Reactive[text.Line],
     context: DefaultEvent
 ) extends Component:
@@ -55,7 +54,7 @@ final class Line(
 
   def measure(constraint: Constraint): Dimensions =
     val line = value.peek
-    val insets = activeBoxStyle.insets
+    val insets = activeProps.box.insets
     // The constraint we were given is for the whole box; shrink it to the space
     // available to the text content.
     val inner = insets.deflate(constraint)
@@ -90,21 +89,21 @@ final class Line(
     )
 
   def minIntrinsicWidth(height: Int | Infinity): Int =
-    value.peek.length + activeBoxStyle.insets.horizontal
+    value.peek.length + activeProps.box.insets.horizontal
 
   def maxIntrinsicWidth(height: Int | Infinity): Int =
-    value.peek.length + activeBoxStyle.insets.horizontal
+    value.peek.length + activeProps.box.insets.horizontal
 
   def minIntrinsicHeight(width: Int | Infinity): Int =
-    1 + activeBoxStyle.insets.vertical
+    1 + activeProps.box.insets.vertical
 
   /** Height beyond which the component would not grow, given a width. */
   def maxIntrinsicHeight(width: Int | Infinity): Int =
-    1 + activeBoxStyle.insets.vertical
+    1 + activeProps.box.insets.vertical
 
   def render(dimensions: Dimensions, buf: Buffer): Unit =
-    val ab = activeBoxStyle
-    val ac = activeContentStyle
+    val ab = activeProps.box
+    val ac = activeProps.content
 
     // The component draws from its own origin; the incoming buffer is already a
     // view clipped to this component's slot.
@@ -115,13 +114,10 @@ final class Line(
     val textBuf = buf.view(inner)
     textBuf.putLine(0, 0, value.peek, ac)
 
-  private def activeBoxStyle: BoxStyle =
-    style(context.state).box
-
-  private def activeContentStyle: CellStyle =
-    style(context.state).content
+  private def activeProps: LineProps =
+    style(context.state)
 object Line:
-  def apply(size: Size, style: TextStyle => TextStyle = identity)(
+  def apply(size: Size, style: LineStyle => LineStyle = identity)(
       body: Event ?=> Reactive[text.Line]
   )(using ctx: Layout): Unit =
     ctx.addComponent { runtime =>
@@ -129,5 +125,5 @@ object Line:
       val context = new DefaultEvent(focusId, runtime) {}
       val value = body(using context)
 
-      new Line(size, style(TextStyle.default), value, context)
+      new Line(size, style(LineStyle.default), value, context)
     }

@@ -30,17 +30,41 @@ snapshot. Element-level states (e.g. the highlighted item in `Select`) are
 not covered by the component-level state record; the same `Style` shape can
 be reused there with a per-item state record when needed.
 
+## Naming: Style vs Props
+
+The type names follow the model. A **`*Props`** type is a resolved record of
+properties — plain data, no state, no functions (`CellProps`, `BoxProps`,
+`LayoutProps`, and the per-component records below). A **`*Style`** type is a
+function from component state to props — `Style[State, Props]` or an alias of
+it. Anything that holds resolved properties is named props (`Cell.props`,
+`BoxProps.borderProps`), reserving "style" for the state-selecting layer.
+
+## Per-component styles
+
+Each stateful component has its own props record and style alias:
+`TextProps`/`TextStyle`, `LineProps`/`LineStyle`, `ButtonProps`/`ButtonStyle`,
+`SelectProps`/`SelectStyle`, `TextInputProps`/`TextInputStyle`. Structural
+duplication between them (most have `box` and `content`) is accepted: it keeps
+each component free to evolve its own properties, and the work lands on the
+framework developer once rather than on users. Component-specific slots live
+in the props record — `SelectProps.selected` (the properties of the selected
+item, default inverted) and `TextInputProps.cursor` (the cursor cell, default
+inverted). These slots are plain `CellProps`, not patches over `content`:
+props stay pure data, and relative styling belongs in `Style` rules.
+`Column`/`Row` take a plain `LayoutProps` — they have no state, so there is
+nothing for a `Style` to select on.
+
 ## Style split
 
 Three distinct levels:
 
-- **Cell-level `CellStyle`** — color, bold, italic, underline, etc. Used everywhere, passed directly to `Buffer.putString` / `Buffer.put`. Already implemented.
-- **Component-level style** — padding, border, background fill. Parameters on the component itself, not on `CellStyle`.
+- **Cell-level `CellProps`** — color, bold, italic, underline, etc. Used everywhere, passed directly to `Buffer.putString` / `Buffer.put`. Already implemented.
+- **Component-level style** — padding, border, background fill. Parameters on the component itself, not on `CellProps`.
 - **Parent-context style** — gutters, alignment modes. Expressed through a more specific `LayoutContext` subtype, only accessible when the parent provides it (compile-time enforcement).
 
 ## No cascade
 
-No CSS-style cascade. Scala provides sufficient abstraction (`CellStyle` is a case class, `.copy()` works, shared styles are plain `val`s or functions). A cascade would add action-at-a-distance complexity for no gain. If ambient style context is ever needed, a `using` parameter is the right mechanism.
+No CSS-style cascade. Scala provides sufficient abstraction (`CellProps` is a case class, `.copy()` works, shared styles are plain `val`s or functions). A cascade would add action-at-a-distance complexity for no gain. If ambient style context is ever needed, a `using` parameter is the right mechanism.
 
 ## CSS box model as reference
 
@@ -60,7 +84,7 @@ Separators (horizontal/vertical lines *between* children) are structurally diffe
 
 ## Block vs inline (deferred)
 
-The current `Text` component conflates a block element (box with border, background fill, padding) and an inline element (styled text content). This means `content: CellStyle` has a `bg` field that can diverge from `ComponentStyle.background`, requiring the user to keep them in sync manually.
+The current `Text` component conflates a block element (box with border, background fill, padding) and an inline element (styled text content). This means `content: CellProps` has a `bg` field that can diverge from `BoxProps.background`, requiring the user to keep them in sync manually.
 
 The clean resolution: content style `bg = Color.Default` means "transparent — inherit from the component background", matching CSS's default behaviour. An explicit `bg` on a content style is an intentional override (like a highlighted `<span>`). This requires a concept of cell-style transparency/inheritance, which is deferred until inline/span styling is tackled.
 

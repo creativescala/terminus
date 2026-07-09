@@ -22,18 +22,19 @@ import terminus.ui.capability.Event
 import terminus.ui.component.Button
 import terminus.ui.component.Column
 import terminus.ui.component.Row
+import terminus.ui.component.Line
 import terminus.ui.component.Text
 import terminus.ui.component.TextInput
 import terminus.ui.layout.Measurement
 import terminus.ui.layout.Size
 import terminus.ui.react.Reactive
 import terminus.ui.react.Var
-import terminus.ui.style.BoxStyle
-import terminus.ui.style.CellStyle
+import terminus.ui.style.BoxProps
+import terminus.ui.style.ButtonStyle
+import terminus.ui.style.CellProps
 import terminus.ui.style.Color
-import terminus.ui.style.TextStyle
+import terminus.ui.style.TextInputStyle
 import terminus.ui.style.Underline
-import terminus.ui.text.Line
 
 // To build any of these examples, give sbt the command 'nativeLink'. Sbt will
 // then prompt for the demo to build. The executable will
@@ -81,24 +82,24 @@ private def staticText(s: String) = Var(text.Text(s))
       Column(Size.fixed(24, 9)) {
         Text(
           Size.fixed(24, 3),
-          _.withBox(_.withBorderStyle(CellStyle(fg = Color.Red)))
-            .withContent(CellStyle(fg = Color.Red, bold = true))
+          _.withBox(_.withBorderProps(CellProps(fg = Color.Red)))
+            .withContent(CellProps(fg = Color.Red, bold = true))
         ) { staticText("🔴 Red — 红色") }
         Text(
           Size.fixed(24, 3),
-          _.withBox(_.withBorderStyle(CellStyle(fg = Color.Green)))
-            .withContent(CellStyle(fg = Color.Green, bold = true))
+          _.withBox(_.withBorderProps(CellProps(fg = Color.Green)))
+            .withContent(CellProps(fg = Color.Green, bold = true))
         ) { staticText("🟢 Green — 緑") }
         Text(
           Size.fixed(24, 3),
-          _.withBox(_.withBorderStyle(CellStyle(fg = Color.Blue)))
-            .withContent(CellStyle(fg = Color.Blue, bold = true))
+          _.withBox(_.withBorderProps(CellProps(fg = Color.Blue)))
+            .withContent(CellProps(fg = Color.Blue, bold = true))
         ) { staticText("🔵 Blue — 青色") }
       }
       Text(
         Size.fixed(24, 9),
-        _.withBox(_.withBorderStyle(CellStyle(fg = Color.Yellow)))
-          .withContent(CellStyle(fg = Color.Yellow, bold = true))
+        _.withBox(_.withBorderProps(CellProps(fg = Color.Yellow)))
+          .withContent(CellProps(fg = Color.Yellow, bold = true))
       ) { staticText("Column on the left\nhas coloured\nborders.") }
     }
   }
@@ -181,7 +182,7 @@ private def staticText(s: String) = Var(text.Text(s))
               Text(
                 Size.fixed(1, 1),
                 _.withBox(_.withoutBorder)
-                  .withContent(CellStyle(fg = shade(colour, j)))
+                  .withContent(CellProps(fg = shade(colour, j)))
               ) {
                 Reactive {
                   val n = levels.get.apply(i)
@@ -209,14 +210,14 @@ private def staticText(s: String) = Var(text.Text(s))
   fullScreen.run(NativeTerminal)
 
 @main def textInputDemo(): Unit =
-  val inputStyle = TextStyle.default
-    .withBox(_.withBorderStyle(CellStyle(fg = Color.BrightBlack)))
+  val inputStyle = TextInputStyle.default
+    .withBox(_.withBorderProps(CellProps(fg = Color.BrightBlack)))
     .focused(
-      _.withBox(_.withBorderStyle(CellStyle(fg = Color.White, bold = true)))
+      _.withBox(_.withBorderProps(CellProps(fg = Color.White, bold = true)))
     )
 
   val fullScreen = FullScreen {
-    val name = Var(Line(""))
+    val name = Var(text.Line(""))
 
     Column(Size.fixed(50, 5)) {
       Text(Size.fixed(50, 1), _.withBox(_.withoutBorder)) {
@@ -239,32 +240,34 @@ private def staticText(s: String) = Var(text.Text(s))
 @main def selectDemo(): Unit = ???
 
 @main def buttonDemo(): Unit =
-  val activeBorder: BoxStyle => BoxStyle =
-    s => s.withBorderStyle(_.withForeground(Color.White))
-  val focusedBorder: BoxStyle => BoxStyle =
-    s => s.withBorderStyle(_.withForeground(Color.Blue))
+  val activeBorder: BoxProps => BoxProps =
+    s => s.withBorderProps(_.withForeground(Color.White))
+  val focusedBorder: BoxProps => BoxProps =
+    s => s.withBorderProps(_.withForeground(Color.Blue))
 
-  val buttonStyle = TextStyle.default
+  val buttonStyle = ButtonStyle.default
     .withBox(activeBorder)
     .focused(
       _.withBox(focusedBorder)
         .withContent(_.withForeground(Color.Blue))
     )
     .disabled(
-      _.withBox(_.withBorderStyle(_.withForeground(Color.BrightBlack)))
+      _.withBox(_.withBorderProps(_.withForeground(Color.BrightBlack)))
         .withContent(_.withForeground(Color.BrightBlack))
     )
 
   val fullScreen = FullScreen {
-    val action = Reactive.variable(Line(""))
+    val action = Reactive.variable(text.Line(""))
     val enabled = action.map(_.isNonEmpty)
     val output = Reactive.variable(text.Line(""))
 
-    Column(Size.wrapContent) {
+    Column(Size(Measurement.MinIntrinsic, Measurement.MaxIntrinsic)) {
       Row(Size.wrapContent) {
         TextInput(
           Size(Measurement.Fixed(25), Measurement.WrapContent),
-          _.withBox(activeBorder).focused(_.withBox(focusedBorder)),
+          _.withBox(activeBorder)
+            .withCursor(_.withoutInvert.withUnderline(Underline.Double))
+            .focused(_.withBox(focusedBorder)),
           action
         )
 
@@ -272,15 +275,15 @@ private def staticText(s: String) = Var(text.Text(s))
           ctx.enabledWhen(enabled)
           ctx.onSubmit {
             val a = action.peek
-            action.set(Line(""))
+            action.set(text.Line(""))
             output.set(a)
           }
-          Reactive.constant(Line("< Go >"))
+          Reactive.constant(text.Line("< Go >"))
         }
       }
 
-      Text(Size.wrapContent, identity) { ctx ?=>
-        output.map(_.toText)
+      Line(Size.wrapContent, identity) { ctx ?=>
+        output
       }
     }
   }

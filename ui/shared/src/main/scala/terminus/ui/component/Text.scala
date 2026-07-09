@@ -31,8 +31,7 @@ import terminus.ui.layout.Measurement
 import terminus.ui.layout.Rect
 import terminus.ui.layout.Size
 import terminus.ui.react.Reactive
-import terminus.ui.style.BoxStyle
-import terminus.ui.style.CellStyle
+import terminus.ui.style.TextProps
 import terminus.ui.style.TextStyle
 import terminus.ui.text
 import terminus.ui.text.Line
@@ -52,7 +51,7 @@ final class Text(
 
   def measure(constraint: Constraint): Dimensions =
     val t = value.peek
-    val insets = activeBoxStyle.insets
+    val insets = activeProps.box.insets
     // The constraint we were given is for the whole box; shrink it to the space
     // available to the text content.
     val inner = insets.deflate(constraint)
@@ -99,12 +98,12 @@ final class Text(
         .map(word => Line(word).width)
         .maxOption
         .getOrElse(0)
-    widestWord + activeBoxStyle.insets.horizontal
+    widestWord + activeProps.box.insets.horizontal
 
   def maxIntrinsicWidth(height: Int | Infinity): Int =
     // Text never grows wider than its widest unwrapped line, whatever the
     // available height.
-    naturalContentWidth + activeBoxStyle.insets.horizontal
+    naturalContentWidth + activeProps.box.insets.horizontal
 
   def minIntrinsicHeight(width: Int | Infinity): Int =
     // Text height is fully determined by width, so the minimum and maximum
@@ -112,7 +111,7 @@ final class Text(
     maxIntrinsicHeight(width)
 
   def maxIntrinsicHeight(width: Int | Infinity): Int =
-    val insets = activeBoxStyle.insets
+    val insets = activeProps.box.insets
     val lineCount =
       width match
         case Infinity => value.peek.lines.length
@@ -121,8 +120,8 @@ final class Text(
     lineCount + insets.vertical
 
   def render(dimensions: Dimensions, buf: Buffer): Unit =
-    val ab = activeBoxStyle
-    val ac = activeContentStyle
+    val ab = activeProps.box
+    val ac = activeProps.content
 
     // The component draws from its own origin; the incoming buffer is already a
     // view clipped to this component's slot.
@@ -141,11 +140,8 @@ final class Text(
   private def naturalContentWidth: Int =
     value.peek.lines.map(_.width).maxOption.getOrElse(0)
 
-  private def activeBoxStyle: BoxStyle =
-    style(context.state).box
-
-  private def activeContentStyle: CellStyle =
-    style(context.state).content
+  private def activeProps: TextProps =
+    style(context.state)
 object Text:
   def apply(size: Size, style: TextStyle => TextStyle = identity)(
       body: Event ?=> Reactive[text.Text]

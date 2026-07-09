@@ -17,7 +17,7 @@
 package terminus.ui.style
 
 /** Styling attributes for a single terminal cell. */
-final case class CellStyle(
+final case class CellProps(
     fg: Color = Color.Default,
     bg: Color = Color.Default,
     bold: Boolean = false,
@@ -27,46 +27,46 @@ final case class CellStyle(
     strikethrough: Boolean = false,
     blink: Boolean = false
 ):
-  def withForeground(color: Color): CellStyle =
+  def withForeground(color: Color): CellProps =
     this.copy(fg = color)
 
-  def withBackground(color: Color): CellStyle =
+  def withBackground(color: Color): CellProps =
     this.copy(bg = color)
 
-  def withBold: CellStyle =
+  def withBold: CellProps =
     this.copy(bold = true)
 
-  def withoutBold: CellStyle =
+  def withoutBold: CellProps =
     this.copy(bold = false)
 
-  def withItalic: CellStyle =
+  def withItalic: CellProps =
     this.copy(italic = true)
 
-  def withoutItalic: CellStyle =
+  def withoutItalic: CellProps =
     this.copy(italic = false)
 
-  def withUnderline(underline: Underline): CellStyle =
+  def withUnderline(underline: Underline): CellProps =
     this.copy(underline = underline)
 
-  def withoutUnderline: CellStyle =
+  def withoutUnderline: CellProps =
     this.copy(underline = Underline.None)
 
-  def withInvert: CellStyle =
+  def withInvert: CellProps =
     this.copy(invert = true)
 
-  def withoutInvert: CellStyle =
+  def withoutInvert: CellProps =
     this.copy(invert = false)
 
-  def withStrikethrough: CellStyle =
+  def withStrikethrough: CellProps =
     this.copy(strikethrough = true)
 
-  def withoutStrikethrough: CellStyle =
+  def withoutStrikethrough: CellProps =
     this.copy(strikethrough = false)
 
-  def withBlink: CellStyle =
+  def withBlink: CellProps =
     this.copy(blink = true)
 
-  def withoutBlink: CellStyle =
+  def withoutBlink: CellProps =
     this.copy(blink = false)
-object CellStyle:
-  val default: CellStyle = CellStyle()
+object CellProps:
+  val default: CellProps = CellProps()

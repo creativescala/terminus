@@ -32,13 +32,13 @@ import terminus.ui.layout.Rect
 import terminus.ui.layout.Size
 import terminus.ui.style.Align
 import terminus.ui.style.Justify
-import terminus.ui.style.LayoutStyle
+import terminus.ui.style.LayoutProps
 
 import scala.collection.Seq
 
 final class Column(
     val size: Size,
-    layoutStyle: LayoutStyle = LayoutStyle.default,
+    layoutProps: LayoutProps = LayoutProps.default,
     context: DefaultEvent & DefaultLayout
 ) extends Component:
 
@@ -106,7 +106,7 @@ final class Column(
     val freeSpace = (dimensions.height - mainHeights.sum).max(0)
     val n = children.size
 
-    val (startOffset, gap) = layoutStyle.justify match
+    val (startOffset, gap) = layoutProps.justify match
       case Justify.Start        => (0, 0)
       case Justify.End          => (freeSpace, 0)
       case Justify.Center       => (freeSpace / 2, 0)
@@ -122,7 +122,7 @@ final class Column(
     children.zip(mainHeights).foreach { (child, h) =>
       if h > 0 then
         val w = child.measure(childCrossConstraint(h, dimensions.width)).width
-        val x = layoutStyle.align match
+        val x = layoutProps.align match
           case Align.Stretch => 0
           case Align.Start   => 0
           case Align.End     => dimensions.width - w
@@ -206,7 +206,7 @@ final class Column(
       height: Int,
       crossBound: Int | Infinity
   ): Constraint =
-    layoutStyle.align match
+    layoutProps.align match
       case Align.Stretch =>
         crossBound match
           case Infinity   => Constraint(0, Infinity, height, height)
@@ -214,7 +214,7 @@ final class Column(
       case _ => Constraint(0, crossBound, height, height)
 
 object Column:
-  def apply(size: Size, style: LayoutStyle => LayoutStyle = identity)(
+  def apply(size: Size, style: LayoutProps => LayoutProps = identity)(
       body: Event & Layout ?=> Unit
   )(using ctx: Layout): Unit =
     ctx.addComponent { runtime =>
@@ -224,5 +224,5 @@ object Column:
       // Evaluate body here so we do not retain a reference to it and it can be garbage collected.
       body(using context)
 
-      new Column(size, style(LayoutStyle.default), context)
+      new Column(size, style(LayoutProps.default), context)
     }

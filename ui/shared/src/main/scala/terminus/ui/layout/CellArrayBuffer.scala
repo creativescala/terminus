@@ -19,7 +19,7 @@ package terminus.ui.layout
 import terminus.effect.AnsiCodes
 import terminus.effect.Cursor
 import terminus.effect.Writer
-import terminus.ui.style.CellStyle
+import terminus.ui.style.CellProps
 import terminus.ui.style.Color
 import terminus.ui.style.Underline
 import terminus.ui.text.Line
@@ -63,7 +63,7 @@ final class CellArrayBuffer(val width: Int, val height: Int) extends Buffer:
     * marks, variation selectors, ZWJ) are skipped; full grapheme cluster
     * composition is not currently supported. Clips to buffer bounds.
     */
-  override def putLine(x: Int, y: Int, l: Line, style: CellStyle): Unit =
+  override def putLine(x: Int, y: Int, l: Line, props: CellProps): Unit =
     val s = l.value
     var col = x
     var i = 0
@@ -86,10 +86,10 @@ final class CellArrayBuffer(val width: Int, val height: Int) extends Buffer:
       CharWidth.of(cp) match
         case 0 => () // zero-width: skip
         case 1 =>
-          put(col, y, Cell(cp, style))
+          put(col, y, Cell(cp, props))
           col += 1
         case _ => // 2
-          put(col, y, Cell(cp, style))
+          put(col, y, Cell(cp, props))
           put(col + 1, y, Cell.continuation)
           col += 2
 
@@ -98,14 +98,14 @@ final class CellArrayBuffer(val width: Int, val height: Int) extends Buffer:
 
   /** Flush the entire buffer to the terminal.
     *
-    * Iterates cells row by row, emitting SGR attribute codes only when style
-    * changes, and using absolute cursor positioning at the start of each row.
-    * Continuation cells (right half of wide characters) are skipped. Emits a
-    * full SGR reset before and after rendering.
+    * Iterates cells row by row, emitting SGR attribute codes only when the
+    * props changes, and using absolute cursor positioning at the start of each
+    * row. Continuation cells (right half of wide characters) are skipped. Emits
+    * a full SGR reset before and after rendering.
     */
   def render(using t: Cursor & Writer): Unit =
     t.write(AnsiCodes.sgr("0"))
-    var currentStyle = CellStyle.default
+    var currentProps = CellProps.default
     var y = 0
     while y < height do
       t.cursor.to(1, y + 1) // 1-based terminal coordinates
@@ -113,7 +113,7 @@ final class CellArrayBuffer(val width: Int, val height: Int) extends Buffer:
       while x < width do
         val cell = cells(y * width + x)
         if cell.codePoint != 0 then // skip continuation cells
-          currentStyle = emitStyle(currentStyle, cell.style)
+          currentProps = emitProps(currentProps, cell.props)
           t.write(new String(Character.toChars(cell.codePoint)))
         x += 1
       y += 1
@@ -138,7 +138,7 @@ final class CellArrayBuffer(val width: Int, val height: Int) extends Buffer:
       s"Buffer dimensions must match for diff render: ${width}x${height} vs ${previous.width}x${previous.height}"
     )
     t.write(AnsiCodes.sgr("0"))
-    var currentStyle = CellStyle.default
+    var currentProps = CellProps.default
     // Track where the terminal cursor currently is (0-based).
     // (-1, -1) means "unknown / needs explicit move".
     var cursorX = -1
@@ -153,7 +153,7 @@ final class CellArrayBuffer(val width: Int, val height: Int) extends Buffer:
           if curr.codePoint != 0 then // skip continuation cells
             if !(cursorX == x && cursorY == y) then
               t.cursor.to(x + 1, y + 1) // 1-based
-            currentStyle = emitStyle(currentStyle, curr.style)
+            currentProps = emitProps(currentProps, curr.props)
             t.write(new String(Character.toChars(curr.codePoint)))
             // Wide chars advance the cursor by 2; narrow by 1
             val advance = CharWidth.of(curr.codePoint).max(1)
@@ -165,11 +165,11 @@ final class CellArrayBuffer(val width: Int, val height: Int) extends Buffer:
     t.flush()
 
   /** Emit SGR codes for any attributes that differ between [[from]] and [[to]],
-    * and return [[to]] as the new current style.
+    * and return [[to]] as the new current props.
     */
-  private def emitStyle(from: CellStyle, to: CellStyle)(using
+  private def emitProps(from: CellProps, to: CellProps)(using
       t: Writer
-  ): CellStyle =
+  ): CellProps =
     if to != from then
       if to.fg != from.fg then t.write(fgCode(to.fg))
       if to.bg != from.bg then t.write(bgCode(to.bg))

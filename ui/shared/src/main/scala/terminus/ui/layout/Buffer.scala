@@ -16,7 +16,7 @@
 
 package terminus.ui.layout
 
-import terminus.ui.style.CellStyle
+import terminus.ui.style.CellProps
 import terminus.ui.text.Line
 
 /** Represents a writable two-dimensional array of [[Cell]]. */
@@ -61,7 +61,7 @@ trait Buffer:
     * translation. Implementations may override for efficiency but must preserve
     * these semantics.
     */
-  def putLine(x: Int, y: Int, l: Line, style: CellStyle): Unit =
+  def putLine(x: Int, y: Int, l: Line, props: CellProps): Unit =
     val s = l.value
     var col = x
     var i = 0
@@ -72,10 +72,10 @@ trait Buffer:
       CharWidth.of(cp) match
         case 0 => () // zero-width: skip
         case 1 =>
-          put(col, y, Cell(cp, style))
+          put(col, y, Cell(cp, props))
           col += 1
         case _ => // 2
-          put(col, y, Cell(cp, style))
+          put(col, y, Cell(cp, props))
           put(col + 1, y, Cell.continuation)
           col += 2
 

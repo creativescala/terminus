@@ -31,9 +31,8 @@ import terminus.ui.layout.Measurement
 import terminus.ui.layout.Rect
 import terminus.ui.layout.Size
 import terminus.ui.react.Var
-import terminus.ui.style.BoxStyle
-import terminus.ui.style.CellStyle
-import terminus.ui.style.TextStyle
+import terminus.ui.style.SelectProps
+import terminus.ui.style.SelectStyle
 import terminus.ui.text.Line
 
 /** A scrollable selection list component.
@@ -49,12 +48,12 @@ import terminus.ui.text.Line
   *
   * Key bindings: Up/Down move one item, PageUp/PageDown move one page, Home/End
   * jump to first/last item. The viewport scrolls to keep the selected item
-  * visible. The selected item is highlighted by inverting the content style;
-  * all other items use the content style unchanged.
+  * visible. The selected item is rendered with the selected properties; all
+  * other items use the content properties.
   */
 final class Select[A](
     val size: Size,
-    style: TextStyle,
+    style: SelectStyle,
     items: Seq[A],
     selected: Var[Int],
     label: A => String,
@@ -69,7 +68,7 @@ final class Select[A](
   private def visibleRows: Int =
     size.height match
       case Measurement.Fixed(cells) =>
-        (cells - activeBoxStyle.insets.vertical).max(0)
+        (cells - activeProps.box.insets.vertical).max(0)
       case _ => 0
 
   private def scrollToShow(sel: Int): Unit =
@@ -116,7 +115,7 @@ final class Select[A](
     ()
 
   def measure(constraint: Constraint): Dimensions =
-    val insets = activeBoxStyle.insets
+    val insets = activeProps.box.insets
     val inner = insets.deflate(constraint)
 
     val targetWidth =
@@ -143,20 +142,20 @@ final class Select[A](
     )
 
   def minIntrinsicWidth(height: Int | Infinity): Int =
-    naturalWidth + activeBoxStyle.insets.horizontal
+    naturalWidth + activeProps.box.insets.horizontal
 
   def maxIntrinsicWidth(height: Int | Infinity): Int =
-    naturalWidth + activeBoxStyle.insets.horizontal
+    naturalWidth + activeProps.box.insets.horizontal
 
   def minIntrinsicHeight(width: Int | Infinity): Int =
-    items.length + activeBoxStyle.insets.vertical
+    items.length + activeProps.box.insets.vertical
 
   def maxIntrinsicHeight(width: Int | Infinity): Int =
-    items.length + activeBoxStyle.insets.vertical
+    items.length + activeProps.box.insets.vertical
 
   def render(dimensions: Dimensions, buf: Buffer): Unit =
-    val ab = activeBoxStyle
-    val ac = activeContentStyle
+    val ab = activeProps.box
+    val ac = activeProps.content
 
     // The component draws from its own origin; the incoming buffer is already a
     // view clipped to this component's slot.
@@ -174,18 +173,15 @@ final class Select[A](
       if itemIdx < items.length then
         val raw = label(items(itemIdx))
         val line = Line(raw.take(inner.width).padTo(inner.width, ' '))
-        val itemStyle = if itemIdx == sel then ac.withInvert else ac
-        buf.putLine(inner.x, inner.y + row, line, itemStyle)
+        val itemProps = if itemIdx == sel then activeProps.selected else ac
+        buf.putLine(inner.x, inner.y + row, line, itemProps)
       row += 1
 
   private def naturalWidth: Int =
     items.map(a => Line(label(a)).width).maxOption.getOrElse(0)
 
-  private def activeBoxStyle: BoxStyle =
-    style(context.state).box
-
-  private def activeContentStyle: CellStyle =
-    style(context.state).content
+  private def activeProps: SelectProps =
+    style(context.state)
 
 object Select:
   /** @param label
@@ -193,7 +189,7 @@ object Select:
     */
   def apply[A](
       size: Size,
-      style: TextStyle => TextStyle = identity,
+      style: SelectStyle => SelectStyle = identity,
       items: Seq[A],
       selected: Var[Int],
       label: A => String = (a: A) => a.toString
@@ -203,7 +199,7 @@ object Select:
       val context = new DefaultEvent(focusId, runtime) {}
       new Select(
         size,
-        style(TextStyle.default),
+        style(SelectStyle.default),
         items,
         selected,
         label,

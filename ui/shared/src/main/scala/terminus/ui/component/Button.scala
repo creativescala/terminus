@@ -35,9 +35,8 @@ import terminus.ui.layout.Rect
 import terminus.ui.layout.Size
 import terminus.ui.react.Constant
 import terminus.ui.react.Reactive
-import terminus.ui.style.BoxStyle
-import terminus.ui.style.CellStyle
-import terminus.ui.style.TextStyle
+import terminus.ui.style.ButtonProps
+import terminus.ui.style.ButtonStyle
 import terminus.ui.text.Line
 
 /** A single-line button, activated with Enter or Space.
@@ -59,7 +58,7 @@ import terminus.ui.text.Line
   */
 final class Button(
     val size: Size,
-    style: TextStyle,
+    style: ButtonStyle,
     label: Reactive[Line],
     context: DefaultEvent
 ) extends Component:
@@ -71,7 +70,7 @@ final class Button(
     ()
 
   def measure(constraint: Constraint): Dimensions =
-    val insets = activeBoxStyle.insets
+    val insets = activeProps.box.insets
     val inner = insets.deflate(constraint)
 
     val targetWidth =
@@ -98,20 +97,20 @@ final class Button(
     )
 
   def minIntrinsicWidth(height: Int | Infinity): Int =
-    naturalWidth + activeBoxStyle.insets.horizontal
+    naturalWidth + activeProps.box.insets.horizontal
 
   def maxIntrinsicWidth(height: Int | Infinity): Int =
-    naturalWidth + activeBoxStyle.insets.horizontal
+    naturalWidth + activeProps.box.insets.horizontal
 
   def minIntrinsicHeight(width: Int | Infinity): Int =
-    1 + activeBoxStyle.insets.vertical
+    1 + activeProps.box.insets.vertical
 
   def maxIntrinsicHeight(width: Int | Infinity): Int =
-    1 + activeBoxStyle.insets.vertical
+    1 + activeProps.box.insets.vertical
 
   def render(dimensions: Dimensions, buf: Buffer): Unit =
-    val ab = activeBoxStyle
-    val ac = activeContentStyle
+    val ab = activeProps.box
+    val ac = activeProps.content
 
     // The component draws from its own origin; the incoming buffer is already a
     // view clipped to this component's slot.
@@ -126,14 +125,11 @@ final class Button(
 
   private def naturalWidth: Int = label.peek.width
 
-  private def activeBoxStyle: BoxStyle =
-    style(context.state).box
-
-  private def activeContentStyle: CellStyle =
-    style(context.state).content
+  private def activeProps: ButtonProps =
+    style(context.state)
 
 object Button:
-  def apply(size: Size, style: TextStyle => TextStyle = identity)(
+  def apply(size: Size, style: ButtonStyle => ButtonStyle = identity)(
       body: Event & Submit[Unit] ?=> Reactive[Line]
   )(using ctx: Layout): Unit =
     ctx.addComponent { runtime =>
@@ -147,5 +143,5 @@ object Button:
         ) {}
       val label = body(using context)
 
-      new Button(size, style(TextStyle.default), label, context)
+      new Button(size, style(ButtonStyle.default), label, context)
     }

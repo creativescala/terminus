@@ -32,13 +32,13 @@ import terminus.ui.layout.Rect
 import terminus.ui.layout.Size
 import terminus.ui.style.Align
 import terminus.ui.style.Justify
-import terminus.ui.style.LayoutStyle
+import terminus.ui.style.LayoutProps
 
 import scala.collection.Seq
 
 final class Row(
     val size: Size,
-    layoutStyle: LayoutStyle = LayoutStyle.default,
+    layoutProps: LayoutProps = LayoutProps.default,
     context: DefaultEvent & DefaultLayout
 ) extends Component:
 
@@ -106,7 +106,7 @@ final class Row(
     val freeSpace = (dimensions.width - mainWidths.sum).max(0)
     val n = children.size
 
-    val (startOffset, gap) = layoutStyle.justify match
+    val (startOffset, gap) = layoutProps.justify match
       case Justify.Start        => (0, 0)
       case Justify.End          => (freeSpace, 0)
       case Justify.Center       => (freeSpace / 2, 0)
@@ -122,7 +122,7 @@ final class Row(
     children.zip(mainWidths).foreach { (child, w) =>
       if w > 0 then
         val h = child.measure(childCrossConstraint(w, dimensions.height)).height
-        val y = layoutStyle.align match
+        val y = layoutProps.align match
           case Align.Stretch => 0
           case Align.Start   => 0
           case Align.End     => dimensions.height - h
@@ -211,7 +211,7 @@ final class Row(
       width: Int,
       crossBound: Int | Infinity
   ): Constraint =
-    layoutStyle.align match
+    layoutProps.align match
       case Align.Stretch =>
         crossBound match
           case Infinity   => Constraint(width, width, 0, Infinity)
@@ -221,7 +221,7 @@ final class Row(
 object Row:
   def apply(
       size: Size,
-      style: LayoutStyle => LayoutStyle = identity
+      style: LayoutProps => LayoutProps = identity
   )(body: Event & Layout ?=> Unit)(using
       ctx: Layout
   ): Unit =
@@ -232,5 +232,5 @@ object Row:
       // Evaluate body here so we do not retain a reference to it and it can be garbage collected.
       body(using context)
 
-      new Row(size, style(LayoutStyle.default), context)
+      new Row(size, style(LayoutProps.default), context)
     }

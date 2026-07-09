@@ -33,9 +33,9 @@ import terminus.ui.layout.Rect
 import terminus.ui.layout.Size
 import terminus.ui.runtime.Runtime
 import terminus.ui.style.Align
-import terminus.ui.style.CellStyle
+import terminus.ui.style.CellProps
 import terminus.ui.style.Justify
-import terminus.ui.style.LayoutStyle
+import terminus.ui.style.LayoutProps
 
 /** Tests focused on [[Column]] layout. Components now render from their own
   * origin into a view the parent clips to their slot, so a child cannot observe
@@ -80,7 +80,7 @@ class ColumnSuite extends FunSuite:
       rendered = Some(dimensions)
       buf.fill(
         Rect(0, 0, dimensions.width, dimensions.height),
-        Cell(mark, CellStyle.default)
+        Cell(mark, CellProps.default)
       )
 
   // Each recorder gets a distinct code point so its cells are identifiable in
@@ -104,7 +104,7 @@ class ColumnSuite extends FunSuite:
     children.foreach(child => ctx.addComponent(_ => child))
     ctx
 
-  def column(size: Size, style: LayoutStyle = LayoutStyle.default)(
+  def column(size: Size, style: LayoutProps = LayoutProps.default)(
       children: Component*
   ): Column =
     new Column(size, style, contextOf(children*))
@@ -304,7 +304,7 @@ class ColumnSuite extends FunSuite:
   do
     test(s"Justify.$j keeps children apart and within bounds") {
       val a, b, c = fixed(1, 1)
-      val col = column(Size.fixed(1, 9), LayoutStyle(justify = j))(a, b, c)
+      val col = column(Size.fixed(1, 9), LayoutProps(justify = j))(a, b, c)
       val buf = render(col, Rect(0, 0, 1, 9))
       assertNoOverlap(buf, a, b, c)
       assertWithin(Rect(0, 0, 1, 9), buf, a, b, c)
@@ -316,7 +316,7 @@ class ColumnSuite extends FunSuite:
 
   test("Align.Start places a narrow child at the left edge") {
     val a = fixed(2, 1)
-    val col = column(Size.fixed(6, 1), LayoutStyle(align = Align.Start))(a)
+    val col = column(Size.fixed(6, 1), LayoutProps(align = Align.Start))(a)
     assertEquals(
       rectOf(render(col, Rect(0, 0, 6, 1)), a.mark),
       Some(Rect(0, 0, 2, 1))
@@ -325,7 +325,7 @@ class ColumnSuite extends FunSuite:
 
   test("Align.Center centres a narrow child on the cross axis") {
     val a = fixed(2, 1)
-    val col = column(Size.fixed(6, 1), LayoutStyle(align = Align.Center))(a)
+    val col = column(Size.fixed(6, 1), LayoutProps(align = Align.Center))(a)
     assertEquals(
       rectOf(render(col, Rect(0, 0, 6, 1)), a.mark),
       Some(Rect(2, 0, 2, 1))
@@ -334,7 +334,7 @@ class ColumnSuite extends FunSuite:
 
   test("Align.End places a narrow child at the right edge") {
     val a = fixed(2, 1)
-    val col = column(Size.fixed(6, 1), LayoutStyle(align = Align.End))(a)
+    val col = column(Size.fixed(6, 1), LayoutProps(align = Align.End))(a)
     assertEquals(
       rectOf(render(col, Rect(0, 0, 6, 1)), a.mark),
       Some(Rect(4, 0, 2, 1))
@@ -343,7 +343,7 @@ class ColumnSuite extends FunSuite:
 
   test("Align.Stretch widens a child to the column width") {
     val a = fixed(2, 1)
-    val col = column(Size.fixed(6, 1), LayoutStyle(align = Align.Stretch))(a)
+    val col = column(Size.fixed(6, 1), LayoutProps(align = Align.Stretch))(a)
     assertEquals(
       rectOf(render(col, Rect(0, 0, 6, 1)), a.mark),
       Some(Rect(0, 0, 6, 1))

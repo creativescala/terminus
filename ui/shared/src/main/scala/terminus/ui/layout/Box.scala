@@ -16,15 +16,15 @@
 
 package terminus.ui.layout
 
-import terminus.ui.style.BoxStyle
+import terminus.ui.style.BoxProps
 
 object Box:
 
   /** The content rect inside a box: bounds shrunk by one cell for the border
     * (if present) and then by [[ComponentStyle.padding]] on each side.
     */
-  def innerRect(bounds: Rect, style: BoxStyle): Rect =
-    val offset = (if style.border.isDefined then 1 else 0) + style.padding
+  def innerRect(bounds: Rect, props: BoxProps): Rect =
+    val offset = (if props.border.isDefined then 1 else 0) + props.padding
     Rect(
       bounds.x + offset,
       bounds.y + offset,
@@ -34,14 +34,14 @@ object Box:
 
   /** Draw a box into the buffer at the given bounds.
     *
-    * Fills the interior with the background style, then draws the border (if
-    * present) using the border style. The minimum usable size when a border is
+    * Fills the interior with the background props, then draws the border (if
+    * present) using the border props. The minimum usable size when a border is
     * present is 2×2. Out-of-bounds writes are silently clipped by the buffer.
     */
-  def render(bounds: Rect, style: BoxStyle, buf: Buffer): Unit =
-    val borderOffset = if style.border.isDefined then 1 else 0
+  def render(bounds: Rect, props: BoxProps, buf: Buffer): Unit =
+    val borderOffset = if props.border.isDefined then 1 else 0
 
-    // Fill interior with background style
+    // Fill interior with the background props
     val fillRect = Rect(
       bounds.x + borderOffset,
       bounds.y + borderOffset,
@@ -49,15 +49,15 @@ object Box:
       bounds.height - 2 * borderOffset
     )
     if fillRect.width > 0 && fillRect.height > 0 then
-      buf.fill(fillRect, Cell(' '.toInt, style.background))
+      buf.fill(fillRect, Cell(' '.toInt, props.background))
 
     // Draw border if present
-    style.border.foreach { border =>
+    props.border.foreach { border =>
       val x0 = bounds.x
       val y0 = bounds.y
       val x1 = bounds.x + bounds.width - 1
       val y1 = bounds.y + bounds.height - 1
-      val bs = style.borderStyle
+      val bs = props.borderProps
 
       // Top row
       buf.put(x0, y0, Cell(border.topLeft.toInt, bs))

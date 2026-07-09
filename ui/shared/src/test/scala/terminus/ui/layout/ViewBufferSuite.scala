@@ -20,7 +20,7 @@ import munit.FunSuite
 import terminus.StringBuilderTerminal
 import terminus.effect.AnsiCodes
 import terminus.ui.Terminal
-import terminus.ui.style.CellStyle
+import terminus.ui.style.CellProps
 import terminus.ui.text.Line
 
 /** Exercises [[ViewBuffer]] through a backing [[CellArrayBuffer]]. The point of
@@ -44,7 +44,7 @@ class ViewBufferSuite extends FunSuite:
 
   def renderFull(buf: CellArrayBuffer): String = capture(buf.render)
 
-  def cell(c: Char): Cell = Cell(c.toInt, CellStyle.default)
+  def cell(c: Char): Cell = Cell(c.toInt, CellProps.default)
 
   // ---------------------------------------------------------------------------
   // put — translation and horizontal clipping
@@ -116,7 +116,7 @@ class ViewBufferSuite extends FunSuite:
     val backing = CellArrayBuffer(6, 1)
     val view = backing.view(Rect(2, 0, 2, 1))
     // "ABCD" starts at absolute (2,0); C and D fall outside the 2-wide view.
-    view.putLine(0, 0, Line("ABCD"), CellStyle.default)
+    view.putLine(0, 0, Line("ABCD"), CellProps.default)
     val out = renderFull(backing)
     assertEquals(
       out,
@@ -128,7 +128,7 @@ class ViewBufferSuite extends FunSuite:
     val backing = CellArrayBuffer(5, 1)
     val view = backing.view(Rect(1, 0, 3, 1))
     // 😀 is width 2 (absolute (1,0) + continuation at (2,0)), then X at (3,0).
-    view.putLine(0, 0, Line("😀X"), CellStyle.default)
+    view.putLine(0, 0, Line("😀X"), CellProps.default)
     // The continuation cell (codePoint 0) is skipped by render.
     val out = renderFull(backing)
     assertEquals(

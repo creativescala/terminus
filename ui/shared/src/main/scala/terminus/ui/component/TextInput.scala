@@ -34,8 +34,8 @@ import terminus.ui.layout.Measurement
 import terminus.ui.layout.Rect
 import terminus.ui.layout.Size
 import terminus.ui.react.Var
-import terminus.ui.style.BoxStyle
-import terminus.ui.style.TextStyle
+import terminus.ui.style.TextInputProps
+import terminus.ui.style.TextInputStyle
 import terminus.ui.text
 import terminus.ui.text.Line
 
@@ -59,7 +59,7 @@ import terminus.ui.text.Line
   */
 final class TextInput(
     val size: Size,
-    style: TextStyle = TextStyle.default,
+    style: TextInputStyle = TextInputStyle.default,
     value: Var[Line],
     context: DefaultEvent
 ) extends Component:
@@ -112,7 +112,7 @@ final class TextInput(
 
   def measure(constraint: Constraint): Dimensions =
     val line = value.peek
-    val insets = activeBoxStyle.insets
+    val insets = activeProps.box.insets
     // The constraint we were given is for the whole box; shrink it to the space
     // available to the text content.
     val inner = insets.deflate(constraint)
@@ -151,17 +151,17 @@ final class TextInput(
 
   def maxIntrinsicWidth(height: Int | Infinity): Int =
     // By definition this component is a single line
-    value.peek.width + activeBoxStyle.insets.horizontal
+    value.peek.width + activeProps.box.insets.horizontal
 
   def minIntrinsicHeight(width: Int | Infinity): Int =
     maxIntrinsicHeight(width)
 
   def maxIntrinsicHeight(width: Int | Infinity): Int =
-    activeBoxStyle.insets.vertical + 1
+    activeProps.box.insets.vertical + 1
 
   def render(dimensions: Dimensions, buf: Buffer): Unit =
-    val ab = activeBoxStyle
-    val ac = activeContentStyle
+    val ab = activeProps.box
+    val ac = activeProps.content
 
     // The component draws from its own origin; the incoming buffer is already a
     // view clipped to this component's slot.
@@ -191,23 +191,20 @@ final class TextInput(
         buf.put(
           inner.x + cursorCol,
           inner.y,
-          Cell(cursorChar.toInt, ac.withInvert)
+          Cell(cursorChar.toInt, activeProps.cursor)
         )
 
-  private def activeBoxStyle: BoxStyle =
-    style(context.state).box
-
-  private def activeContentStyle =
-    style(context.state).content
+  private def activeProps: TextInputProps =
+    style(context.state)
 
 object TextInput:
   def apply(
       size: Size,
-      style: TextStyle => TextStyle = identity,
+      style: TextInputStyle => TextInputStyle = identity,
       value: Var[Line]
   )(using ctx: Layout): Unit =
     ctx.addComponent { runtime =>
       val focusId = FocusId.next
       val context = new DefaultEvent(focusId, runtime) {}
-      new TextInput(size, style(TextStyle.default), value, context)
+      new TextInput(size, style(TextInputStyle.default), value, context)
     }
