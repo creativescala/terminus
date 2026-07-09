@@ -16,7 +16,9 @@
 
 package terminus.ui.style
 
-/** Trait for style types that can be copied, allowing copy-on-write semantics.
+/** A Rule is a predicate on the component's state (`State`) and a patch to
+  * apply when the predicate holds.
   */
-trait WithCopy[A]:
-  def copy(): A
+final class Rule[-State, Props](pred: State => Boolean, patch: Props => Props):
+  def apply(state: State, props: Props): Props =
+    if pred(state) then patch(props) else props

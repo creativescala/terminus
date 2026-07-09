@@ -27,3 +27,7 @@ object Size:
     Size(Measurement.Fixed(width), Measurement.Fixed(height))
 
   val zero: Size = fixed(0, 0)
+
+  /** Wrap content in both dimensions. */
+  val wrapContent: Size =
+    Size(Measurement.WrapContent, Measurement.WrapContent)

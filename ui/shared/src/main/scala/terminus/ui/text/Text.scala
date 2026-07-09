@@ -40,6 +40,9 @@ object Text:
     // unsafe avoids sanitizing strings that are already sanitized
     normalized.split("\n", -1).iterator.map(Line.apply).toVector
 
+  def fromLine(l: Line): Text =
+    Vector(l)
+
   extension (text: Text)
 
     /** The logical lines, with hard breaks preserved and no soft wrapping. */

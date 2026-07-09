@@ -40,6 +40,10 @@ sealed trait Reactive[A]:
     Reactive { f(this.get) }
 
 object Reactive:
+  def variable[A](value: A): Var[A] = Var(value)
+
+  def constant[A](constant: A): Reactive[A] = Constant(constant)
+
   def apply[A](thunk: React ?=> A): Reactive[A] = Computed(thunk)
 
   extension [A](nested: Reactive[Reactive[A]])

@@ -19,17 +19,21 @@ package terminus.ui
 import terminus.Key
 import terminus.NativeTerminal
 import terminus.ui.capability.Event
+import terminus.ui.component.Button
 import terminus.ui.component.Column
 import terminus.ui.component.Row
 import terminus.ui.component.Text
 import terminus.ui.component.TextInput
+import terminus.ui.layout.Measurement
 import terminus.ui.layout.Size
 import terminus.ui.react.Reactive
 import terminus.ui.react.Var
+import terminus.ui.style.BoxStyle
 import terminus.ui.style.CellStyle
 import terminus.ui.style.Color
 import terminus.ui.style.TextStyle
 import terminus.ui.style.Underline
+import terminus.ui.text.Line
 
 // To build any of these examples, give sbt the command 'nativeLink'. Sbt will
 // then prompt for the demo to build. The executable will
@@ -207,12 +211,12 @@ private def staticText(s: String) = Var(text.Text(s))
 @main def textInputDemo(): Unit =
   val inputStyle = TextStyle.default
     .withBox(_.withBorderStyle(CellStyle(fg = Color.BrightBlack)))
-    .withFocus(
+    .focused(
       _.withBox(_.withBorderStyle(CellStyle(fg = Color.White, bold = true)))
     )
 
   val fullScreen = FullScreen {
-    val name = Var(text.Line(""))
+    val name = Var(Line(""))
 
     Column(Size.fixed(50, 5)) {
       Text(Size.fixed(50, 1), _.withBox(_.withoutBorder)) {
@@ -233,3 +237,52 @@ private def staticText(s: String) = Var(text.Text(s))
 // TODO: port to the new component APIs (Select already has apply — this one
 // is no longer blocked, just not yet rewritten).
 @main def selectDemo(): Unit = ???
+
+@main def buttonDemo(): Unit =
+  val activeBorder: BoxStyle => BoxStyle =
+    s => s.withBorderStyle(_.withForeground(Color.White))
+  val focusedBorder: BoxStyle => BoxStyle =
+    s => s.withBorderStyle(_.withForeground(Color.Blue))
+
+  val buttonStyle = TextStyle.default
+    .withBox(activeBorder)
+    .focused(
+      _.withBox(focusedBorder)
+        .withContent(_.withForeground(Color.Blue))
+    )
+    .disabled(
+      _.withBox(_.withBorderStyle(_.withForeground(Color.BrightBlack)))
+        .withContent(_.withForeground(Color.BrightBlack))
+    )
+
+  val fullScreen = FullScreen {
+    val action = Reactive.variable(Line(""))
+    val enabled = action.map(_.isNonEmpty)
+    val output = Reactive.variable(text.Line(""))
+
+    Column(Size.wrapContent) {
+      Row(Size.wrapContent) {
+        TextInput(
+          Size(Measurement.Fixed(25), Measurement.WrapContent),
+          _.withBox(activeBorder).focused(_.withBox(focusedBorder)),
+          action
+        )
+
+        Button(Size.wrapContent, _ => buttonStyle) { ctx ?=>
+          ctx.enabledWhen(enabled)
+          ctx.onSubmit {
+            val a = action.peek
+            action.set(Line(""))
+            output.set(a)
+          }
+          Reactive.constant(Line("< Go >"))
+        }
+      }
+
+      Text(Size.wrapContent, identity) { ctx ?=>
+        output.map(_.toText)
+      }
+    }
+  }
+
+  fullScreen.run(NativeTerminal)

@@ -48,6 +48,10 @@ import terminus.ui.text.Line
   * TextInput(Size.fixed(30, 1), name)
   * }}}
   *
+  * The caller may also change `value` from outside the component; if the new
+  * text is shorter than the old cursor position, the cursor is clamped to the
+  * end of the new text (and is otherwise left where it was).
+  *
   * Key bindings: printable characters insert at the cursor, Backspace / Delete
   * delete around the cursor, Left / Right / Home / End move the cursor. Text
   * longer than the visible area scrolls horizontally to keep the cursor in
@@ -96,9 +100,14 @@ final class TextInput(
       case _ => ()
   }
   def react(using React): Unit =
-    value.get
+    val line = value.get
     cursor.get
+    // The caller owns `value` and may have replaced it since the last frame,
+    // leaving the cursor beyond the end of the new text. Clamp it here so
+    // layout, render, and subsequent key handlers always see a valid position.
+    cursor.update(_.min(line.length))
     context.focus.get
+    context.availability.get
     ()
 
   def measure(constraint: Constraint): Dimensions =
@@ -173,25 +182,23 @@ final class TextInput(
 
     buf.putLine(inner.x, inner.y, visible, ac)
 
-    // Draw the cursor by inverting the cell at the cursor column.
-    val cursorChar =
-      if cursorCol < visible.length then visible(cursorCol) else ' '
-    buf.put(
-      inner.x + cursorCol,
-      inner.y,
-      Cell(cursorChar.toInt, ac.withInvert)
-    )
+    // When the control is active draw the cursor by inverting the cell at the cursor column.
+    context.focus.peek match
+      case Focus.Unfocused => ()
+      case Focus.Focused   =>
+        val cursorChar =
+          if cursorCol < visible.length then visible(cursorCol) else ' '
+        buf.put(
+          inner.x + cursorCol,
+          inner.y,
+          Cell(cursorChar.toInt, ac.withInvert)
+        )
 
   private def activeBoxStyle: BoxStyle =
-    context.focus.peek match
-      case Focus.Focused   => style.focus.map(_.box).getOrElse(style.box)
-      case Focus.Unfocused => style.box
+    style(context.state).box
 
   private def activeContentStyle =
-    context.focus.peek match
-      case Focus.Focused   =>
-        style.focus.map(_.content).getOrElse(style.content)
-      case Focus.Unfocused => style.content
+    style(context.state).content
 
 object TextInput:
   def apply(

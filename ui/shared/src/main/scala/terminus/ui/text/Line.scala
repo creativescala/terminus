@@ -56,6 +56,9 @@ object Line:
     /** The underlying `String`. */
     def value: String = line
 
+    /** Convert this Line to Text. */
+    def toText: Text = Text.fromLine(line)
+
     /** The display width of this line, in terminal cells (wide characters count
       * as two, combining / zero-width characters as zero).
       */
@@ -131,6 +134,12 @@ object Line:
         if current.nonEmpty then flush()
         val out = result.result()
         if out.isEmpty then Vector(("": Line)) else out
+
+    def isEmpty: Boolean =
+      line.isEmpty()
+
+    def isNonEmpty: Boolean =
+      !line.isEmpty()
 
   /** Break a single word with no break opportunities into chunks each at most
     * `width` cells wide. A wide character is never split across chunks.

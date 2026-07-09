@@ -17,135 +17,121 @@
 package terminus.ui.style
 
 import munit.FunSuite
+import terminus.ui.capability.Availability
+import terminus.ui.capability.ComponentState
+import terminus.ui.capability.Focus
 
 class TextStyleSuite extends FunSuite:
 
-  // ---------------------------------------------------------------------------
-  // withBox — copy-on-write
-  // ---------------------------------------------------------------------------
-
-  test("withBox returns a new instance, not the original") {
-    val original = TextStyle.default
-    val updated = original.withBox(_.withoutBorder)
-    assertNotEquals(updated, original)
-  }
-
-  test("withBox does not mutate the original") {
-    val original = TextStyle.default
-    val before = original.box
-    original.withBox(_.withoutBorder)
-    assertEquals(original.box, before)
-    assertEquals(original.box.border, Some(Border.single))
-  }
-
-  test("withBox(BoxStyle) replaces the box style") {
-    val noBorder = BoxStyle.default.withoutBorder
-    val updated = TextStyle.default.withBox(noBorder)
-    assertEquals(updated.box, noBorder)
-  }
-
-  test("withBox(f) applies the function to the current box style") {
-    val updated = TextStyle.default.withBox(_.withPadding(2))
-    assertEquals(updated.box.padding, 2)
-  }
+  val unfocused = ComponentState(Focus.Unfocused, Availability.Enabled)
+  val focused = ComponentState(Focus.Focused, Availability.Enabled)
+  val disabled = ComponentState(Focus.Unfocused, Availability.Disabled)
+  val focusedAndDisabled = ComponentState(Focus.Focused, Availability.Disabled)
 
   // ---------------------------------------------------------------------------
-  // withContent — copy-on-write
+  // Base properties
   // ---------------------------------------------------------------------------
 
-  test("withContent returns a new instance, not the original") {
-    val original = TextStyle.default
-    val updated = original.withContent(_.withBold)
-    assertNotEquals(updated, original)
-  }
-
-  test("withContent does not mutate the original") {
-    val original = TextStyle.default
-    val before = original.content
-    original.withContent(_.withBold)
-    assertEquals(original.content, before)
-  }
-
-  test("withContent(CellStyle) replaces the content style") {
-    val bold = CellStyle.default.withBold
-    val updated = TextStyle.default.withContent(bold)
-    assertEquals(updated.content, bold)
-  }
-
-  test("withContent(f) applies the function to the current content style") {
-    val updated = TextStyle.default.withContent(_.withItalic)
-    assertEquals(updated.content.italic, true)
-  }
-
-  // ---------------------------------------------------------------------------
-  // withFocus / withoutFocus — copy-on-write
-  // ---------------------------------------------------------------------------
-
-  test("TextStyle has no focus style by default") {
-    assertEquals(TextStyle.default.focus, None)
-  }
-
-  test("withFocus(f) returns a new instance") {
-    val original = TextStyle.default
-    val updated = original.withFocus(_.withBox(_.withoutBorder))
-    assertNotEquals(updated, original)
-  }
-
-  test("withFocus(f) does not mutate the original") {
-    val original = TextStyle.default
-    val before = original.focus.map(_.box)
-    original.withFocus(_.withBox(_.withoutBorder))
-    assertEquals(original.focus.map(_.box), before)
-  }
-
-  test("withFocus(f) updates the focused box style") {
-    val updated = TextStyle.default.withFocus(_.withBox(_.withoutBorder))
-    assertEquals(updated.focus.map(_.box.border), Some(None))
-  }
-
-  test("withFocus(f) updates the focused content style") {
-    val updated = TextStyle.default.withFocus(_.withContent(_.withBold))
-    assertEquals(updated.focus.map(_.content.bold), Some(true))
-  }
-
-  test("withoutFocus removes the focus style") {
-    val updated = TextStyle.default.withoutFocus
-    assertEquals(updated.focus, None)
-  }
-
-  test("withFocus(f) creates focus from default even after withoutFocus") {
-    val noFocus = TextStyle.default.withoutFocus
-    val attempted = noFocus.withFocus(_.withContent(_.withBold))
-    assertEquals(attempted.focus.map(_.content.bold), Some(true))
-  }
-
-  // ---------------------------------------------------------------------------
-  // Chaining
-  // ---------------------------------------------------------------------------
-
-  test("method calls can be chained") {
+  test("the default style resolves to the default props in every state") {
     val style = TextStyle.default
-      .withBox(_.withoutBorder)
-      .withContent(_.withBold)
-      .withFocus(_.withContent(_.withItalic))
-
-    assertEquals(style.box.border, None)
-    assertEquals(style.content.bold, true)
-    assertEquals(style.focus.map(_.content.italic), Some(true))
+    assertEquals(style(unfocused), TextProps.default)
+    assertEquals(style(focused), TextProps.default)
+    assertEquals(style(disabled), TextProps.default)
   }
 
-  test("chaining does not mutate intermediate results") {
+  test("withBox(BoxStyle) replaces the base box style") {
+    val noBorder = BoxStyle.default.withoutBorder
+    val style = TextStyle.default.withBox(noBorder)
+    assertEquals(style(unfocused).box, noBorder)
+  }
+
+  test("withBox(f) updates the current base box style") {
+    val style = TextStyle.default.withBox(_.withPadding(2))
+    assertEquals(style(unfocused).box.padding, 2)
+  }
+
+  test("withContent(CellStyle) replaces the base content style") {
+    val bold = CellStyle.default.withBold
+    val style = TextStyle.default.withContent(bold)
+    assertEquals(style(unfocused).content, bold)
+  }
+
+  test("withContent(f) updates the current base content style") {
+    val style = TextStyle.default.withContent(_.withItalic)
+    assertEquals(style(unfocused).content.italic, true)
+  }
+
+  test("combinators do not change earlier style values") {
     val base = TextStyle.default
     val step1 = base.withBox(_.withoutBorder)
     val step2 = step1.withContent(_.withBold)
 
-    // base unaffected
-    assert(base.box.border.isDefined)
-    assertEquals(base.content.bold, false)
-    // step1 unaffected by step2
-    assertEquals(step2.box.border, None)
-    assertEquals(step1.content.bold, false)
-    // step2 has both changes
-    assertEquals(step2.box.border, None)
-    assertEquals(step2.content.bold, true)
+    assert(base(unfocused).box.border.isDefined)
+    assertEquals(base(unfocused).content.bold, false)
+    assertEquals(step1(unfocused).content.bold, false)
+    assertEquals(step2(unfocused).box.border, None)
+    assertEquals(step2(unfocused).content.bold, true)
+  }
+
+  // ---------------------------------------------------------------------------
+  // State rules
+  // ---------------------------------------------------------------------------
+
+  test("a focused rule applies only in the focused state") {
+    val style = TextStyle.default.focused(_.withContent(_.withBold))
+    assertEquals(style(focused).content.bold, true)
+    assertEquals(style(unfocused).content.bold, false)
+  }
+
+  test("a disabled rule applies only in the disabled state") {
+    val style = TextStyle.default.disabled(_.withContent(_.withItalic))
+    assertEquals(style(disabled).content.italic, true)
+    assertEquals(style(unfocused).content.italic, false)
+    assertEquals(style(focused).content.italic, false)
+  }
+
+  test("a state rule patches the base style rather than replacing it") {
+    // The base customization (padding) must survive into the focused state
+    // even though the focused rule doesn't mention it.
+    val style = TextStyle.default
+      .withBox(_.withPadding(2))
+      .focused(_.withContent(_.withBold))
+    assertEquals(style(focused).box.padding, 2)
+    assertEquals(style(focused).content.bold, true)
+  }
+
+  test("rules for independent states combine when both match") {
+    val style = TextStyle.default
+      .focused(_.withContent(_.withBold))
+      .disabled(_.withContent(_.withItalic))
+    val props = style(focusedAndDisabled)
+    assertEquals(props.content.bold, true)
+    assertEquals(props.content.italic, true)
+  }
+
+  test("on conflict the later-declared rule wins") {
+    val style = TextStyle.default
+      .focused(_.withBox(_.withPadding(1)))
+      .disabled(_.withBox(_.withPadding(3)))
+    assertEquals(style(focusedAndDisabled).box.padding, 3)
+    assertEquals(style(focused).box.padding, 1)
+    assertEquals(style(disabled).box.padding, 3)
+  }
+
+  test("when adds a rule with an arbitrary predicate") {
+    val style = TextStyle.default.when(_.focus == Focus.Unfocused)(
+      _.withContent(_.withInvert)
+    )
+    assertEquals(style(unfocused).content.invert, true)
+    assertEquals(style(focused).content.invert, false)
+  }
+
+  test("withBase applies under all existing rules") {
+    val style = TextStyle.default
+      .focused(_.withContent(_.withBold))
+      .withBase(_.withContent(_.withItalic))
+    assertEquals(style(unfocused).content.italic, true)
+    val props = style(focused)
+    assertEquals(props.content.italic, true)
+    assertEquals(props.content.bold, true)
   }

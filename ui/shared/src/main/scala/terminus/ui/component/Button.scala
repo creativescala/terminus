@@ -17,9 +17,7 @@
 package terminus.ui.component
 
 import terminus.Key
-import terminus.ui.capability.Availability
 import terminus.ui.capability.Event
-import terminus.ui.capability.Focus
 import terminus.ui.capability.Layout
 import terminus.ui.capability.React
 import terminus.ui.capability.Submit
@@ -56,8 +54,8 @@ import terminus.ui.text.Line
   * }}}
   *
   * Registering the submit handler makes the button focusable. A disabled button
-  * is skipped by focus traversal, does not activate, and renders in its
-  * disabled style (falling back to the base style when none is set).
+  * is skipped by focus traversal, does not activate, and renders with any
+  * `disabled` style rules applied over its base style.
   */
 final class Button(
     val size: Size,
@@ -129,23 +127,10 @@ final class Button(
   private def naturalWidth: Int = label.peek.width
 
   private def activeBoxStyle: BoxStyle =
-    context.availability.peek match
-      case Availability.Disabled =>
-        style.disabled.map(_.box).getOrElse(style.box)
-      case Availability.Enabled =>
-        context.focus.peek match
-          case Focus.Focused   => style.focus.map(_.box).getOrElse(style.box)
-          case Focus.Unfocused => style.box
+    style(context.state).box
 
   private def activeContentStyle: CellStyle =
-    context.availability.peek match
-      case Availability.Disabled =>
-        style.disabled.map(_.content).getOrElse(style.content)
-      case Availability.Enabled =>
-        context.focus.peek match
-          case Focus.Focused =>
-            style.focus.map(_.content).getOrElse(style.content)
-          case Focus.Unfocused => style.content
+    style(context.state).content
 
 object Button:
   def apply(size: Size, style: TextStyle => TextStyle = identity)(

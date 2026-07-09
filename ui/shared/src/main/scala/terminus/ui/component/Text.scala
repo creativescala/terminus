@@ -17,7 +17,6 @@
 package terminus.ui.component
 
 import terminus.ui.capability.Event
-import terminus.ui.capability.Focus
 import terminus.ui.capability.Layout
 import terminus.ui.capability.React
 import terminus.ui.event.DefaultEvent
@@ -48,6 +47,7 @@ final class Text(
   def react(using React): Unit =
     value.get
     context.focus.get
+    context.availability.get
     ()
 
   def measure(constraint: Constraint): Dimensions =
@@ -142,15 +142,10 @@ final class Text(
     value.peek.lines.map(_.width).maxOption.getOrElse(0)
 
   private def activeBoxStyle: BoxStyle =
-    context.focus.peek match
-      case Focus.Focused   => style.focus.map(_.box).getOrElse(style.box)
-      case Focus.Unfocused => style.box
+    style(context.state).box
 
   private def activeContentStyle: CellStyle =
-    context.focus.peek match
-      case Focus.Focused   =>
-        style.focus.map(_.content).getOrElse(style.content)
-      case Focus.Unfocused => style.content
+    style(context.state).content
 object Text:
   def apply(size: Size, style: TextStyle => TextStyle = identity)(
       body: Event ?=> Reactive[text.Text]

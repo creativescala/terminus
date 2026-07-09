@@ -1,5 +1,35 @@
 # Styling Design
 
+## Stateful styles
+
+A component style is a function from the component's state to the resolved
+properties it renders with, represented as data: `Style[State, Props]` is a
+base `Props` plus an ordered list of rules `(State => Boolean, Props => Props)`.
+
+- **Props** is the flat, resolved property set (e.g. `TextProps(box, content)`)
+  — a plain case class, no mixins.
+- **State** is a record of the component's state variables
+  (`ComponentState(focus, availability)`), with traits (`HasFocus`,
+  `HasAvailability`) mirroring the capabilities.
+- **Rules are patches over the base, not replacements.** A focused rule that
+  only sets bold keeps every other base property. Patches are endomorphisms
+  `Props => Props` under composition — the reification of the "merge over
+  base" monoid, but strictly more expressive than per-field `Option` merging
+  because a patch can express relative changes ("bold, whatever the base is").
+- **Rules stack in declaration order; later wins on conflict.** Combined
+  states (disabled *and* focused) get both patches, so there is no hardcoded
+  precedence in components.
+- **State-specific combinators are typed.** `focused` / `disabled` are
+  extension methods constrained by the state traits, so styling a state a
+  component doesn't have is a compile error — same philosophy as the typed
+  `LayoutContext` below.
+
+Components resolve the active properties with `style(context.state)` (see
+`DefaultEvent.state`); both `measure` and `render` use the same state
+snapshot. Element-level states (e.g. the highlighted item in `Select`) are
+not covered by the component-level state record; the same `Style` shape can
+be reused there with a per-item state record when needed.
+
 ## Style split
 
 Three distinct levels:

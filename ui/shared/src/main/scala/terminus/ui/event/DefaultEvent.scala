@@ -18,6 +18,7 @@ package terminus.ui.event
 
 import terminus.Key
 import terminus.ui.capability.Availability
+import terminus.ui.capability.ComponentState
 import terminus.ui.capability.Event
 import terminus.ui.capability.Focus
 import terminus.ui.react.Constant
@@ -60,3 +61,12 @@ trait DefaultEvent(focusId: FocusId, runtime: Runtime) extends Event:
   // The runtime consults this predicate at focus traversal and key dispatch
   // time, outside any React context, hence peek.
   runtime.setEnabled(focusId, () => availability.peek == Availability.Enabled)
+
+  /** A snapshot of the state variables that style selection depends on.
+    *
+    * Reads with peek: a component's react method must separately track the
+    * underlying reactives (focus, availability) to be re-rendered when they
+    * change.
+    */
+  def state: ComponentState =
+    ComponentState(focus.peek, availability.peek)

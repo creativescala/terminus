@@ -16,38 +16,15 @@
 
 package terminus.ui.style
 
-/** Base type for text style, avoids infinite recursion in focused style. */
-final class BaseTextStyle()
-    extends BoxStyleProps[BaseTextStyle],
-      ContentStyleProps[BaseTextStyle],
-      WithCopy[BaseTextStyle]:
-  // IMPORTANT: copy() must mirror every mixin field. If a new mixin is added to
-  // BaseTextStyle, add the corresponding assignment here or withBox/withContent
-  // calls on copies will silently share state with the original.
-  def copy(): BaseTextStyle =
-    val copy = BaseTextStyle()
-    copy.boxStyle = this.boxStyle
-    copy.contentStyle = this.contentStyle
-    copy
+import terminus.ui.capability.ComponentState
 
-/** Styling for [[terminus.ui.component.Text]] components. */
-final class TextStyle()
-    extends BoxStyleProps[TextStyle],
-      ContentStyleProps[TextStyle],
-      FocusStyleProps[BaseTextStyle, TextStyle](BaseTextStyle()),
-      DisabledStyleProps[BaseTextStyle, TextStyle](BaseTextStyle()),
-      WithCopy[TextStyle]:
-  // IMPORTANT: copy() must mirror every mixin field. If a new mixin is added to
-  // TextStyle, add the corresponding assignment here or withBox/withContent/
-  // withFocus/withDisabled calls on copies will silently share state with the
-  // original.
-  def copy(): TextStyle =
-    val copy = TextStyle()
-    copy.boxStyle = this.boxStyle
-    copy.contentStyle = this.contentStyle
-    copy.focusStyle = this.focusStyle.map(_.copy())
-    copy.disabledStyle = this.disabledStyle.map(_.copy())
-    copy
+/** Styling for text-like components ([[terminus.ui.component.Text]],
+  * [[terminus.ui.component.Line]], [[terminus.ui.component.Button]],
+  * [[terminus.ui.component.Select]], and [[terminus.ui.component.TextInput]]):
+  * a [[Style]] selecting [[TextProps]] from the component's
+  * [[terminus.ui.capability.ComponentState]].
+  */
+type TextStyle = Style[ComponentState, TextProps]
 
 object TextStyle:
-  val default: TextStyle = TextStyle()
+  val default: TextStyle = Style(TextProps.default)
