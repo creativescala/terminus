@@ -42,6 +42,9 @@ object Line:
     */
   def apply(s: String): Line = sanitize(s)
 
+  /** The empty Line. */
+  val empty: Line = Line.unsafe("")
+
   /** Construct a `Line` without sanitizing it first. Should only be used as a
     * performance optimization for strings that are known to be safe.
     */
