@@ -261,10 +261,10 @@ private def staticText(s: String) = Var(text.Text(s))
   // (the width of the input + button row) instead of being stretched to the
   // full terminal width. The column's own default Align.Stretch then widens
   // the Line to match.
-  val fullScreen = FullScreen.withLayout(_.withAlign(Align.Start)) {
+  val app = FullScreen.withLayout(_.withAlign(Align.Start)) {
     val action = Reactive.variable(text.Line(""))
     val enabled = action.map(_.isNonEmpty)
-    val output = Reactive.variable(text.Line(""))
+    val output = Reactive.variable(text.Line.empty)
 
     Column(Size.wrapContent) {
       Row(Size.wrapContent) {
@@ -280,7 +280,7 @@ private def staticText(s: String) = Var(text.Text(s))
           ctx.enabledWhen(enabled)
           ctx.onSubmit {
             val a = action.peek
-            action.set(text.Line(""))
+            action.set(text.Line.empty)
             output.set(a)
           }
           Reactive.constant(text.Line("< Go >"))
@@ -293,4 +293,4 @@ private def staticText(s: String) = Var(text.Text(s))
     }
   }
 
-  fullScreen.run(NativeTerminal)
+  app.run(NativeTerminal)
