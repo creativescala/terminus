@@ -72,7 +72,7 @@ object KeyMappings:
   // Escape sequences
   private lazy val escapeSequences: Map[String, Key] = Map(
     // Simple ESC sequences
-    s"$ESC${Ascii.HT}" -> Key.backTab,
+    s"$ESC${Ascii.HT}" -> Key.shiftTab,
     s"${ESC}b" -> Key.controlLeft,
     s"${ESC}f" -> Key.controlRight,
     s"$ESC§" -> Key('§'),
@@ -100,8 +100,8 @@ object KeyMappings:
     s"$ESC[D" -> Key.left,
     s"$ESC[F" -> Key.`end`,
     s"$ESC[H" -> Key.home,
-    s"$ESC[Z" -> Key.backTab,
-    s"$ESC[~" -> Key.backTab,
+    s"$ESC[Z" -> Key.shiftTab,
+    s"$ESC[~" -> Key.shiftTab,
 
     // Function keys and control combinations
     s"$ESC[11^" -> Key.controlF1,

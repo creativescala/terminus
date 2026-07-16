@@ -20,7 +20,6 @@ import terminus.AlternateScreenMode
 import terminus.Cursor
 import terminus.Erase
 import terminus.Key
-import terminus.KeyCode
 import terminus.KeyReader
 import terminus.RawMode
 import terminus.Writer
@@ -71,7 +70,7 @@ class FullScreen(runtime: Runtime, column: Column):
             runtime.addRootHandlers(
               Map(
                 Key.tab -> Seq(() => runtime.nextFocus()),
-                Key.shift(KeyCode.Tab) -> Seq(() => runtime.prevFocus()),
+                Key.shiftTab -> Seq(() => runtime.prevFocus()),
                 Key.controlQ -> Seq(() => quit = true)
               )
             )

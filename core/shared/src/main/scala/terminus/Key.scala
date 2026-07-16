@@ -87,8 +87,8 @@ object Key:
 
   val backspace = Key(KeyCode.Backspace)
   val space = Key(' ')
-  val tab = Key('\t')
-  val backTab = Key(KeyCode.BackTab)
+  val tab = Key(KeyCode.Tab)
+  val shiftTab = Key.shift(KeyCode.Tab)
   val newLine = Key('\n')
 
   /** An alias for `newLine`. */

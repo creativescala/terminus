@@ -17,7 +17,6 @@
 package terminus
 
 enum KeyCode:
-  case BackTab
   case Backspace
   case CapsLock
   case Character(char: Char)

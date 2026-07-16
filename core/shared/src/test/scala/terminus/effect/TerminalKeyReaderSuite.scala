@@ -67,9 +67,9 @@ class TerminalKeyReaderSuite extends FunSuite:
         "\u001b[6~" -> (Key.pageDown),
         "\u001b[7~" -> (Key.home), // xrvt
         "\u001b[8~" -> (Key.`end`), // xrvt
-        "\u001b[Z" -> (Key.backTab), // shift + tab
-        "\u001b\u0009" -> (Key.backTab), // Linux console
-        "\u001b[~" -> (Key.backTab), // Windows console
+        "\u001b[Z" -> (Key.shiftTab), // shift + tab
+        "\u001b\u0009" -> (Key.shiftTab), // Linux console
+        "\u001b[~" -> (Key.shiftTab), // Windows console
         "\u001bOP" -> (Key.f1),
         "\u001bOQ" -> (Key.f2),
         "\u001bOR" -> (Key.f3),
