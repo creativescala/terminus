@@ -68,7 +68,7 @@ val jline = Def.setting("org.jline" % "jline" % "4.3.0")
 
 val scalajsDom = Def.setting("org.scala-js" %%% "scalajs-dom" % "2.8.1")
 
-val munit = Def.setting("org.scalameta" %%% "munit" % "1.3.3" % "test")
+val munit = Def.setting("org.scalameta" %%% "munit" % "1.3.4" % "test")
 val munitScalaCheck =
   Def.setting("org.scalameta" %%% "munit-scalacheck" % "1.3.0" % "test")
 
