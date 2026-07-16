@@ -20,8 +20,8 @@ import munit.FunSuite
 import terminus.Key
 import terminus.ui.capability.Availability
 import terminus.ui.capability.Focus
-import terminus.ui.react.Reactive
-import terminus.ui.react.Var
+import terminus.ui.react.Computed
+import terminus.ui.react.WritableSignal
 import terminus.ui.runtime.Runtime
 
 /** Tests that [[DefaultEvent]]'s reactive availability drives the runtime's
@@ -47,10 +47,10 @@ class DefaultEventSuite extends FunSuite:
     val runtime = Runtime.empty
     val event = focusable(runtime)
 
-    val condition = Var(false)
-    // Deliberately a Computed, not the Var itself: exercises the flatten/map
-    // chain and peek-on-stale recomputation.
-    event.enabledWhen(Reactive { condition.get })
+    val condition = WritableSignal(false)
+    // Deliberately a Computed, not the signal itself: exercises the nested
+    // read and peek-on-stale recomputation.
+    event.enabledWhen(Computed { condition.get })
 
     assertEquals(event.availability.peek, Availability.Disabled)
     condition.set(true)
@@ -63,8 +63,8 @@ class DefaultEventSuite extends FunSuite:
     val b = focusable(runtime)
     val c = focusable(runtime)
 
-    val bEnabled = Var(false)
-    b.enabledWhen(Reactive { bEnabled.get })
+    val bEnabled = WritableSignal(false)
+    b.enabledWhen(Computed { bEnabled.get })
 
     assertEquals(a.focus.peek, Focus.Focused, "first focusable starts focused")
     runtime.nextFocus()
@@ -85,7 +85,7 @@ class DefaultEventSuite extends FunSuite:
     val a = focusable(runtime)
     val b = focusable(runtime)
 
-    val label = Reactive {
+    val label = Computed {
       if a.focus.get == Focus.Focused then "a" else "b"
     }
 
@@ -114,7 +114,7 @@ class DefaultEventSuite extends FunSuite:
     val id = FocusId.next
     val event = new DefaultEvent(id, runtime) {}
     event.onKey(Key.enter) { fired = true }
-    event.enabledWhen(Var(false))
+    event.enabledWhen(WritableSignal(false))
 
     runtime.dispatch(Key.enter)
     assert(!fired, "disabled component receives no events")

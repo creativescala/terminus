@@ -19,7 +19,7 @@ package terminus.ui.component
 import munit.FunSuite
 import terminus.StringBuilderTerminal
 import terminus.effect.AnsiCodes
-import terminus.ui.capability.React
+import terminus.ui.capability.Observe
 import terminus.ui.event.DefaultEvent
 import terminus.ui.event.FocusId
 import terminus.ui.layout.Buffer
@@ -41,6 +41,8 @@ import terminus.ui.style.LayoutProps
 
 class LayoutSuite extends FunSuite:
 
+  given Observe = Observe.empty
+
   /** A leaf component with the given size. Its natural dimensions are the fixed
     * cells on each axis (zero on a flexible axis), and it draws via `draw`.
     */
@@ -54,14 +56,17 @@ class LayoutSuite extends FunSuite:
         case Measurement.Fixed(cells) => cells
         case _                        => 0
 
-      def react(using React): Unit = ()
-      def measure(constraint: Constraint): Dimensions =
+      def measure(constraint: Constraint)(using Observe): Dimensions =
         constraint.constrain(Dimensions(natWidth, natHeight))
-      def minIntrinsicWidth(height: Int | Infinity): Int = natWidth
-      def maxIntrinsicWidth(height: Int | Infinity): Int = natWidth
-      def minIntrinsicHeight(width: Int | Infinity): Int = natHeight
-      def maxIntrinsicHeight(width: Int | Infinity): Int = natHeight
-      def render(dimensions: Dimensions, buf: Buffer): Unit =
+      def minIntrinsicWidth(height: Int | Infinity)(using Observe): Int =
+        natWidth
+      def maxIntrinsicWidth(height: Int | Infinity)(using Observe): Int =
+        natWidth
+      def minIntrinsicHeight(width: Int | Infinity)(using Observe): Int =
+        natHeight
+      def maxIntrinsicHeight(width: Int | Infinity)(using Observe): Int =
+        natHeight
+      def render(dimensions: Dimensions, buf: Buffer)(using Observe): Unit =
         // The component draws from its own origin into the view it is given, so
         // the bounds handed to `draw` are anchored at (0, 0).
         draw(Rect(0, 0, dimensions.width, dimensions.height), buf)

@@ -16,11 +16,23 @@
 
 package terminus.ui.react
 
+import terminus.ui.capability.Observe
 import terminus.ui.capability.React
+import terminus.ui.runtime.Runtime
 
-import scala.collection.mutable
+/** The default implementation of the [[terminus.ui.capability.React]]
+  * capability. Creation does the framework-side wiring the application never
+  * sees: effects are routed to the runtime's effect queue, which the event loop
+  * drains. When ownership is implemented, this is also where created values
+  * will be registered for disposal with their owning component.
+  */
+trait DefaultReact(runtime: Runtime) extends React:
+  def signal[A](initial: A): WritableSignal[A] =
+    WritableSignal(initial)
 
-trait DefaultReact extends React:
-  val stack: mutable.Stack[Listener] = mutable.Stack.empty
-object DefaultReact:
-  def empty: React = new DefaultReact() {}
+  def computed[A](thunk: Observe ?=> A): Signal[A] =
+    Computed(thunk)
+
+  def effect(thunk: Observe ?=> Unit): Unit =
+    Effect(runtime.effectQueue)(thunk)
+    ()

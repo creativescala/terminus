@@ -21,9 +21,10 @@ import terminus.ui.capability.Availability
 import terminus.ui.capability.ComponentState
 import terminus.ui.capability.Event
 import terminus.ui.capability.Focus
-import terminus.ui.react.Constant
-import terminus.ui.react.Reactive
-import terminus.ui.react.Var
+import terminus.ui.capability.Observe
+import terminus.ui.react.Computed
+import terminus.ui.react.Signal
+import terminus.ui.react.WritableSignal
 import terminus.ui.runtime.Runtime
 
 /** The default implementation of the [[terminus.ui.capability.Event]]
@@ -42,31 +43,35 @@ trait DefaultEvent(focusId: FocusId, runtime: Runtime) extends Event:
 
   def prevFocus(): Unit = runtime.prevFocus()
 
-  val focus: Reactive[Focus] =
-    runtime.focusedId.map(id =>
-      if id == focusId then Focus.Focused else Focus.Unfocused
-    )
+  // Framework code constructs Computed directly rather than going through the
+  // React capability: these signals belong to the context itself, not to
+  // anything the application created.
+  val focus: Signal[Focus] = Computed {
+    if runtime.focusedId.get == focusId then Focus.Focused
+    else Focus.Unfocused
+  }
 
-  // The current enabled condition. A Var of a Reactive so that enabledWhen can
-  // switch the source; availability flattens through it.
-  private val available: Var[Reactive[Boolean]] = Var(Constant(true))
+  // The current enabled condition. A signal of a signal so that enabledWhen
+  // can switch the source; availability reads through both layers.
+  private val available: WritableSignal[Signal[Boolean]] =
+    WritableSignal(Signal.constant(true))
 
-  def enabledWhen(condition: Reactive[Boolean]): Unit =
+  def enabledWhen(condition: Signal[Boolean]): Unit =
     available.set(condition)
 
-  val availability: Reactive[Availability] = available.flatten.map(b =>
-    if b then Availability.Enabled else Availability.Disabled
-  )
+  val availability: Signal[Availability] = Computed {
+    if available.get.get then Availability.Enabled else Availability.Disabled
+  }
 
   // The runtime consults this predicate at focus traversal and key dispatch
-  // time, outside any React context, hence peek.
+  // time, outside any tracked computation, hence peek.
   runtime.setEnabled(focusId, () => availability.peek == Availability.Enabled)
 
   /** A snapshot of the state variables that style selection depends on.
     *
-    * Reads with peek: a component's react method must separately track the
-    * underlying reactives (focus, availability) to be re-rendered when they
-    * change.
+    * Reads with get: resolving a style during measure or render subscribes the
+    * enclosing render effect to focus and availability, so a change to either
+    * triggers the next frame.
     */
-  def state: ComponentState =
-    ComponentState(focus.peek, availability.peek)
+  def state(using Observe): ComponentState =
+    ComponentState(focus.get, availability.get)

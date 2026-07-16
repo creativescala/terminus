@@ -19,16 +19,16 @@ package terminus.ui.event
 import munit.FunSuite
 import terminus.Key
 import terminus.ui.capability.Submit
-import terminus.ui.react.Constant
-import terminus.ui.react.Reactive
-import terminus.ui.react.Var
+import terminus.ui.react.Computed
+import terminus.ui.react.Signal
+import terminus.ui.react.WritableSignal
 import terminus.ui.runtime.Runtime
 
 class DefaultSubmitSuite extends FunSuite:
 
   test("the handler receives the value as of the keypress, not registration") {
     val runtime = Runtime.empty
-    val value = Var("old")
+    val value = WritableSignal("old")
     val submit =
       new DefaultSubmit[String](FocusId.next, runtime, Seq(Key.enter), value) {}
 
@@ -42,8 +42,8 @@ class DefaultSubmitSuite extends FunSuite:
 
   test("a Computed value is current at submit time") {
     val runtime = Runtime.empty
-    val raw = Var("query")
-    val trimmed = Reactive { raw.get.trim }
+    val raw = WritableSignal("query")
+    val trimmed = Computed { raw.get.trim }
     val submit =
       new DefaultSubmit[String](
         FocusId.next,
@@ -66,7 +66,7 @@ class DefaultSubmitSuite extends FunSuite:
       FocusId.next,
       runtime,
       Seq(Key.enter, Key.space),
-      Constant(())
+      Signal.constant(())
     ) {}
 
     var count = 0
@@ -84,7 +84,7 @@ class DefaultSubmitSuite extends FunSuite:
         FocusId.next,
         runtime,
         Seq(Key.enter),
-        Constant(())
+        Signal.constant(())
       ) {}
 
     var fired = false
@@ -101,7 +101,7 @@ class DefaultSubmitSuite extends FunSuite:
         FocusId.next,
         runtime,
         Seq(Key.enter),
-        Constant(())
+        Signal.constant(())
       ) {}
 
     var fired = false

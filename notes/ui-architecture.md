@@ -55,7 +55,7 @@ trait Signal[A] extends ReadSignal[A]:
 
 Signals are created and owned by an `EventContext`. Their lifetime matches the context's lifetime — useful for screen-level resource management.
 
-Currently `get` has no tracking: any signal change triggers a full-frame re-render regardless of which components read that signal. The intended future API is `get(using RenderContext)` (tracked) and `peek: A` (untracked, for use in event handlers), which would enable subtree re-rendering.
+Today's names: `Signal[A]` is the read-only interface (`get`/`peek`/`map`), `WritableSignal[A]` adds `set`/`update`, and `Computed`/`Constant` are private implementations behind `Signal`. `get(using Observe)` is tracked: it subscribes the enclosing tracked computation (today, the root render effect). `peek` is untracked, for event handlers and other code outside a render pass. Granularity is still whole-frame — any tracked dependency change redraws everything — but the tracking is real: a frame renders only when something it actually read has changed.
 
 ### `AppContext` and content type aliases
 
@@ -92,7 +92,7 @@ Two-phase: layout pass (size accumulation via `add`) then render pass (writing t
 1. **Setup** (runs once): the app function is called with `AppContext` in scope. Signals are created, key handlers registered, and the component tree built.
 2. **Render** (runs on signal change): the component tree's render methods are called. Leaf components evaluate their `LeafContent` closures with a fresh `RenderContext`, which re-registers signal dependencies and returns the current value.
 3. **Event dispatch**: the event loop reads a key, dispatches to registered handlers. Handlers inside a `FocusScope` are gated on focus; global handlers always fire.
-4. **Invalidation and re-render**: `Signal.set` calls `scheduleRerender()`. Currently this triggers a full-frame re-render; later, subtree re-rendering will be possible once bounds are captured in the `RenderContext`.
+4. **Invalidation and re-render**: writing a signal marks its subscribers stale, which schedules the root render effect. The event loop drains the effect queue after each dispatch, so a handler that writes several signals produces one frame. If nothing a frame read has changed, no frame is drawn.
 
 ### Setup scope vs render scope
 
@@ -102,7 +102,53 @@ This distinction is the most important thing to understand about the programming
 
 **Render scope** is a leaf component's content lambda — the `=> String` passed to `Text`, for example. This code runs on *every render pass*. Reactive values read here return their current value each frame. This is where signal reads and `isFocused` checks belong.
 
-The current API does not enforce this distinction at the type level — both scopes receive an `AppContext` / `RenderContext`, so nothing stops you from reading a signal in setup scope and getting a stale value. This is expected to resolve naturally when dependency tracking is added: `signal.get` will require a `RenderContext` in scope, which is only available inside content lambdas, making the setup/render boundary compile-time enforced.
+The distinction is now enforced at the type level by two capabilities with deliberately disjoint scopes:
+
+- **`Observe`** (render scope) — the capability to *read* signals reactively. `signal.get` requires it, and it is only available inside tracked computations: measure/intrinsics/render, and the thunks of computeds and effects. In setup or handler code, `get` does not compile; use `peek`.
+- **`React`** (setup scope) — the capability to *create* reactive values: `signal(initial)`, `computed { ... }`, `effect { ... }`. It is only available in setup code (the body passed to `FullScreen` or to a component), so reactive values cannot be created inside a render pass, where they would be recreated every frame and never disposed. All creation goes through the capability (including `map`, which needs one) so the implementation can do framework-side wiring: routing effects to the event loop's queue and, in future, registering created values for disposal with their owning component. The capability is implemented by the same per-component context objects that implement `Event` and `Layout` — which is how, when ownership lands, a component's context will own what its body created.
+
+## Rendering is an effect
+
+The whole frame is a single `Effect` (react package): an eagerly-run thunk that
+re-tracks its reactive dependencies on every run, like a `Computed` whose
+staleness schedules a re-run instead of waiting to be pulled. `FullScreen.run`
+constructs the effect (drawing the first frame) and the loop is: read key →
+dispatch → refresh the terminal-size signal → drain the `EffectQueue`.
+
+Effects are leaves of the reactive graph: they produce no value, nothing can
+depend on them, and they have no combinators — composition happens on the
+value side (`computed`, `map`), with an effect at the bottom. Applications
+create them through `React.effect`, which returns `Unit`; only the framework
+holds `Effect` references. The `EffectQueue` (one per `Runtime`) is
+framework-internal: applications can neither schedule nor drain directly, so
+a handler cannot force a mid-batch render.
+
+Consequences of the design:
+
+- **There is no `Component.react`.** Measure, the intrinsics, and render take
+  `(using Observe)` and read with `get`; the read *is* the subscription. A
+  component cannot render from state it isn't subscribed to.
+- **Batching.** `setStale` only schedules; effects run when the loop drains,
+  once per batch, so handlers that write several signals cannot cause glitches
+  or double renders.
+- **Terminal size is a reactive input**: a signal the loop refreshes after
+  each key and the render effect reads, so a resize is just another dependency
+  change.
+- **Effects must not write signals they read.** The TextInput cursor is the
+  example: instead of normalizing the cursor signal each frame, out-of-range
+  positions (after an external shrink of the value) are clamped at every read.
+
+Deferred, in dependency order: ownership/disposal (a `dispose()` on effects
+and computeds, registered with the creating context via `React`, plus an
+`onCleanup` hook for applications) becomes necessary as soon as components can
+be removed; per-component effects need retained layout and a
+needs-layout/needs-paint split; equality cut-off in `Computed` needs two-phase
+dirty/check marking and only pays off once there is more than one effect;
+timers/animation need the loop to block on an event queue rather than
+`readKey` (the EventQ/Cats Effect direction), at which point the effect queue
+gains a wake-up source that isn't a key — this is also why `WritableSignal`
+creation goes through `React`: an off-loop writer must be able to wake the
+loop, and that wiring is baked in at creation.
 
 ## Effect layer
 

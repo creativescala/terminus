@@ -16,33 +16,52 @@
 
 package terminus.ui.capability
 
-import terminus.ui.react.Listener
+import terminus.ui.react.Signal
+import terminus.ui.react.WritableSignal
 
 import scala.annotation.implicitNotFound
-import scala.collection.mutable
 
-/** Reactive scope for a component render pass.
+/** The capability to create reactive values: signals, computed signals, and
+  * effects.
   *
-  * Signal reads inside a component's content use the React capability in scope
-  * to register the component as a subscriber, so that signal changes can
-  * trigger a targeted re-render.
+  * A React is in scope in setup code — the body passed to
+  * [[terminus.ui.FullScreen]] or to a component — which is where reactive state
+  * belongs. All reactive values are created through this capability so the
+  * implementation can do the framework-side wiring they need (routing effects
+  * to the event loop's queue and, in future, registering everything created for
+  * disposal with its owning component). Application code never sees those
+  * concerns.
   *
-  * For the initial full-frame re-render implementation this is a stub; the full
-  * dependency-tracking mechanism will be wired in when subtree re-render is
-  * implemented.
+  * It is deliberately unavailable inside tracked computations (see
+  * [[Observe]]): a reactive value created during a render pass would be
+  * recreated on every frame and never disposed.
   */
 @implicitNotFound(
-  """signal.get requires a React capability, which is only available inside a
-component content lambda (the body passed to Text, etc.).
+  """Creating a signal, computed, or effect requires a React capability, which
+is only available in setup code: the body passed to FullScreen or to a
+component such as Column or Text. Move the creation there.
 
-If you meant to read this signal reactively, move the call inside a
-component's content: Text(w, h) { mySignal.get }
-
-If you intentionally want an untracked read in setup or event-handler
-code, use signal.peek instead."""
+Reactive values must not be created inside a render pass or another reactive
+thunk — they would be recreated on every run and never disposed."""
 )
 trait React:
-  val stack: mutable.Stack[Listener]
-object React:
-  def empty: React = new React:
-    val stack: mutable.Stack[Listener] = mutable.Stack.empty
+  /** Create a writable signal holding `initial`. */
+  def signal[A](initial: A): WritableSignal[A]
+
+  /** Create a signal with a constant value. This doesn't need the React
+    * capability, but is nonetheless provided by this capability so the API is
+    * uniform: all signals can be constructed by calls to a React instance.
+    */
+  def constant[A](value: A): Signal[A] =
+    Signal.constant(value)
+
+  /** Create a signal derived from other signals: `thunk` re-evaluates when a
+    * signal it reads changes.
+    */
+  def computed[A](thunk: Observe ?=> A): Signal[A]
+
+  /** Create an effect: `thunk` runs now, and re-runs when a signal it reads
+    * changes. Re-runs are batched: they happen when the event loop next drains
+    * its effect queue, not at the instant of the write.
+    */
+  def effect(thunk: Observe ?=> Unit): Unit

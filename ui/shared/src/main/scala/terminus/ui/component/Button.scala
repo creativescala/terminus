@@ -19,6 +19,7 @@ package terminus.ui.component
 import terminus.Key
 import terminus.ui.capability.Event
 import terminus.ui.capability.Layout
+import terminus.ui.capability.Observe
 import terminus.ui.capability.React
 import terminus.ui.capability.Submit
 import terminus.ui.event.DefaultEvent
@@ -33,8 +34,8 @@ import terminus.ui.layout.Infinity
 import terminus.ui.layout.Measurement
 import terminus.ui.layout.Rect
 import terminus.ui.layout.Size
-import terminus.ui.react.Constant
-import terminus.ui.react.Reactive
+import terminus.ui.react.DefaultReact
+import terminus.ui.react.Signal
 import terminus.ui.style.ButtonProps
 import terminus.ui.style.ButtonStyle
 import terminus.ui.text.Line
@@ -48,7 +49,7 @@ import terminus.ui.text.Line
   * Button(Size.fixed(12, 3)) { ctx ?=>
   *   ctx.onSubmit { save() }
   *   ctx.enabledWhen(formValid)
-  *   Constant(Line("Save"))
+  *   ctx.constant(Line("Save"))
   * }
   * }}}
   *
@@ -59,17 +60,11 @@ import terminus.ui.text.Line
 final class Button(
     val size: Size,
     style: ButtonStyle,
-    label: Reactive[Line],
+    label: Signal[Line],
     context: DefaultEvent
 ) extends Component:
 
-  def react(using React): Unit =
-    label.get
-    context.availability.get
-    context.focus.get
-    ()
-
-  def measure(constraint: Constraint): Dimensions =
+  def measure(constraint: Constraint)(using Observe): Dimensions =
     val insets = activeProps.box.insets
     val inner = insets.deflate(constraint)
 
@@ -96,19 +91,19 @@ final class Button(
       insets.inflate(Dimensions(contentWidth, contentHeight))
     )
 
-  def minIntrinsicWidth(height: Int | Infinity): Int =
+  def minIntrinsicWidth(height: Int | Infinity)(using Observe): Int =
     naturalWidth + activeProps.box.insets.horizontal
 
-  def maxIntrinsicWidth(height: Int | Infinity): Int =
+  def maxIntrinsicWidth(height: Int | Infinity)(using Observe): Int =
     naturalWidth + activeProps.box.insets.horizontal
 
-  def minIntrinsicHeight(width: Int | Infinity): Int =
+  def minIntrinsicHeight(width: Int | Infinity)(using Observe): Int =
     1 + activeProps.box.insets.vertical
 
-  def maxIntrinsicHeight(width: Int | Infinity): Int =
+  def maxIntrinsicHeight(width: Int | Infinity)(using Observe): Int =
     1 + activeProps.box.insets.vertical
 
-  def render(dimensions: Dimensions, buf: Buffer): Unit =
+  def render(dimensions: Dimensions, buf: Buffer)(using Observe): Unit =
     val ab = activeProps.box
     val ac = activeProps.content
 
@@ -119,18 +114,18 @@ final class Button(
     val inner = Box.innerRect(bounds, ab)
     if inner.width <= 0 || inner.height <= 0 then return
 
-    val raw = label.peek.value
+    val raw = label.get.value
     val line = Line(raw.take(inner.width).padTo(inner.width, ' '))
     buf.putLine(inner.x, inner.y, line, ac)
 
-  private def naturalWidth: Int = label.peek.width
+  private def naturalWidth(using Observe): Int = label.get.width
 
-  private def activeProps: ButtonProps =
+  private def activeProps(using Observe): ButtonProps =
     style(context.state)
 
 object Button:
   def apply(size: Size, style: ButtonStyle => ButtonStyle = identity)(
-      body: Event & Submit[Unit] ?=> Reactive[Line]
+      body: (Event & Submit[Unit] & React) ?=> Signal[Line]
   )(using ctx: Layout): Unit =
     ctx.addComponent { runtime =>
       val focusId = FocusId.next
@@ -139,8 +134,9 @@ object Button:
           focusId,
           runtime,
           Seq(Key.enter, Key.space),
-          Constant(())
-        ) {}
+          Signal.constant(())
+        )
+        with DefaultReact(runtime) {}
       val label = body(using context)
 
       new Button(size, style(ButtonStyle.default), label, context)

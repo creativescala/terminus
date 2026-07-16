@@ -25,7 +25,10 @@ import terminus.KeyReader
 import terminus.RawMode
 import terminus.Writer
 import terminus.effect
+import terminus.effect.TerminalDimensions
 import terminus.ui.capability.Layout
+import terminus.ui.capability.Observe
+import terminus.ui.capability.React
 import terminus.ui.component.Column
 import terminus.ui.event.DefaultEvent
 import terminus.ui.event.FocusId
@@ -35,6 +38,8 @@ import terminus.ui.layout.DefaultLayout
 import terminus.ui.layout.Measurement
 import terminus.ui.layout.Size
 import terminus.ui.react.DefaultReact
+import terminus.ui.react.Effect
+import terminus.ui.react.WritableSignal
 import terminus.ui.runtime.Runtime
 import terminus.ui.style.LayoutProps
 
@@ -43,9 +48,9 @@ import terminus.ui.style.LayoutProps
   */
 class FullScreen(runtime: Runtime, column: Column):
 
-  private[ui] def toBuffer()(using dims: effect.Dimensions): CellArrayBuffer =
-    column.react(using DefaultReact.empty)
-    val terminalSize = dims.getDimensions
+  private[ui] def toBuffer(terminalSize: TerminalDimensions)(using
+      Observe
+  ): CellArrayBuffer =
     val constraint = Constraint.tight(terminalSize.columns, terminalSize.rows)
     val contentDimensions = column.measure(constraint)
     val buf = CellArrayBuffer(contentDimensions.width, contentDimensions.height)
@@ -71,31 +76,43 @@ class FullScreen(runtime: Runtime, column: Column):
               )
             )
 
-            def renderFrame(prev: CellArrayBuffer): CellArrayBuffer =
-              val buf = toBuffer()
-              if prev.width == buf.width && prev.height == buf.height then
-                buf.renderDiff(prev)
-              else
-                InteractiveTerminal.erase.screen()
-                buf.render
+            // The terminal size is a reactive input like any other: the
+            // render effect reads it, so a resize schedules a redraw the same
+            // way a signal written by a key handler does. The loop refreshes
+            // it after every key.
+            val terminalSize =
+              WritableSignal(terminal.getDimensions)
 
-              buf
+            var prev: Option[CellArrayBuffer] = None
 
-            def loop(prev: CellArrayBuffer): Unit =
+            // Rendering is an effect: the frame is drawn when a reactive read
+            // anywhere in measure or render has changed, and not otherwise.
+            // Constructing the effect draws the first frame and subscribes to
+            // everything that frame read.
+            Effect(runtime.effectQueue) {
+              val buf = toBuffer(terminalSize.get)
+              prev match
+                case Some(p)
+                    if p.width == buf.width && p.height == buf.height =>
+                  buf.renderDiff(p)
+                case _ =>
+                  InteractiveTerminal.erase.screen()
+                  buf.render
+              prev = Some(buf)
+            }
+
+            def loop(): Unit =
               if quit then ()
               else
-                val buf = renderFrame(prev)
                 InteractiveTerminal.readKey() match
                   case terminus.Eof => quit = true
                   case key: Key     => runtime.dispatch(key)
-                loop(buf)
+                if !quit then
+                  terminalSize.set(terminal.getDimensions)
+                  runtime.effectQueue.drain()
+                loop()
 
-            loop {
-              InteractiveTerminal.erase.screen()
-              val buf = toBuffer()
-              buf.render
-              buf
-            }
+            loop()
           }
         }
       }
@@ -114,7 +131,7 @@ object FullScreen:
         RawMode,
         Writer
 
-  def apply(body: Layout ?=> Unit): FullScreen =
+  def apply(body: (Layout & React) ?=> Unit): FullScreen =
     withLayout(identity)(ctx ?=> body(using ctx))
 
   /** As [[apply]], but also configures the layout of the root column that holds
@@ -128,12 +145,13 @@ object FullScreen:
     * `Layout ?=> Unit` context function type.
     */
   def withLayout(style: LayoutProps => LayoutProps)(
-      body: Layout ?=> Unit
+      body: (Layout & React) ?=> Unit
   ): FullScreen =
     val focusId = FocusId.next
     val runtime = Runtime.empty
     val context = new DefaultEvent(focusId, runtime)
-      with DefaultLayout(runtime) {}
+      with DefaultLayout(runtime)
+      with DefaultReact(runtime) {}
     // Evaluate body here so we do not retain a reference to it and it can be garbage collected.
     body(using context)
     val column = new Column(

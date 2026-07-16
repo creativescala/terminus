@@ -17,7 +17,7 @@
 package terminus.ui.component
 
 import munit.FunSuite
-import terminus.ui.capability.React
+import terminus.ui.capability.Observe
 import terminus.ui.event.DefaultEvent
 import terminus.ui.event.FocusId
 import terminus.ui.layout.Buffer
@@ -53,6 +53,8 @@ import terminus.ui.style.LayoutProps
   */
 class ColumnSuite extends FunSuite:
 
+  given Observe = Observe.empty
+
   /** A leaf component with a unique [[mark]]. When rendered it fills the view
     * it is given with that mark and remembers the [[Dimensions]] it was asked
     * to draw, so a scan of the backing buffer reveals its actual (clipped)
@@ -69,14 +71,15 @@ class ColumnSuite extends FunSuite:
       case Measurement.Fixed(cells) => cells
       case _                        => 0
 
-    def react(using React): Unit = ()
-    def measure(constraint: Constraint): Dimensions =
+    def measure(constraint: Constraint)(using Observe): Dimensions =
       constraint.constrain(Dimensions(natWidth, natHeight))
-    def minIntrinsicWidth(height: Int | Infinity): Int = natWidth
-    def maxIntrinsicWidth(height: Int | Infinity): Int = natWidth
-    def minIntrinsicHeight(width: Int | Infinity): Int = natHeight
-    def maxIntrinsicHeight(width: Int | Infinity): Int = natHeight
-    def render(dimensions: Dimensions, buf: Buffer): Unit =
+    def minIntrinsicWidth(height: Int | Infinity)(using Observe): Int = natWidth
+    def maxIntrinsicWidth(height: Int | Infinity)(using Observe): Int = natWidth
+    def minIntrinsicHeight(width: Int | Infinity)(using Observe): Int =
+      natHeight
+    def maxIntrinsicHeight(width: Int | Infinity)(using Observe): Int =
+      natHeight
+    def render(dimensions: Dimensions, buf: Buffer)(using Observe): Unit =
       rendered = Some(dimensions)
       buf.fill(
         Rect(0, 0, dimensions.width, dimensions.height),

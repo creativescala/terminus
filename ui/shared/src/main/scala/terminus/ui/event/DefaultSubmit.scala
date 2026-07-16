@@ -18,7 +18,7 @@ package terminus.ui.event
 
 import terminus.Key
 import terminus.ui.capability.Submit
-import terminus.ui.react.Reactive
+import terminus.ui.react.Signal
 import terminus.ui.runtime.Runtime
 
 /** The default implementation of the [[terminus.ui.capability.Submit]]
@@ -37,7 +37,7 @@ trait DefaultSubmit[A](
     focusId: FocusId,
     runtime: Runtime,
     keys: Seq[Key],
-    currentValue: Reactive[A]
+    currentValue: Signal[A]
 ) extends Submit[A]:
 
   def onSubmit(handler: A => Unit): Unit =

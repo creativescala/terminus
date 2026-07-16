@@ -20,7 +20,7 @@ import terminus.Key
 import terminus.KeyCode
 import terminus.ui.capability.Focus
 import terminus.ui.capability.Layout
-import terminus.ui.capability.React
+import terminus.ui.capability.Observe
 import terminus.ui.event.DefaultEvent
 import terminus.ui.event.FocusId
 import terminus.ui.layout.Box
@@ -33,7 +33,7 @@ import terminus.ui.layout.Infinity
 import terminus.ui.layout.Measurement
 import terminus.ui.layout.Rect
 import terminus.ui.layout.Size
-import terminus.ui.react.Var
+import terminus.ui.react.WritableSignal
 import terminus.ui.style.TextInputProps
 import terminus.ui.style.TextInputStyle
 import terminus.ui.text
@@ -44,7 +44,7 @@ import terminus.ui.text.Line
   * The caller owns `value` and can read it to react to what the user has typed:
   *
   * {{{
-  * val name = Var(Line(""))
+  * val name = signal(Line(""))
   * TextInput(Size.fixed(30, 1), name)
   * }}}
   *
@@ -60,17 +60,25 @@ import terminus.ui.text.Line
 final class TextInput(
     val size: Size,
     style: TextInputStyle = TextInputStyle.default,
-    value: Var[Line],
+    value: WritableSignal[Line],
     context: DefaultEvent
 ) extends Component:
-  private val cursor = Var(0)
+  private val cursor = WritableSignal(0)
+
+  /** The effective cursor position. The caller owns `value` and may have shrunk
+    * it since the cursor last moved, so the stored position is clamped at every
+    * read rather than written back — nothing observable ever sees an
+    * out-of-range cursor.
+    */
+  private def cursorPos: Int =
+    cursor.peek.min(value.peek.length)
 
   context.onKey(Key.left) {
-    cursor.update(c => (c - 1).max(0))
+    cursor.set((cursorPos - 1).max(0))
   }
 
   context.onKey(Key.right) {
-    cursor.update(c => (c + 1).min(value.peek.length))
+    cursor.set((cursorPos + 1).min(value.peek.length))
   }
 
   context.onKey(Key.home) {
@@ -82,36 +90,25 @@ final class TextInput(
   }
 
   context.onKey(Key.backspace) {
-    val pos = cursor.peek
+    val pos = cursorPos
     if pos > 0 then
       value.update(line => line.delete(pos - 1))
-      cursor.update(_ - 1)
+      cursor.set(pos - 1)
   }
   context.onKey(Key.delete) {
-    val pos = cursor.peek
-    value.update(line => line.delete(pos))
+    value.update(line => line.delete(cursorPos))
   }
   context.onAnyKey { key =>
     key.code match
       case KeyCode.Character(c) if !c.isControl =>
-        val pos = cursor.peek
+        val pos = cursorPos
         value.update(line => line.insert(pos, c))
-        cursor.update(_ + 1)
+        cursor.set(pos + 1)
       case _ => ()
   }
-  def react(using React): Unit =
-    val line = value.get
-    cursor.get
-    // The caller owns `value` and may have replaced it since the last frame,
-    // leaving the cursor beyond the end of the new text. Clamp it here so
-    // layout, render, and subsequent key handlers always see a valid position.
-    cursor.update(_.min(line.length))
-    context.focus.get
-    context.availability.get
-    ()
 
-  def measure(constraint: Constraint): Dimensions =
-    val line = value.peek
+  def measure(constraint: Constraint)(using Observe): Dimensions =
+    val line = value.get
     val insets = activeProps.box.insets
     // The constraint we were given is for the whole box; shrink it to the space
     // available to the text content.
@@ -146,20 +143,20 @@ final class TextInput(
       insets.inflate(Dimensions(contentWidth, contentHeight))
     )
 
-  def minIntrinsicWidth(height: Int | Infinity): Int =
+  def minIntrinsicWidth(height: Int | Infinity)(using Observe): Int =
     maxIntrinsicWidth(height)
 
-  def maxIntrinsicWidth(height: Int | Infinity): Int =
+  def maxIntrinsicWidth(height: Int | Infinity)(using Observe): Int =
     // By definition this component is a single line
-    value.peek.width + activeProps.box.insets.horizontal
+    value.get.width + activeProps.box.insets.horizontal
 
-  def minIntrinsicHeight(width: Int | Infinity): Int =
+  def minIntrinsicHeight(width: Int | Infinity)(using Observe): Int =
     maxIntrinsicHeight(width)
 
-  def maxIntrinsicHeight(width: Int | Infinity): Int =
+  def maxIntrinsicHeight(width: Int | Infinity)(using Observe): Int =
     activeProps.box.insets.vertical + 1
 
-  def render(dimensions: Dimensions, buf: Buffer): Unit =
+  def render(dimensions: Dimensions, buf: Buffer)(using Observe): Unit =
     val ab = activeProps.box
     val ac = activeProps.content
 
@@ -170,8 +167,8 @@ final class TextInput(
     val inner = Box.innerRect(bounds, ab)
     if inner.width <= 0 then return
 
-    val line = value.peek
-    val pos = cursor.peek
+    val line = value.get
+    val pos = cursor.get.min(line.length)
 
     // Scroll to keep the cursor in view: cursor sits at the right edge when
     // the text overflows, and at its natural position otherwise.
@@ -194,14 +191,14 @@ final class TextInput(
           Cell(cursorChar.toInt, activeProps.cursor)
         )
 
-  private def activeProps: TextInputProps =
+  private def activeProps(using Observe): TextInputProps =
     style(context.state)
 
 object TextInput:
   def apply(
       size: Size,
       style: TextInputStyle => TextInputStyle = identity,
-      value: Var[Line]
+      value: WritableSignal[Line]
   )(using ctx: Layout): Unit =
     ctx.addComponent { runtime =>
       val focusId = FocusId.next

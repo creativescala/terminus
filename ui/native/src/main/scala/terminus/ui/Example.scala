@@ -18,18 +18,16 @@ package terminus.ui
 
 import terminus.Key
 import terminus.NativeTerminal
-import terminus.ui.capability.Event
 import terminus.ui.component.Button
 import terminus.ui.component.Column
-import terminus.ui.component.Row
 import terminus.ui.component.Line
+import terminus.ui.component.Row
 import terminus.ui.component.Text
 import terminus.ui.component.TextInput
 import terminus.ui.layout.Measurement
 import terminus.ui.layout.Size
-import terminus.ui.react.Reactive
+import terminus.ui.react.Signal
 import terminus.ui.style.Align
-import terminus.ui.react.Var
 import terminus.ui.style.BoxProps
 import terminus.ui.style.ButtonStyle
 import terminus.ui.style.CellProps
@@ -41,10 +39,10 @@ import terminus.ui.style.Underline
 // then prompt for the demo to build. The executable will
 // 'ui/native/target/scala-<version>/terminus-ui'
 
-/** Wrap unchanging text as a [[terminus.ui.react.Reactive]], which is what
+/** Wrap unchanging text as a [[terminus.ui.react.Signal]], which is what
   * [[Text]] requires as content.
   */
-private def staticText(s: String) = Var(text.Text(s))
+private def staticText(s: String) = Signal.constant(text.Text(s))
 
 @main def demo(): Unit =
   val fullScreen = FullScreen {
@@ -110,8 +108,8 @@ private def staticText(s: String) = Var(text.Text(s))
   fullScreen.run(NativeTerminal)
 
 /** A little graphic equalizer, showing off reactive content and the layout
-  * system. The arrow keys mutate plain [[Var]]s; each bar is a [[Text]] whose
-  * content is a [[Reactive]] derived from those Vars, so it redraws itself when
+  * system. The arrow keys mutate writable signals; each bar is a [[Text]] whose
+  * content is a computed signal derived from them, so it redraws itself when
   * they change. The whole screen is a single focusable [[Column]] that owns the
   * key handling — registering `onKey` in its body makes it focusable, and as
   * the only focusable element it receives keys immediately.
@@ -135,25 +133,25 @@ private def staticText(s: String) = Var(text.Text(s))
     def lerp(channel: Int): Int = ((channel * (0.25 + 0.75 * t)).round).toInt
     Color.Rgb(lerp(base.r), lerp(base.g), lerp(base.b))
 
-  // levels(i) is the height of channel i's bar; selected is the channel the
-  // arrow keys currently act on.
-  val levels = Var(Vector.fill(channels.size)(maxLevel / 2))
-  val selected = Var(0)
+  val fullScreen = FullScreen { ctx ?=>
+    // levels(i) is the height of channel i's bar; selected is the channel the
+    // arrow keys currently act on. Signals are created inside the FullScreen
+    // body, where the React capability is in scope.
+    val levels = ctx.signal(Vector.fill(channels.size)(maxLevel / 2))
+    val selected = ctx.signal(0)
 
-  val fullScreen = FullScreen {
-    Column(Size.fixed(40, channels.size + 4)) {
-      val events = summon[Event]
-      events.onKey(Key.up) {
+    Column(Size.fixed(40, channels.size + 4)) { ctx ?=>
+      ctx.onKey(Key.up) {
         selected.update(s => (s - 1 + channels.size) % channels.size)
       }
-      events.onKey(Key.down) {
+      ctx.onKey(Key.down) {
         selected.update(s => (s + 1) % channels.size)
       }
-      events.onKey(Key.right) {
+      ctx.onKey(Key.right) {
         val i = selected.peek
         levels.update(ls => ls.updated(i, (ls(i) + 1).min(maxLevel)))
       }
-      events.onKey(Key.left) {
+      ctx.onKey(Key.left) {
         val i = selected.peek
         levels.update(ls => ls.updated(i, (ls(i) - 1).max(0)))
       }
@@ -168,8 +166,8 @@ private def staticText(s: String) = Var(text.Text(s))
       channels.zipWithIndex.foreach { case ((name, colour), i) =>
         Row(Size.fixed(40, 1)) {
           // Channel name, with a marker on the selected channel.
-          Text(Size.fixed(12, 1), _.withBox(_.withoutBorder)) {
-            Reactive {
+          Text(Size.fixed(12, 1), _.withBox(_.withoutBorder)) { ctx ?=>
+            ctx.computed {
               val marker = if selected.get == i then "▶ " else "  "
               text.Text(marker + name)
             }
@@ -184,8 +182,8 @@ private def staticText(s: String) = Var(text.Text(s))
                 Size.fixed(1, 1),
                 _.withBox(_.withoutBorder)
                   .withContent(CellProps(fg = shade(colour, j)))
-              ) {
-                Reactive {
+              ) { ctx ?=>
+                ctx.computed {
                   val n = levels.get.apply(i)
                   text.Text(if j < n then "█" else "░")
                 }
@@ -193,8 +191,8 @@ private def staticText(s: String) = Var(text.Text(s))
             }
           }
           // Numeric value.
-          Text(Size.fixed(4, 1), _.withBox(_.withoutBorder)) {
-            Reactive {
+          Text(Size.fixed(4, 1), _.withBox(_.withoutBorder)) { ctx ?=>
+            ctx.computed {
               val n = levels.get.apply(i)
               text.Text(f" $n%2d")
             }
@@ -217,16 +215,16 @@ private def staticText(s: String) = Var(text.Text(s))
       _.withBox(_.withBorderProps(CellProps(fg = Color.White, bold = true)))
     )
 
-  val fullScreen = FullScreen {
-    val name = Var(text.Line(""))
+  val fullScreen = FullScreen { ctx ?=>
+    val name = ctx.signal(text.Line(""))
 
     Column(Size.fixed(50, 5)) {
       Text(Size.fixed(50, 1), _.withBox(_.withoutBorder)) {
         staticText("Type a name. Ctrl+Q to quit.")
       }
       TextInput(Size.fixed(50, 3), _ => inputStyle, name)
-      Text(Size.fixed(50, 1), _.withBox(_.withoutBorder)) {
-        Reactive {
+      Text(Size.fixed(50, 1), _.withBox(_.withoutBorder)) { ctx ?=>
+        ctx.computed {
           val typed = name.get.value
           text.Text(if typed.isEmpty then "" else s"Hello, $typed!")
         }
@@ -261,17 +259,17 @@ private def staticText(s: String) = Var(text.Text(s))
   // (the width of the input + button row) instead of being stretched to the
   // full terminal width. The column's own default Align.Stretch then widens
   // the Line to match.
-  val app = FullScreen.withLayout(_.withAlign(Align.Start)) {
-    val action = Reactive.variable(text.Line(""))
+  val app = FullScreen.withLayout(_.withAlign(Align.Start)) { ctx ?=>
+    val action = ctx.signal(text.Line(""))
     val enabled = action.map(_.isNonEmpty)
-    val output = Reactive.variable(text.Line.empty)
+    val output = ctx.signal(text.Line.empty)
 
     Column(Size.wrapContent) {
       Row(Size.wrapContent) {
         TextInput(
           Size(Measurement.Fixed(25), Measurement.WrapContent),
           _.withBox(activeBorder)
-            .withCursor(_.withoutInvert.withUnderline(Underline.Double))
+            .withCursor(_.withoutInvert.withUnderline(Underline.Straight))
             .focused(_.withBox(focusedBorder)),
           action
         )
@@ -283,7 +281,7 @@ private def staticText(s: String) = Var(text.Text(s))
             action.set(text.Line.empty)
             output.set(a)
           }
-          Reactive.constant(text.Line("< Go >"))
+          ctx.constant(text.Line("< Go >"))
         }
       }
 

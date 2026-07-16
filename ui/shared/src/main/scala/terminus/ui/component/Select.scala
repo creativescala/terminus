@@ -18,7 +18,7 @@ package terminus.ui.component
 
 import terminus.Key
 import terminus.ui.capability.Layout
-import terminus.ui.capability.React
+import terminus.ui.capability.Observe
 import terminus.ui.event.DefaultEvent
 import terminus.ui.event.FocusId
 import terminus.ui.layout.Box
@@ -30,7 +30,7 @@ import terminus.ui.layout.Infinity
 import terminus.ui.layout.Measurement
 import terminus.ui.layout.Rect
 import terminus.ui.layout.Size
-import terminus.ui.react.Var
+import terminus.ui.react.WritableSignal
 import terminus.ui.style.SelectProps
 import terminus.ui.style.SelectStyle
 import terminus.ui.text.Line
@@ -42,7 +42,7 @@ import terminus.ui.text.Line
   * caller owns `selected` and can read it to react to the user's choice:
   *
   * {{{
-  * val choice = Var(0)
+  * val choice = ctx.signal(0)
   * Select(Size.fixed(30, 8), items, choice)
   * }}}
   *
@@ -55,24 +55,24 @@ final class Select[A](
     val size: Size,
     style: SelectStyle,
     items: Seq[A],
-    selected: Var[Int],
+    selected: WritableSignal[Int],
     label: A => String,
     context: DefaultEvent
 ) extends Component:
 
-  private val scroll = Var(0)
+  private val scroll = WritableSignal(0)
 
   private def clampSelected(n: Int): Int =
     n.max(0).min((items.length - 1).max(0))
 
-  private def visibleRows: Int =
+  private def visibleRows(using Observe): Int =
     size.height match
       case Measurement.Fixed(cells) =>
         (cells - activeProps.box.insets.vertical).max(0)
       case _ => 0
 
   private def scrollToShow(sel: Int): Unit =
-    val vr = visibleRows
+    val vr = visibleRows(using Observe.empty)
     val s = scroll.peek
     if sel < s then scroll.set(sel)
     else if sel >= s + vr then scroll.set(sel - vr + 1)
@@ -88,12 +88,12 @@ final class Select[A](
     scrollToShow(next)
   }
   context.onKey(Key.pageUp) {
-    val next = clampSelected(selected.peek - visibleRows)
+    val next = clampSelected(selected.peek - visibleRows(using Observe.empty))
     selected.set(next)
     scrollToShow(next)
   }
   context.onKey(Key.pageDown) {
-    val next = clampSelected(selected.peek + visibleRows)
+    val next = clampSelected(selected.peek + visibleRows(using Observe.empty))
     selected.set(next)
     scrollToShow(next)
   }
@@ -107,14 +107,7 @@ final class Select[A](
     scrollToShow(last)
   }
 
-  def react(using React): Unit =
-    selected.get
-    scroll.get
-    context.focus.get
-    context.availability.get
-    ()
-
-  def measure(constraint: Constraint): Dimensions =
+  def measure(constraint: Constraint)(using Observe): Dimensions =
     val insets = activeProps.box.insets
     val inner = insets.deflate(constraint)
 
@@ -141,19 +134,19 @@ final class Select[A](
       insets.inflate(Dimensions(contentWidth, contentHeight))
     )
 
-  def minIntrinsicWidth(height: Int | Infinity): Int =
+  def minIntrinsicWidth(height: Int | Infinity)(using Observe): Int =
     naturalWidth + activeProps.box.insets.horizontal
 
-  def maxIntrinsicWidth(height: Int | Infinity): Int =
+  def maxIntrinsicWidth(height: Int | Infinity)(using Observe): Int =
     naturalWidth + activeProps.box.insets.horizontal
 
-  def minIntrinsicHeight(width: Int | Infinity): Int =
+  def minIntrinsicHeight(width: Int | Infinity)(using Observe): Int =
     items.length + activeProps.box.insets.vertical
 
-  def maxIntrinsicHeight(width: Int | Infinity): Int =
+  def maxIntrinsicHeight(width: Int | Infinity)(using Observe): Int =
     items.length + activeProps.box.insets.vertical
 
-  def render(dimensions: Dimensions, buf: Buffer): Unit =
+  def render(dimensions: Dimensions, buf: Buffer)(using Observe): Unit =
     val ab = activeProps.box
     val ac = activeProps.content
 
@@ -164,8 +157,8 @@ final class Select[A](
     val inner = Box.innerRect(bounds, ab)
     if inner.width <= 0 || inner.height <= 0 then return
 
-    val sel = selected.peek
-    val s = scroll.peek
+    val sel = selected.get
+    val s = scroll.get
 
     var row = 0
     while row < inner.height do
@@ -180,7 +173,7 @@ final class Select[A](
   private def naturalWidth: Int =
     items.map(a => Line(label(a)).width).maxOption.getOrElse(0)
 
-  private def activeProps: SelectProps =
+  private def activeProps(using Observe): SelectProps =
     style(context.state)
 
 object Select:
@@ -191,7 +184,7 @@ object Select:
       size: Size,
       style: SelectStyle => SelectStyle = identity,
       items: Seq[A],
-      selected: Var[Int],
+      selected: WritableSignal[Int],
       label: A => String = (a: A) => a.toString
   )(using ctx: Layout): Unit =
     ctx.addComponent { runtime =>

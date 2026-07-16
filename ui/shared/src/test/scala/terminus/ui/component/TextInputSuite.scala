@@ -21,8 +21,7 @@ import terminus.Key
 import terminus.ui.event.DefaultEvent
 import terminus.ui.event.FocusId
 import terminus.ui.layout.Size
-import terminus.ui.react.DefaultReact
-import terminus.ui.react.Var
+import terminus.ui.react.WritableSignal
 import terminus.ui.runtime.Runtime
 import terminus.ui.text.Line
 
@@ -34,9 +33,9 @@ class TextInputSuite extends FunSuite:
     */
   private def fixture(
       initial: String
-  ): (Runtime, Var[Line], TextInput) =
+  ): (Runtime, WritableSignal[Line], TextInput) =
     val runtime = Runtime.empty
-    val value = Var(Line(initial))
+    val value = WritableSignal(Line(initial))
     val context = new DefaultEvent(FocusId.next, runtime) {}
     val input =
       new TextInput(Size.fixed(50, 3), value = value, context = context)
@@ -54,25 +53,23 @@ class TextInputSuite extends FunSuite:
   test(
     "an external change that shortens the value clamps the cursor at the next frame"
   ) {
-    val (runtime, value, input) = fixture("")
+    val (runtime, value, _) = fixture("")
     typeString(runtime, "hello world")
     // Cursor is now at 11, past the end of the replacement text.
     value.set(Line("hi"))
-    input.react(using DefaultReact.empty)
 
-    // Without the clamp Line.insert(11, _) on "hi" is out of range and the
-    // keystroke is silently dropped.
+    // Without clamp-at-read Line.insert(11, _) on "hi" is out of range and
+    // the keystroke is silently dropped.
     typeString(runtime, "!")
     assertEquals(value.peek.value, "hi!")
   }
 
   test("an external change that keeps the cursor valid leaves it in place") {
-    val (runtime, value, input) = fixture("")
+    val (runtime, value, _) = fixture("")
     typeString(runtime, "abcdef")
     (1 to 3).foreach(_ => runtime.dispatch(Key.left))
     // Cursor is at 3, still valid in the replacement text.
     value.set(Line("ABCDEF"))
-    input.react(using DefaultReact.empty)
 
     typeString(runtime, "x")
     assertEquals(value.peek.value, "ABCxDEF")

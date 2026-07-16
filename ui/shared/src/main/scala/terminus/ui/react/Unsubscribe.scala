@@ -18,7 +18,7 @@ package terminus.ui.react
 
 import scala.collection.mutable
 
-/** An Unsubscribe is a handle to unsubscribe a subscriber from a Reactive's
+/** An Unsubscribe is a handle to unsubscribe a subscriber from a signal's
   * subscriber list.
   */
 opaque type Unsubscribe = () => Unit

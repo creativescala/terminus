@@ -16,55 +16,52 @@
 
 package terminus.ui.layout
 
-import terminus.ui.capability.React
+import terminus.ui.capability.Observe
 
 /** A component is something that can be rendered to the terminal and
   * participates in layout.
   *
   * The protocol for calling the methods on Component is:
   *
-  *   - Methods are only called once per rendering loop, except size and the
-  *     intrinsic methods which may be called multiple times.
-  *   - Methods are called in the order:
-  *     - react, which indicates the start of a rendering loop
-  *     - size (intrinsic methods may also be called here)
-  *     - measure (intrinsic methods may also be called here)
-  *     - render
+  *   - size (intrinsic methods may also be called here); then
+  *   - measure (intrinsic methods may also be called here); then
+  *   - render
+  *
+  * A rendering pass runs inside a reactive tracking context (the [[Observe]]
+  * capability): reading a signal with `get` anywhere in measure, the
+  * intrinsics, or render subscribes the enclosing render effect, so a change to
+  * that signal triggers the next frame. There is no separate
+  * dependency-declaration step — the read is the subscription.
   */
 trait Component:
-  /** Called at the started of a rendering pass, this is the signal to a
-    * component to re-evaluate any reactives it depends on, and perform any
-    * recomputations needed before layout.
-    */
-  def react(using React): Unit
-
   /** The amount of space this Component wishes to occupy. */
   def size: Size
 
   /** Measure this component against a parent-supplied Constraint, returning the
     * size it wants to occupy. The result MUST satisfy `constraint` (i.e. equal
-    * `constraint.constrain(result)`). Pure: no buffer writes, no mutation — a
+    * `constraint.constrain(result)`). No buffer writes and no observable
+    * mutation (reactive reads register subscriptions, which is idempotent) — a
     * parent may call this more than once per layout pass.
     */
-  def measure(constraint: Constraint): Dimensions
+  def measure(constraint: Constraint)(using Observe): Dimensions
 
   /** Minimum width at which content still renders correctly, given a height.
     * `height` may be Infinity ("unbounded").
     */
-  def minIntrinsicWidth(height: Int | Infinity): Int
+  def minIntrinsicWidth(height: Int | Infinity)(using Observe): Int
 
   /** Width beyond which the component would not grow, given a height. */
-  def maxIntrinsicWidth(height: Int | Infinity): Int
+  def maxIntrinsicWidth(height: Int | Infinity)(using Observe): Int
 
   /** Minimum height at which content still renders correctly, given a width.
     * `width` may be Infinity ("unbounded").
     */
-  def minIntrinsicHeight(width: Int | Infinity): Int
+  def minIntrinsicHeight(width: Int | Infinity)(using Observe): Int
 
   /** Height beyond which the component would not grow, given a width. */
-  def maxIntrinsicHeight(width: Int | Infinity): Int
+  def maxIntrinsicHeight(width: Int | Infinity)(using Observe): Int
 
   /** Draw the component to the Buffer with the given Dimensions. The component
     * should always start at (0, 0).
     */
-  def render(dimensions: Dimensions, buf: Buffer): Unit
+  def render(dimensions: Dimensions, buf: Buffer)(using Observe): Unit
