@@ -63,6 +63,7 @@ commands += Command.command("build") { state =>
 // Dependencies
 
 val catsCore = Def.setting("org.typelevel" %%% "cats-core" % "2.13.0")
+val catsEffect = Def.setting("org.typelevel" %%% "cats-effect" % "3.7.0")
 
 val jline = Def.setting("org.jline" % "jline" % "4.3.0")
 
@@ -83,7 +84,7 @@ lazy val commonSettings = Seq(
   licenses := Seq(License.Apache2)
 )
 
-lazy val root = tlCrossRootProject.aggregate(core, ui, unidocs)
+lazy val root = tlCrossRootProject.aggregate(core, coreCe, ui, uiCe, unidocs)
 
 lazy val core = crossProject(JSPlatform, JVMPlatform, NativePlatform)
   .in(file("core"))
@@ -95,6 +96,15 @@ lazy val core = crossProject(JSPlatform, JVMPlatform, NativePlatform)
   .jvmSettings(libraryDependencies += jline.value)
   .jsSettings(libraryDependencies += scalajsDom.value)
 
+lazy val coreCe = crossProject(JSPlatform, JVMPlatform, NativePlatform)
+  .in(file("core-ce"))
+  .settings(
+    commonSettings,
+    libraryDependencies ++= Seq(catsEffect.value),
+    name := "terminus-core-ce"
+  )
+  .dependsOn(core)
+
 lazy val ui = crossProject(JSPlatform, JVMPlatform, NativePlatform)
   .in(file("ui"))
   .settings(
@@ -102,6 +112,15 @@ lazy val ui = crossProject(JSPlatform, JVMPlatform, NativePlatform)
     commonSettings
   )
   .dependsOn(core)
+
+lazy val uiCe = crossProject(JSPlatform, JVMPlatform, NativePlatform)
+  .in(file("ui-ce"))
+  .settings(
+    commonSettings,
+    libraryDependencies ++= Seq(catsEffect.value),
+    name := "terminus-ui-ce"
+  )
+  .dependsOn(ui, coreCe)
 
 lazy val docs =
   project
@@ -174,8 +193,8 @@ lazy val unidocs = project
     ScalaUnidoc / unidoc / unidocProjectFilter :=
       inAnyProject -- inProjects(
         docs,
-        core.js,
-        examples.js
+        examples.js,
+        examples.jvm
       )
   )
 
