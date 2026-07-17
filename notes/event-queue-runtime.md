@@ -114,6 +114,17 @@ not just signal unsubscription.
    so JVM and Native share it; JS needs an event-driven driver instead of the
    char pump. Parity demos: `sbt 'uiCeJVM/runMain terminus.ui.ce.demo'` and
    `sbt 'uiCeNative/runMain terminus.ui.ce.demo'`.
-4. `Timer` capability + spinner/blink demo — the payoff milestone.
+4. ~~`Timer` capability + spinner demo — the payoff milestone.~~ Done. The
+   `Timer` trait lives in ui's capability package (pure interface, so app
+   code stays free of cats-effect; the blocking runner simply never provides
+   it). `ce.FullScreen` mirrors `ui.FullScreen` but gives the body
+   `Layout & React & Timer`. The implementation, `DefaultTimer`, is
+   two-phase: tasks scheduled before the session exists (setup scope) are
+   recorded and replayed when the runner connects; tasks scheduled after
+   (event handlers — pressed-flash) spawn immediately. Fibers run under a
+   `Supervisor` (canceled when the session ends) and deliver ticks as
+   `Event.Effect`s on the queue. The runner's `Dispatcher` had to become
+   parallel: a sequential one would queue handler-time spawns behind the
+   running session forever.
 5. SIGWINCH → resize `Event.Effect` (JVM/Native), replacing per-key size
    polling in the CE runner.

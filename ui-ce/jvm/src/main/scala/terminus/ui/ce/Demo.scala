@@ -20,37 +20,12 @@ import cats.effect.IO
 import cats.effect.IOApp
 import cats.effect.Resource
 import terminus.JLineTerminal
-import terminus.Key
-import terminus.ui.FullScreen
-import terminus.ui.component.Column
-import terminus.ui.component.Text
-import terminus.ui.layout.Size
-import terminus.ui.react.Signal
-import terminus.ui.text
 
 // Run with: sbt 'uiCeJVM/runMain terminus.ui.ce.demo'
 //
-// A counter driven through the Cats Effect runner. Behavior should be
-// identical to running the same app through the blocking FullScreen.run:
-// this is the parity check for the event-queue runner.
+// See DemoApp for what the demo shows.
 object demo extends IOApp.Simple:
   def run: IO[Unit] =
-    val fullScreen = FullScreen { ctx ?=>
-      val count = ctx.signal(0)
-
-      Column(Size.fixed(40, 2)) { ctx ?=>
-        ctx.onKey(Key.up)(count.update(_ + 1))
-        ctx.onKey(Key.down)(count.update(_ - 1))
-
-        Text(Size.fixed(40, 1), _.withBox(_.withoutBorder)) { ctx ?=>
-          ctx.computed(text.Text(s"Count: ${count.get}"))
-        }
-        Text(Size.fixed(40, 1), _.withBox(_.withoutBorder)) {
-          Signal.constant(text.Text("↑/↓ change · Ctrl+Q quit"))
-        }
-      }
-    }
-
     Resource
       .make(IO(JLineTerminal.apply))(terminal => IO(terminal.close()))
-      .use(terminal => Runner.run(fullScreen, terminal))
+      .use(terminal => DemoApp.make.run(terminal))
