@@ -102,8 +102,18 @@ not just signal unsubscription.
    behavior (pure refactor).~~ Done.
 2. ~~`core-ce`: char-queue pump + CE `readKey` driver, with timeout
    tests.~~ Done.
-3. `ui-ce`: event queue + consumer fiber + CE `FullScreen` runner, no timers
-   yet — parity milestone.
+3. ~~`ui-ce`: event queue + consumer fiber + CE `FullScreen` runner, no
+   timers yet — parity milestone.~~ Done (JVM): `Events.keys`/`Events.consume`
+   (shared) + `Runner.run` (jvm). One wart, by design: core's terminal modes
+   are synchronous brackets, so `Runner.run` enters them on a blocking thread
+   and runs the concurrent session inside via `Dispatcher.unsafeRunSync` —
+   consequently canceling the runner's `IO` does not stop the session; quit
+   comes from within (Ctrl+Q / Eof). #27 (modes as `Resource`) removes this
+   inversion. The runner lives in a `jvm-native` source directory: Scala
+   Native has supported threads since 0.5.10 and Cats Effect works with them,
+   so JVM and Native share it; JS needs an event-driven driver instead of the
+   char pump. Parity demos: `sbt 'uiCeJVM/runMain terminus.ui.ce.demo'` and
+   `sbt 'uiCeNative/runMain terminus.ui.ce.demo'`.
 4. `Timer` capability + spinner/blink demo — the payoff milestone.
 5. SIGWINCH → resize `Event.Effect` (JVM/Native), replacing per-key size
    polling in the CE runner.

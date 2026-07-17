@@ -120,6 +120,17 @@ lazy val uiCe = crossProject(JSPlatform, JVMPlatform, NativePlatform)
     libraryDependencies ++= Seq(catsEffect.value),
     name := "terminus-ui-ce"
   )
+  // The Runner drives the terminal with blocking reads on a thread, which
+  // works on the JVM and (since Scala Native supports threads) Native, but
+  // not JS. jvm-native holds this shared-but-not-JS code.
+  .jvmSettings(
+    Compile / unmanagedSourceDirectories +=
+      baseDirectory.value.getParentFile / "jvm-native" / "src" / "main" / "scala"
+  )
+  .nativeSettings(
+    Compile / unmanagedSourceDirectories +=
+      baseDirectory.value.getParentFile / "jvm-native" / "src" / "main" / "scala"
+  )
   .dependsOn(ui, coreCe)
 
 lazy val docs =
