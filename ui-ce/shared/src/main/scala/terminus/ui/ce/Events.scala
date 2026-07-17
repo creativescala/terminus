@@ -21,7 +21,10 @@ import cats.effect.std.Queue
 import terminus.Eof
 import terminus.Key
 import terminus.ce.KeyReader
+import terminus.effect.TerminalDimensions
 import terminus.ui.runtime.Event
+
+import scala.concurrent.duration.FiniteDuration
 
 /** The producer and consumer sides of the event queue. Producers — the key
   * reader here, timers and resize notifications in future — offer [[Event]]s;
@@ -39,16 +42,31 @@ private[ui] object Events:
       case key: Key => queue.offer(Event.Input(key)) >> keys(chars, queue)
     }
 
-  /** Consume events one at a time, running `beforeStep` and then `step` for
-    * each, finishing when `step` returns false.
+  /** Poll `dimensions` every `interval` and, when the value changes, offer an
+    * effect that runs `update` with the new value. Polling rather than SIGWINCH
+    * is deliberate: a signal handler can only safely set a flag that something
+    * must then poll anyway, and the char pump already polls at a similar
+    * cadence. When core grows a resize-notification hook this producer's
+    * implementation changes; its place in the design does not.
     */
-  def consume(
+  def resizes(
+      dimensions: IO[TerminalDimensions],
+      update: TerminalDimensions => Unit,
       queue: Queue[IO, Event],
-      beforeStep: IO[Unit],
-      step: Event => Boolean
+      interval: FiniteDuration
   ): IO[Unit] =
+    def loop(previous: TerminalDimensions): IO[Unit] =
+      IO.sleep(interval) >> dimensions.flatMap { current =>
+        if current == previous then loop(previous)
+        else queue.offer(Event.Effect(() => update(current))) >> loop(current)
+      }
+
+    dimensions.flatMap(loop)
+
+  /** Consume events one at a time, finishing when `step` returns false. */
+  def consume(queue: Queue[IO, Event], step: Event => Boolean): IO[Unit] =
     queue.take.flatMap { event =>
-      beforeStep >> IO(step(event)).flatMap { continue =>
-        if continue then consume(queue, beforeStep, step) else IO.unit
+      IO(step(event)).flatMap { continue =>
+        if continue then consume(queue, step) else IO.unit
       }
     }

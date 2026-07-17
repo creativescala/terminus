@@ -27,6 +27,8 @@ import terminus.ui.FullScreen.InteractiveTerminal
 import terminus.ui.react.WritableSignal
 import terminus.ui.runtime.Event
 
+import scala.concurrent.duration.*
+
 /** A Cats Effect runner for full screen applications: the concurrent
   * counterpart of the blocking `FullScreen.run`.
   *
@@ -95,8 +97,9 @@ object Runner:
     for
       queue <- Queue.unbounded[IO, Event]
       // The terminal size is a reactive input, exactly as in the blocking
-      // runner. Until resize notifications become a producer of their own the
-      // consumer refreshes it before every step.
+      // runner. Where the blocking runner refreshes it after every key, here
+      // a resize producer polls for changes and offers them as events, so a
+      // resize redraws without waiting for a key press.
       terminalSize <- IO(WritableSignal(terminal.getDimensions))
       step <- IO(fullScreen.eventLoop(terminalSize))
       // The supervisor owns the timer fibers, canceling any still running
@@ -109,18 +112,25 @@ object Runner:
             supervisor.supervise(serve(task, queue)).void
           )
 
+        val resizes = Events.resizes(
+          IO.blocking(terminal.getDimensions),
+          terminalSize.set,
+          queue,
+          resizePollInterval
+        )
+
         IO(timer.connect(spawn)) >>
           CharSource.fromReader(terminal).use { chars =>
             Events.keys(chars, queue).background.surround {
-              Events.consume(
-                queue,
-                beforeStep = IO(terminalSize.set(terminal.getDimensions)),
-                step
-              )
+              resizes.background.surround {
+                Events.consume(queue, step)
+              }
             }
           }
       }
     yield ()
+
+  private val resizePollInterval = 100.millis
 
   /** The fiber serving one timer task: ticks and one-shots reach the reactive
     * graph as `Event.Effect`s on the queue, so they are writes on the loop like

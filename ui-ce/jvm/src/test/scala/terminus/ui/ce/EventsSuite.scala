@@ -17,11 +17,13 @@
 package terminus.ui.ce
 
 import cats.effect.IO
+import cats.effect.Ref
 import cats.effect.std.Queue
 import cats.effect.unsafe.implicits.global
 import munit.FunSuite
 import terminus.Eof
 import terminus.Key
+import terminus.effect.TerminalDimensions
 import terminus.ui.runtime.Event
 
 import scala.collection.mutable
@@ -74,7 +76,6 @@ class EventsSuite extends FunSuite:
         _ <- events.foldLeft(IO.unit)((io, e) => io >> queue.offer(e))
         _ <- Events.consume(
           queue,
-          beforeStep = IO.unit,
           step = event =>
             seen += event
             event != stop
@@ -84,22 +85,35 @@ class EventsSuite extends FunSuite:
     assertEquals(run(io), events)
   }
 
-  test("consume runs beforeStep before every step, including the last") {
-    val order = mutable.ListBuffer.empty[String]
+  test("resizes offers an event only when the dimensions change") {
+    // Polls of unchanged dimensions produce nothing; the change produces one
+    // event carrying the new value.
+    val script = List(
+      TerminalDimensions(80, 24),
+      TerminalDimensions(80, 24),
+      TerminalDimensions(80, 24),
+      TerminalDimensions(120, 40)
+    )
+    var applied: Option[TerminalDimensions] = None
 
     val io =
       for
+        remaining <- Ref.of[IO, List[TerminalDimensions]](script)
+        dimensions = remaining.modify {
+          case head :: tail => (tail, head)
+          case Nil          => (Nil, script.last)
+        }
         queue <- Queue.unbounded[IO, Event]
-        _ <- queue.offer(Event.Effect(() => ()))
-        _ <- queue.offer(Event.Input(Eof))
-        _ <- Events.consume(
-          queue,
-          beforeStep = IO(order += "before"),
-          step = event =>
-            order += "step"
-            event != Event.Input(Eof)
-        )
-      yield order.toList
+        producer <- Events
+          .resizes(dimensions, d => applied = Some(d), queue, 1.milli)
+          .start
+        event <- queue.take
+        _ <- producer.cancel
+      yield event
 
-    assertEquals(run(io), List("before", "step", "before", "step"))
+    run(io) match
+      case Event.Effect(update) =>
+        update()
+        assertEquals(applied, Some(TerminalDimensions(120, 40)))
+      case other => fail(s"Unexpected event: $other")
   }

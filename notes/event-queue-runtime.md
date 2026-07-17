@@ -126,5 +126,17 @@ not just signal unsubscription.
    `Event.Effect`s on the queue. The runner's `Dispatcher` had to become
    parallel: a sequential one would queue handler-time spawns behind the
    running session forever.
-5. SIGWINCH → resize `Event.Effect` (JVM/Native), replacing per-key size
-   polling in the CE runner.
+5. ~~Resize as an `Event.Effect` (JVM/Native), replacing per-key size polling
+   in the CE runner.~~ Done, as `Events.resizes`: a producer fiber polls
+   `getDimensions` every 100ms and offers a resize effect only on change, so
+   a resize redraws without waiting for a key press. Polling rather than
+   actual SIGWINCH is deliberate: a signal handler can only safely set a
+   flag that something must then poll anyway (Native), the JVM route needs
+   either `sun.misc.Signal` or new core API on `JLineTerminal`, and the char
+   pump already polls at a similar cadence. When core grows a
+   resize-notification hook (natural to design alongside #13/#27), only this
+   producer's implementation changes — its place in the design does not.
+
+All five steps are done; #47 can close. Follow-on threads: #27 removes the
+runner's bracket inversion; #42's cleanup design should account for timer
+fibers; a core resize-notification hook would upgrade `Events.resizes`.
