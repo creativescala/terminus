@@ -54,10 +54,19 @@ Two runners feed the step function:
 The driver loops `KeyParser` states exactly like `TerminalKeyReader`, but
 `IO.timeout` around `IO.blocking(stdin.read())` does **not** cancel the
 underlying read: the abandoned blocked thread eventually swallows the next
-keystroke. Chosen design: a dedicated reader thread pushes chars into a
-`Queue[IO, Char]`, and the parser driver reads with
-`charQueue.take.timeout(100.millis)` — canceling a queue take is safe, so
-the escape-disambiguation timeout is honestly `IO.timeout`.
+keystroke. Implemented design (`terminus.ce`, in `core-ce`):
+
+- `CharSource.pump` runs a background fiber pushing chars into a
+  `Queue[IO, Eof | Char]` and yields the queue's take action. The fiber
+  reads with core's *timed* `NonBlockingReader.read(pollInterval)` under
+  `IO.blocking`, so it is never parked in an uncancelable indefinite read:
+  cancelation lands at a poll boundary, bounding shutdown latency at the
+  poll interval (default 50ms) without touching input latency (a timed read
+  returns as soon as a char is available). The pump stops after `Eof`.
+- `KeyReader.readKey(chars, timeout)` drives `KeyParser`, reading with
+  `chars.timeoutTo(timeout, Timeout)` while disambiguating — canceling a
+  queue take is safe, so the escape-disambiguation timeout is honestly
+  `IO.timeout`.
 
 ## Modules
 
@@ -91,8 +100,8 @@ not just signal unsubscription.
 
 1. ~~Extract `step` from `FullScreen.run`; blocking runner keeps current
    behavior (pure refactor).~~ Done.
-2. `core-ce`: reader-thread char queue + CE `readKey` driver, with timeout
-   tests.
+2. ~~`core-ce`: char-queue pump + CE `readKey` driver, with timeout
+   tests.~~ Done.
 3. `ui-ce`: event queue + consumer fiber + CE `FullScreen` runner, no timers
    yet — parity milestone.
 4. `Timer` capability + spinner/blink demo — the payoff milestone.
