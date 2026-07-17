@@ -33,6 +33,14 @@ final class Runtime private ():
   // effects through the React capability, whose implementation routes here.
   private[ui] val effectQueue: EffectQueue = EffectQueue()
 
+  // Set when the application requests that the event loop stop; read by the
+  // loop after each step.
+  private var quit: Boolean = false
+
+  private[ui] def requestQuit(): Unit = quit = true
+
+  private[ui] def quitRequested: Boolean = quit
+
   // The single source of truth for focus. A signal so that components can
   // derive reactive focus state from it; see [[event.DefaultEvent.focus]].
   private val currentFocus: WritableSignal[FocusId] =
