@@ -18,44 +18,26 @@ package terminus.effect
 
 import terminus.Eof
 import terminus.Key
-import terminus.KeyMappings
-import terminus.KeySequence
-import terminus.Timeout
+import terminus.KeyParser
 
 import scala.annotation.tailrec
 import scala.concurrent.duration.*
 
 /** An implementation of KeyReader that interprets the standard terminal escape
-  * codes for key presses. The timeout is how long we wait between an escape
-  * being pressed and another key before we decide they are separate key
-  * presses.
+  * codes for key presses, using [[terminus.KeyParser]] to do the parsing. The
+  * timeout is how long we wait between an escape being pressed and another key
+  * before we decide they are separate key presses.
   */
 trait TerminalKeyReader(timeout: Duration = 100.millis) extends KeyReader:
   self: NonBlockingReader & Reader =>
 
-  // Some references on parsing terminal codes:
-  //   https://github.com/crossterm-rs/crossterm/blob/master/src/event/sys/unix/parse.rs
-  //   https://github.com/Textualize/textual/blob/main/src/textual/_ansi_sequences.py
   def readKey(): Eof | Key =
-    val input = read()
+    @tailrec
+    def loop(parser: KeyParser): Eof | Key =
+      val input = if parser.isDisambiguating then read(timeout) else read()
+      parser.parse(input) match
+        case Eof             => Eof
+        case key: Key        => key
+        case next: KeyParser => loop(next)
 
-    input match
-      case Eof     => Eof
-      case c: Char =>
-        KeyMappings.default.get(c) match
-          case None                  => Key(c)
-          case Some(k: Key)          => k
-          case Some(ks: KeySequence) =>
-            read(timeout) match
-              case Eof     => ks.root
-              case Timeout => ks.root
-              case cx      => readKeySequence(s"$c$cx", ks)
-
-  @tailrec
-  private def readKeySequence(acc: String, sequence: KeySequence): Eof | Key =
-    if sequence.sequences.contains(acc) then sequence.sequences(acc)
-    else if sequence.subSequences.contains(acc) then
-      read() match
-        case Eof     => Eof
-        case c: Char => readKeySequence(acc + c.toString, sequence)
-    else Key.unknown(acc)
+    loop(KeyParser.Start)
