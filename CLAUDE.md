@@ -4,6 +4,8 @@ Terminus is a Scala terminal toolkit, cross-platform across JVM, JS, and Scala N
 
 - **`core/`** — low-level effect traits and ANSI escape code primitives
 - **`ui/`** — cell buffer–based terminal UI toolkit built on top of core
+- **`core-ce/`** — Cats Effect integration for core: char pump, CE key driver
+- **`ui-ce/`** — Cats Effect event-queue runner for ui, with the `Timer` capability
 
 ## Notes
 
@@ -19,4 +21,5 @@ Design notes and architectural decisions are kept in `notes/`:
 sbt compile
 sbt test
 sbt 'uiNative/runMain terminus.ui.demo'
+sbt 'uiCeJVM/runMain terminus.ui.ce.demo'    # CE runner: spinner/timers demo
 ```

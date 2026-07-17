@@ -111,9 +111,14 @@ The distinction is now enforced at the type level by two capabilities with delib
 
 The whole frame is a single `Effect` (react package): an eagerly-run thunk that
 re-tracks its reactive dependencies on every run, like a `Computed` whose
-staleness schedules a re-run instead of waiting to be pulled. `FullScreen.run`
-constructs the effect (drawing the first frame) and the loop is: read key →
-dispatch → refresh the terminal-size signal → drain the `EffectQueue`.
+staleness schedules a re-run instead of waiting to be pulled.
+`FullScreen.eventLoop` constructs the effect (drawing the first frame) and
+returns a step function `Event => Boolean`: handle one event (a key, or an
+effect marshaled onto the loop), drain the `EffectQueue`, false means quit.
+Two runners feed it: the blocking `FullScreen.run` (read key → refresh the
+terminal-size signal → step) and the Cats Effect runner in `ui-ce`, where
+producers (keys, timers, resizes) feed a queue and a single consumer steps —
+see `notes/event-queue-runtime.md`.
 
 Effects are leaves of the reactive graph: they produce no value, nothing can
 depend on them, and they have no combinators — composition happens on the
@@ -131,24 +136,27 @@ Consequences of the design:
 - **Batching.** `setStale` only schedules; effects run when the loop drains,
   once per batch, so handlers that write several signals cannot cause glitches
   or double renders.
-- **Terminal size is a reactive input**: a signal the loop refreshes after
-  each key and the render effect reads, so a resize is just another dependency
-  change.
+- **Terminal size is a reactive input**: a signal the render effect reads, so
+  a resize is just another dependency change. The blocking runner refreshes it
+  after each key; the CE runner has a resize producer that polls for changes
+  and delivers them as events.
 - **Effects must not write signals they read.** The TextInput cursor is the
   example: instead of normalizing the cursor signal each frame, out-of-range
   positions (after an external shrink of the value) are clamped at every read.
 
-Deferred, in dependency order: ownership/disposal (a `dispose()` on effects
-and computeds, registered with the creating context via `React`, plus an
-`onCleanup` hook for applications) becomes necessary as soon as components can
-be removed; per-component effects need retained layout and a
-needs-layout/needs-paint split; equality cut-off in `Computed` needs two-phase
-dirty/check marking and only pays off once there is more than one effect;
-timers/animation need the loop to block on an event queue rather than
-`readKey` (the EventQ/Cats Effect direction), at which point the effect queue
-gains a wake-up source that isn't a key — this is also why `WritableSignal`
-creation goes through `React`: an off-loop writer must be able to wake the
-loop, and that wiring is baked in at creation.
+Timers/animation landed via the event queue and Cats Effect runner (#47, see
+`notes/event-queue-runtime.md`): the loop blocks on a queue rather than
+`readKey`, and the `Timer` capability wakes it without a key press — the
+payoff of routing `WritableSignal` creation through `React` so off-loop
+writers reach the loop. Per-component effects (needs-layout/needs-paint) and
+equality cut-off in `Computed` were closed as not-planned (#45, #44):
+whole-frame rendering + diff-flush is the design, and the incrementalism only
+saves CPU that terminal-sized workloads don't spend; revisit as an
+exploration if ever. Still deferred: ownership/disposal (a `dispose()` on
+effects and computeds, registered with the creating context via `React`, plus
+an `onCleanup` hook for applications) becomes necessary as soon as components
+can be removed — and #42's design should account for timer fibers (#51), the
+first per-app external resource.
 
 ## Effect layer
 
