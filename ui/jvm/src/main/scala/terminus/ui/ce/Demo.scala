@@ -21,7 +21,7 @@ import cats.effect.IOApp
 import cats.effect.Resource
 import terminus.JLineTerminal
 
-// Run with: sbt 'uiCeJVM/runMain terminus.ui.ce.demo'
+// Run with: sbt 'uiJVM/runMain terminus.ui.ce.demo'
 //
 // See DemoApp for what the demo shows.
 object demo extends IOApp.Simple:

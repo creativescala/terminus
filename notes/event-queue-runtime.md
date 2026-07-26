@@ -70,12 +70,15 @@ keystroke. Implemented design (`terminus.ce`, in `core-ce`):
 
 ## Modules
 
-Mirror the core/ui split:
-
 - **`core-ce`** (depends on `core` + cats-effect): char source, CE `readKey`
   driver; later the #27 territory (terminal modes as `Resource`).
-- **`ui-ce`** (depends on `ui` + `core-ce`): the event queue, CE runner for
-  `FullScreen`, timer capability.
+- **`ui`** (depends on `core` + `core-ce`): the event queue, CE runner for
+  `FullScreen`, timer capability, in the `terminus.ui.ce` package. Originally
+  a separate `ui-ce` module mirroring the core/core-ce split; folded into `ui`
+  (2026-07) once it became clear no real application would use `ui` without
+  animation/timers, so the CE runner is not really optional the way `core-ce`
+  is for `core`. `core`/`core-ce` stay split: a blocking ANSI/terminal toolkit
+  with no UI framework is still a legitimate standalone use case.
 
 ## Time as a capability
 
@@ -112,8 +115,9 @@ not just signal unsubscription.
    inversion. The runner lives in a `jvm-native` source directory: Scala
    Native has supported threads since 0.5.10 and Cats Effect works with them,
    so JVM and Native share it; JS needs an event-driven driver instead of the
-   char pump. Parity demos: `sbt 'uiCeJVM/runMain terminus.ui.ce.demo'` and
-   `sbt 'uiCeNative/runMain terminus.ui.ce.demo'`.
+   char pump. Parity demos: `sbt 'uiJVM/runMain terminus.ui.ce.demo'` and
+   `sbt 'uiNative/runMain terminus.ui.ce.demo'` (originally `uiCeJVM`/
+   `uiCeNative`, before `ui-ce` folded into `ui`).
 4. ~~`Timer` capability + spinner demo — the payoff milestone.~~ Done. The
    `Timer` trait lives in ui's capability package (pure interface, so app
    code stays free of cats-effect; the blocking runner simply never provides

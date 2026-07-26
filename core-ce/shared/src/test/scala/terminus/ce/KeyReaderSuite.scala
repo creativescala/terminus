@@ -18,14 +18,13 @@ package terminus.ce
 
 import cats.effect.IO
 import cats.effect.std.Queue
-import cats.effect.unsafe.implicits.global
-import munit.FunSuite
+import munit.CatsEffectSuite
 import terminus.Eof
 import terminus.Key
 
 import scala.concurrent.duration.*
 
-class KeyReaderSuite extends FunSuite:
+class KeyReaderSuite extends CatsEffectSuite:
   /** A char source backed by a queue preloaded with `input`; reads beyond the
     * end block, as reads from a quiet terminal do.
     */
@@ -35,24 +34,24 @@ class KeyReaderSuite extends FunSuite:
       _ <- input.toList.foldLeft(IO.unit)((io, c) => io >> queue.offer(c))
     yield queue.take
 
-  def run[A](io: IO[A]): A = io.timeout(5.seconds).unsafeRunSync()
+  def run[A](io: IO[A]): IO[A] = io.timeout(5.seconds)
 
   test("A plain character is read as a key press") {
     val io = charsOf('a').flatMap(chars => KeyReader.readKey(chars))
-    assertEquals(run(io), Key('a'): Eof | Key)
+    run(io).assertEquals(Key('a'): Eof | Key)
   }
 
   test("A complete escape sequence is read as the mapped key press") {
     val io =
       charsOf('\u001b', '[', 'A').flatMap(chars => KeyReader.readKey(chars))
-    assertEquals(run(io), Key.up: Eof | Key)
+    run(io).assertEquals(Key.up: Eof | Key)
   }
 
   test("Escape with no further input is the escape key, after the timeout") {
     val io = charsOf('\u001b').flatMap(chars =>
       KeyReader.readKey(chars, timeout = 20.millis)
     )
-    assertEquals(run(io), Key.escape: Eof | Key)
+    run(io).assertEquals(Key.escape: Eof | Key)
   }
 
   test("A character arriving within the timeout is not lost") {
@@ -66,12 +65,12 @@ class KeyReaderSuite extends FunSuite:
         key <- KeyReader.readKey(queue.take, timeout = 5.seconds)
         _ <- offer.join
       yield key
-    assertEquals(run(io), Key.up: Eof | Key)
+    run(io).assertEquals(Key.up: Eof | Key)
   }
 
   test("Eof is passed through") {
     val io = charsOf(Eof).flatMap(chars => KeyReader.readKey(chars))
-    assertEquals(run(io), Eof: Eof | Key)
+    run(io).assertEquals(Eof: Eof | Key)
   }
 
   test("Successive reads parse successive keys from one source") {
@@ -81,5 +80,5 @@ class KeyReaderSuite extends FunSuite:
         second <- KeyReader.readKey(chars)
       yield (first, second)
     }
-    assertEquals(run(io), (Key.up: Eof | Key, Key('b'): Eof | Key))
+    run(io).assertEquals((Key.up: Eof | Key, Key('b'): Eof | Key))
   }

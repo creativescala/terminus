@@ -18,14 +18,13 @@ package terminus.ce
 
 import cats.effect.IO
 import cats.effect.Ref
-import cats.effect.unsafe.implicits.global
-import munit.FunSuite
+import munit.CatsEffectSuite
 import terminus.Eof
 import terminus.Timeout
 
 import scala.concurrent.duration.*
 
-class CharSourceSuite extends FunSuite:
+class CharSourceSuite extends CatsEffectSuite:
   /** A read action that works through `script`, then times out forever. */
   def scripted(
       script: List[Timeout | Eof | Char]
@@ -39,7 +38,7 @@ class CharSourceSuite extends FunSuite:
         }
       )
 
-  def run[A](io: IO[A]): A = io.timeout(5.seconds).unsafeRunSync()
+  def run[A](io: IO[A]): IO[A] = io.timeout(5.seconds)
 
   test("The pump delivers characters and Eof in order, reading past timeouts") {
     val io =
@@ -52,7 +51,7 @@ class CharSourceSuite extends FunSuite:
           yield (a, b, eof)
         }
       )
-    assertEquals(run(io), ('a': Eof | Char, 'b': Eof | Char, Eof: Eof | Char))
+    run(io).assertEquals(('a': Eof | Char, 'b': Eof | Char, Eof: Eof | Char))
   }
 
   test("The pump stops reading after Eof") {
@@ -64,5 +63,5 @@ class CharSourceSuite extends FunSuite:
           take >> take >> IO.sleep(50.millis) >> count.get
         }
       yield reads
-    assertEquals(run(io), 2)
+    run(io).assertEquals(2)
   }

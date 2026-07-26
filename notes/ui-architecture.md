@@ -116,9 +116,9 @@ staleness schedules a re-run instead of waiting to be pulled.
 returns a step function `Event => Boolean`: handle one event (a key, or an
 effect marshaled onto the loop), drain the `EffectQueue`, false means quit.
 Two runners feed it: the blocking `FullScreen.run` (read key → refresh the
-terminal-size signal → step) and the Cats Effect runner in `ui-ce`, where
-producers (keys, timers, resizes) feed a queue and a single consumer steps —
-see `notes/event-queue-runtime.md`.
+terminal-size signal → step) and the Cats Effect runner in `terminus.ui.ce`,
+where producers (keys, timers, resizes) feed a queue and a single consumer
+steps — see `notes/event-queue-runtime.md`.
 
 Effects are leaves of the reactive graph: they produce no value, nothing can
 depend on them, and they have no combinators — composition happens on the

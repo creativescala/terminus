@@ -24,8 +24,8 @@ import scala.concurrent.duration.FiniteDuration
   * key press.
   *
   * Only runtimes with a notion of time provide this capability — the Cats
-  * Effect runner in ui-ce does, the blocking runner does not — which is how an
-  * application that needs timers says so at compile time.
+  * Effect runner (`terminus.ui.ce`) does, the blocking runner does not — which
+  * is how an application that needs timers says so at compile time.
   */
 trait Timer:
   /** A signal that counts timer ticks, incremented every `interval`. Belongs in

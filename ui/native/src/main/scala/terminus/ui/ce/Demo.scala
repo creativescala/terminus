@@ -20,7 +20,7 @@ import cats.effect.IO
 import cats.effect.IOApp
 import terminus.NativeTerminal
 
-// Run with: sbt 'uiCeNative/runMain terminus.ui.ce.demo'
+// Run with: sbt 'uiNative/runMain terminus.ui.ce.demo'
 //
 // The Native twin of the JVM demo; see DemoApp for what it shows.
 object demo extends IOApp.Simple:

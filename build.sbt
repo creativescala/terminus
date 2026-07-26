@@ -70,6 +70,8 @@ val jline = Def.setting("org.jline" % "jline" % "4.3.0")
 val scalajsDom = Def.setting("org.scala-js" %%% "scalajs-dom" % "2.8.1")
 
 val munit = Def.setting("org.scalameta" %%% "munit" % "1.3.4" % "test")
+val munitCatsEffect =
+  Def.setting("org.typelevel" %%% "munit-cats-effect" % "2.2.0" % "test")
 val munitScalaCheck =
   Def.setting("org.scalameta" %%% "munit-scalacheck" % "1.3.0" % "test")
 
@@ -84,7 +86,7 @@ lazy val commonSettings = Seq(
   licenses := Seq(License.Apache2)
 )
 
-lazy val root = tlCrossRootProject.aggregate(core, coreCe, ui, uiCe, unidocs)
+lazy val root = tlCrossRootProject.aggregate(core, coreCe, ui, unidocs)
 
 lazy val core = crossProject(JSPlatform, JVMPlatform, NativePlatform)
   .in(file("core"))
@@ -100,7 +102,7 @@ lazy val coreCe = crossProject(JSPlatform, JVMPlatform, NativePlatform)
   .in(file("core-ce"))
   .settings(
     commonSettings,
-    libraryDependencies ++= Seq(catsEffect.value),
+    libraryDependencies ++= Seq(catsEffect.value, munitCatsEffect.value),
     name := "terminus-core-ce"
   )
   .dependsOn(core)
@@ -109,16 +111,8 @@ lazy val ui = crossProject(JSPlatform, JVMPlatform, NativePlatform)
   .in(file("ui"))
   .settings(
     name := "terminus-ui",
-    commonSettings
-  )
-  .dependsOn(core)
-
-lazy val uiCe = crossProject(JSPlatform, JVMPlatform, NativePlatform)
-  .in(file("ui-ce"))
-  .settings(
     commonSettings,
-    libraryDependencies ++= Seq(catsEffect.value),
-    name := "terminus-ui-ce"
+    libraryDependencies ++= Seq(catsEffect.value)
   )
   // The Runner drives the terminal with blocking reads on a thread, which
   // works on the JVM and (since Scala Native supports threads) Native, but
@@ -131,7 +125,7 @@ lazy val uiCe = crossProject(JSPlatform, JVMPlatform, NativePlatform)
     Compile / unmanagedSourceDirectories +=
       baseDirectory.value.getParentFile / "jvm-native" / "src" / "main" / "scala"
   )
-  .dependsOn(ui, coreCe)
+  .dependsOn(coreCe)
 
 lazy val docs =
   project
