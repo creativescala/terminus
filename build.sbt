@@ -20,7 +20,7 @@ import laika.config.ApiLinks
 import laika.theme.Theme
 import laika.helium.config.TextLink
 
-ThisBuild / tlBaseVersion := "0.6" // your current series x.y
+ThisBuild / tlBaseVersion := "0.7" // your current series x.y
 
 Global / onChangedBuildSource := ReloadOnSourceChanges
 
@@ -64,6 +64,7 @@ commands += Command.command("build") { state =>
 
 val catsCore = Def.setting("org.typelevel" %%% "cats-core" % "2.13.0")
 val catsEffect = Def.setting("org.typelevel" %%% "cats-effect" % "3.7.0")
+val fs2 = Def.setting("co.fs2" %%% "fs2-core" % "3.13.0")
 
 val jline = Def.setting("org.jline" % "jline" % "4.3.0")
 
@@ -112,7 +113,7 @@ lazy val ui = crossProject(JSPlatform, JVMPlatform, NativePlatform)
   .settings(
     name := "terminus-ui",
     commonSettings,
-    libraryDependencies ++= Seq(catsEffect.value)
+    libraryDependencies ++= Seq(catsEffect.value, fs2.value)
   )
   // The Runner drives the terminal with blocking reads on a thread, which
   // works on the JVM and (since Scala Native supports threads) Native, but

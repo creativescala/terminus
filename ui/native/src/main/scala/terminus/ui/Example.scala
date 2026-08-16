@@ -105,7 +105,7 @@ private def staticText(s: String) = Signal.constant(text.Text(s))
 
   // FullScreen always runs the full interactive loop (alternate screen, raw
   // mode, key-read loop) — there is no longer a render-once mode. Ctrl+Q quits.
-  fullScreen.run(NativeTerminal)
+  fullScreen.unsafeRun(using NativeTerminal)
 
 /** A little graphic equalizer, showing off reactive content and the layout
   * system. The arrow keys mutate writable signals; each bar is a [[Text]] whose
@@ -206,7 +206,7 @@ private def staticText(s: String) = Signal.constant(text.Text(s))
     }
   }
 
-  fullScreen.run(NativeTerminal)
+  fullScreen.unsafeRun(using NativeTerminal)
 
 @main def textInputDemo(): Unit =
   val inputStyle = TextInputStyle.default
@@ -232,7 +232,7 @@ private def staticText(s: String) = Signal.constant(text.Text(s))
     }
   }
 
-  fullScreen.run(NativeTerminal)
+  fullScreen.unsafeRun(using NativeTerminal)
 
 // TODO: port to the new component APIs (Select already has apply — this one
 // is no longer blocked, just not yet rewritten).
@@ -291,4 +291,4 @@ private def staticText(s: String) = Signal.constant(text.Text(s))
     }
   }
 
-  app.run(NativeTerminal)
+  app.unsafeRun(using NativeTerminal)

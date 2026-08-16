@@ -34,5 +34,5 @@ trait DefaultReact(runtime: Runtime) extends React:
     Computed(thunk)
 
   def effect(thunk: Observe ?=> Unit): Unit =
-    Effect(runtime.effectQueue)(thunk)
+    Effect(runtime)(thunk)
     ()

@@ -28,4 +28,6 @@ object demo extends IOApp.Simple:
   def run: IO[Unit] =
     Resource
       .make(IO(JLineTerminal.apply))(terminal => IO(terminal.close()))
-      .use(terminal => DemoApp.make.run(terminal))
+      .use(terminal =>
+        DemoApp.make.flatMap(app => IO.blocking(app.run(using terminal)))
+      )

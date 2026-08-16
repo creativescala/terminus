@@ -17,6 +17,7 @@
 package terminus.ui.react
 
 import terminus.ui.capability.Observe
+import terminus.ui.capability.Schedule
 
 import scala.collection.mutable
 
@@ -25,7 +26,7 @@ import scala.collection.mutable
   *
   * The thunk runs once on construction, subscribing to every signal it reads
   * with `get`. When any of them changes the effect does not re-run immediately;
-  * it is placed on its [[EffectQueue]] and runs when the queue next drains.
+  * it is placed on its [[Schedule]] and runs when the schedule next drains.
   * Each run re-tracks from scratch, so dependencies may change between runs.
   *
   * The thunk should not write to a signal it also reads: the write marks the
@@ -38,21 +39,22 @@ import scala.collection.mutable
   * [[terminus.ui.capability.React]] capability and never hold a reference.
   */
 private[ui] final class Effect private (
-    queue: EffectQueue,
+    scheduler: Schedule,
     thunk: Observe ?=> Unit
-) extends Listener:
+) extends Listener,
+      Runnable:
   private val sources: mutable.Set[Unsubscribe] = mutable.Set.empty
   private var scheduled = false
 
   def setStale(): Unit =
     if !scheduled then
       scheduled = true
-      queue.schedule(this)
+      scheduler.schedule(this)
 
   def addUnsubscribe(unsubscribe: Unsubscribe): Unit =
     sources += unsubscribe
 
-  private[react] def run(): Unit =
+  def run(): Unit =
     // Cleared before the thunk runs so a dependency change made by the thunk
     // itself (discouraged, but possible) re-schedules rather than being lost.
     scheduled = false
@@ -69,7 +71,7 @@ private[ui] final class Effect private (
 private[ui] object Effect:
   /** Create an effect and run it immediately, establishing its subscriptions.
     */
-  def apply(queue: EffectQueue)(thunk: Observe ?=> Unit): Effect =
-    val effect = new Effect(queue, thunk)
+  def apply(scheduler: Schedule)(thunk: Observe ?=> Unit): Effect =
+    val effect = new Effect(scheduler, thunk)
     effect.run()
     effect

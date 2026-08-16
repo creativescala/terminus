@@ -18,6 +18,7 @@ package terminus.ui.runtime
 
 import terminus.Eof
 import terminus.Key
+import terminus.effect.TerminalDimensions
 
 /** A single event consumed by the event loop. Everything that drives the loop —
   * key presses, and writes originating outside it — arrives as one of these, so
@@ -31,4 +32,7 @@ private[ui] enum Event:
     * loop — timer ticks, resize notifications, application events — are
     * marshaled onto it.
     */
-  case Effect(run: () => Unit)
+  case Effect(run: Runnable)
+
+  /** The new dimension of the terminal following a resize. */
+  case Resize(dimensions: TerminalDimensions)

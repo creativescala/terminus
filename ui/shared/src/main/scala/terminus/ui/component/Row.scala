@@ -20,6 +20,7 @@ import terminus.ui.capability.Event
 import terminus.ui.capability.Layout
 import terminus.ui.capability.Observe
 import terminus.ui.capability.React
+import terminus.ui.capability.Timer
 import terminus.ui.event.DefaultEvent
 import terminus.ui.event.FocusId
 import terminus.ui.layout.Buffer
@@ -35,6 +36,7 @@ import terminus.ui.react.DefaultReact
 import terminus.ui.style.Align
 import terminus.ui.style.Justify
 import terminus.ui.style.LayoutProps
+import terminus.ui.timer.DefaultTimer
 
 import scala.collection.Seq
 
@@ -229,14 +231,15 @@ object Row:
   def apply(
       size: Size,
       style: LayoutProps => LayoutProps = identity
-  )(body: (Event & Layout & React) ?=> Unit)(using
+  )(body: (Event & Layout & React & Timer) ?=> Unit)(using
       ctx: Layout
   ): Unit =
     ctx.addComponent { runtime =>
       val focusId = FocusId.next
       val context = new DefaultEvent(focusId, runtime)
         with DefaultLayout(runtime)
-        with DefaultReact(runtime) {}
+        with DefaultReact(runtime)
+        with DefaultTimer(runtime) {}
       // Evaluate body here so we do not retain a reference to it and it can be garbage collected.
       body(using context)
 
