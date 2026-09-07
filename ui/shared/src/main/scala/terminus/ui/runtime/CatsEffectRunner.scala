@@ -10,7 +10,6 @@ import terminus.Key
 import terminus.ce.CharSource
 import terminus.ce.KeyReader
 import terminus.effect
-import terminus.ui.react.WritableSignal
 
 import java.util.concurrent.ArrayBlockingQueue
 import java.util.concurrent.BlockingQueue
@@ -41,67 +40,61 @@ final class CatsEffectRunner(
   ): BlockingQueue[Event] =
     val resizePollInterval = 100.millis
     val outQueue = ArrayBlockingQueue[Event](128)
-    val terminalSize = WritableSignal(terminal.getDimensions)
-    val ceEffect: IO[Unit] =
-      for
-        // The supervisor owns the IO effects fibers, canceling any still running
-        // when the session ends.
-        _ <- Supervisor[IO].use { supervisor =>
-          val effects = Stream
-            .fromQueueUnterminated(inQueue)
-            .evalMap(s =>
-              supervisor.supervise(
-                s.evalMap(r => IO.blocking(outQueue.put(Event.Effect(r))))
-                  .compile
-                  .drain
-              )
-            )
+    // The supervisor owns the IO effects fibers, canceling any still running
+    // when the session ends.
+    val effects = Stream
+      .fromQueueUnterminated(inQueue)
+      .evalMap(s =>
+        supervisor.supervise(
+          s.evalMap(r => IO.blocking(outQueue.put(Event.Effect(r))))
             .compile
             .drain
+        )
+      )
+      .compile
+      .drain
 
-          val resize = Stream
-            .awakeDelay[IO](resizePollInterval)
-            .evalMap(_ => IO.blocking(terminal.getDimensions))
-            .filterWithPrevious((p, c) => p != c)
-            .evalMap(d => IO.blocking(outQueue.put(Event.Resize(d))))
-            .compile
-            .drain
+    val resize = Stream
+      .awakeDelay[IO](resizePollInterval)
+      .evalMap(_ => IO.blocking(terminal.getDimensions))
+      .filterWithPrevious((p, c) => p != c)
+      .evalMap(d => IO.blocking(outQueue.put(Event.Resize(d))))
+      .compile
+      .drain
 
-          val keys = CharSource.fromReader(terminal).use { chars =>
-            def loop(): IO[Unit] =
-              KeyReader.readKey(chars).flatMap {
-                case Eof      => IO.blocking(outQueue.put(Event.Input(Eof)))
-                case key: Key =>
-                  IO.blocking(
-                    outQueue.put(Event.Input(key))
-                  ) >> loop()
-              }
-
-            loop()
-          }
-
-          supervisor.supervise(
-            effects.background.surround {
-              resize.background.surround {
-                // Keys is the one that will signal stop, so it's the inner most
-                // effect
-                keys
-              }
-            }
-          )
+    val keys = CharSource.fromReader(terminal).use { chars =>
+      def loop(): IO[Unit] =
+        KeyReader.readKey(chars).flatMap {
+          case Eof      => IO.blocking(outQueue.put(Event.Input(Eof)))
+          case key: Key =>
+            IO.blocking(
+              outQueue.put(Event.Input(key))
+            ) >> loop()
         }
-      yield ()
+
+      loop()
+    }
+
+    val ceEffect =
+      supervisor.supervise(
+        effects.background.surround {
+          resize.background.surround {
+            // Keys is the one that will signal stop, so it's the inner most
+            // effect
+            keys
+          }
+        }
+      )
 
     dispatcher.unsafeRunAndForget(ceEffect)
     outQueue
 object CatsEffectRunner:
   def apply: IO[CatsEffectRunner] =
-    val dispatcherResource = Dispatcher[IO]
+    val dispatcherResource = Dispatcher.parallel[IO]
     val queue = Queue.bounded[IO, Stream[IO, Runnable]](128)
-    val supervisorResource = Supervisor[IO]
 
     dispatcherResource.use { dispatcher =>
-      supervisorResource.use { supervisor =>
+      Supervisor[IO].use { supervisor =>
         queue.map { new CatsEffectRunner(dispatcher, _, supervisor) }
       }
     }
