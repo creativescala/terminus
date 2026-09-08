@@ -18,7 +18,8 @@ package terminus.ui.react
 
 import munit.FunSuite
 import terminus.ui.capability.React
-import terminus.ui.runtime.Runtime
+import terminus.ui.runtime.DefaultRuntime
+import terminus.ui.runtime.TestRunner
 
 /** Tests effects through the application-facing surface: the [[React]]
   * capability's `signal` / `computed` / `effect` methods, with the queue
@@ -30,9 +31,10 @@ class EffectSuite extends FunSuite:
     * an application and its event loop would see them.
     */
   private class Fixture:
-    private val runtime = Runtime.empty
+    private val runner = new TestRunner
+    private val runtime = DefaultRuntime(runner)
     val react: React = new DefaultReact(runtime) {}
-    def drain(): Unit = runtime.effectQueue.drain()
+    def drain(): Unit = runner.drain()
 
   test("an effect runs once on construction") {
     val f = new Fixture

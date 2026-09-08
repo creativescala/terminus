@@ -79,3 +79,10 @@ trait Runtime extends Schedule:
   def prevFocus(): Unit
 
   def dispatch(key: Key): Unit
+
+object Runtime:
+  /** A runtime backed by a no-op [[Runner]]: focus traversal and dispatch work
+    * normally, but nothing scheduled through it (React effects, timers) ever
+    * runs. Handy for tests that don't exercise scheduling.
+    */
+  def empty: Runtime = DefaultRuntime(Runner.noop)
