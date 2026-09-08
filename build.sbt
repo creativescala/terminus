@@ -33,7 +33,7 @@ ThisBuild / developers := List(
   tlGitHubDev("noelwelsh", "Noel Welsh")
 )
 
-lazy val scala3 = "3.8.4"
+lazy val scala3 = "3.9.0"
 
 ThisBuild / crossScalaVersions := List(scala3)
 ThisBuild / githubWorkflowJavaVersions := List(JavaSpec.temurin("17"))
@@ -63,18 +63,18 @@ commands += Command.command("build") { state =>
 // Dependencies
 
 val catsCore = Def.setting("org.typelevel" %%% "cats-core" % "2.13.0")
-val catsEffect = Def.setting("org.typelevel" %%% "cats-effect" % "3.7.0")
-val fs2 = Def.setting("co.fs2" %%% "fs2-core" % "3.13.0")
+val catsEffect = Def.setting("org.typelevel" %%% "cats-effect" % "3.7.1")
+val fs2 = Def.setting("co.fs2" %%% "fs2-core" % "3.14.0")
 
-val jline = Def.setting("org.jline" % "jline" % "4.3.0")
+val jline = Def.setting("org.jline" % "jline" % "4.4.3")
 
 val scalajsDom = Def.setting("org.scala-js" %%% "scalajs-dom" % "2.8.1")
 
-val munit = Def.setting("org.scalameta" %%% "munit" % "1.3.4" % "test")
+val munit = Def.setting("org.scalameta" %%% "munit" % "1.3.6" % "test")
 val munitCatsEffect =
   Def.setting("org.typelevel" %%% "munit-cats-effect" % "2.2.0" % "test")
 val munitScalaCheck =
-  Def.setting("org.scalameta" %%% "munit-scalacheck" % "1.3.0" % "test")
+  Def.setting("org.scalameta" %%% "munit-scalacheck" % "1.3.1" % "test")
 
 // Projects and Settings
 
