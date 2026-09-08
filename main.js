@@ -2198,28 +2198,6 @@ function $m_RTLong$() {
   }
   return $n_RTLong$;
 }
-/** @constructor */
-function $c_s_$less$colon$less$() {
-  this.s_$less$colon$less$__f_singleton = null;
-  $n_s_$less$colon$less$ = this;
-  this.s_$less$colon$less$__f_singleton = new $c_s_$less$colon$less$$anon$1();
-}
-$c_s_$less$colon$less$.prototype = new $h_O();
-$c_s_$less$colon$less$.prototype.constructor = $c_s_$less$colon$less$;
-/** @constructor */
-function $h_s_$less$colon$less$() {
-}
-$h_s_$less$colon$less$.prototype = $c_s_$less$colon$less$.prototype;
-var $d_s_$less$colon$less$ = new $TypeData().initClass($c_s_$less$colon$less$, "scala.$less$colon$less$", ({
-  s_$less$colon$less$: 1
-}));
-var $n_s_$less$colon$less$;
-function $m_s_$less$colon$less$() {
-  if ((!$n_s_$less$colon$less$)) {
-    $n_s_$less$colon$less$ = new $c_s_$less$colon$less$();
-  }
-  return $n_s_$less$colon$less$;
-}
 function $p_s_Array$__slowcopy__O__I__O__I__I__V($thiz, src, srcPos, dest, destPos, length) {
   var i = srcPos;
   var j = destPos;
@@ -5438,15 +5416,6 @@ function $asArrayOf_jl_Error(obj, depth) {
 class $c_jl_Exception extends $c_jl_Throwable {
 }
 /** @constructor */
-function $c_s_$less$colon$less() {
-}
-$c_s_$less$colon$less.prototype = new $h_O();
-$c_s_$less$colon$less.prototype.constructor = $c_s_$less$colon$less;
-/** @constructor */
-function $h_s_$less$colon$less() {
-}
-$h_s_$less$colon$less.prototype = $c_s_$less$colon$less.prototype;
-/** @constructor */
 function $c_s_Predef$() {
   this.s_Predef$__f_Map = null;
   $n_s_Predef$ = this;
@@ -6601,15 +6570,6 @@ var $d_ju_concurrent_ExecutionException = new $TypeData().initClass($c_ju_concur
   Ljava_io_Serializable: 1
 }));
 /** @constructor */
-function $c_s_$eq$colon$eq() {
-}
-$c_s_$eq$colon$eq.prototype = new $h_s_$less$colon$less();
-$c_s_$eq$colon$eq.prototype.constructor = $c_s_$eq$colon$eq;
-/** @constructor */
-function $h_s_$eq$colon$eq() {
-}
-$h_s_$eq$colon$eq.prototype = $c_s_$eq$colon$eq.prototype;
-/** @constructor */
 function $c_sc_AbstractIterator() {
 }
 $c_sc_AbstractIterator.prototype = new $h_O();
@@ -6876,7 +6836,7 @@ $c_Lterminus_effect_Stack.prototype.productElement__I__O = (function(n) {
   if ((n === 0)) {
     return this.Lterminus_effect_Stack__f_reset;
   }
-  throw $ct_jl_IndexOutOfBoundsException__T__(new $c_jl_IndexOutOfBoundsException(), ("" + n));
+  throw $ct_jl_IndexOutOfBoundsException__I__(new $c_jl_IndexOutOfBoundsException(), n);
 });
 $c_Lterminus_effect_Stack.prototype.push__T__Lterminus_effect_Writer__V = (function(code, writer) {
   var this$1 = $n(this.Lterminus_effect_Stack__f_stack);
@@ -7047,6 +7007,11 @@ function $ct_jl_IndexOutOfBoundsException__T__($thiz, s) {
   $ct_jl_Throwable__T__jl_Throwable__Z__Z__($thiz, s, null, true, true);
   return $thiz;
 }
+function $ct_jl_IndexOutOfBoundsException__I__($thiz, index) {
+  var s = ("Index out of range: " + index);
+  $ct_jl_Throwable__T__jl_Throwable__Z__Z__($thiz, s, null, true, true);
+  return $thiz;
+}
 class $c_jl_IndexOutOfBoundsException extends $c_jl_RuntimeException {
 }
 var $d_jl_IndexOutOfBoundsException = new $TypeData().initClass($c_jl_IndexOutOfBoundsException, "java.lang.IndexOutOfBoundsException", ({
@@ -7178,28 +7143,6 @@ var $d_Lorg_scalajs_linker_runtime_UndefinedBehaviorError = new $TypeData().init
   jl_VirtualMachineError: 1,
   jl_Error: 1,
   jl_Throwable: 1,
-  Ljava_io_Serializable: 1
-}));
-/** @constructor */
-function $c_s_$less$colon$less$$anon$1() {
-}
-$c_s_$less$colon$less$$anon$1.prototype = new $h_s_$eq$colon$eq();
-$c_s_$less$colon$less$$anon$1.prototype.constructor = $c_s_$less$colon$less$$anon$1;
-/** @constructor */
-function $h_s_$less$colon$less$$anon$1() {
-}
-$h_s_$less$colon$less$$anon$1.prototype = $c_s_$less$colon$less$$anon$1.prototype;
-$c_s_$less$colon$less$$anon$1.prototype.apply__O__O = (function(x) {
-  return x;
-});
-$c_s_$less$colon$less$$anon$1.prototype.toString__T = (function() {
-  return "generalized constraint";
-});
-var $d_s_$less$colon$less$$anon$1 = new $TypeData().initClass($c_s_$less$colon$less$$anon$1, "scala.$less$colon$less$$anon$1", ({
-  s_$less$colon$less$$anon$1: 1,
-  s_$eq$colon$eq: 1,
-  s_$less$colon$less: 1,
-  F1: 1,
   Ljava_io_Serializable: 1
 }));
 function $p_s_MatchError__objString__T($thiz) {
@@ -9730,7 +9673,7 @@ $c_s_util_Failure.prototype.productElement__I__O = (function(n) {
   if ((n === 0)) {
     return this.s_util_Failure__f_exception;
   }
-  throw $ct_jl_IndexOutOfBoundsException__T__(new $c_jl_IndexOutOfBoundsException(), ("" + n));
+  throw $ct_jl_IndexOutOfBoundsException__I__(new $c_jl_IndexOutOfBoundsException(), n);
 });
 $c_s_util_Failure.prototype.get__O = (function() {
   var $x_1 = $n(this.s_util_Failure__f_exception);
@@ -9811,7 +9754,7 @@ $c_s_util_Success.prototype.productElement__I__O = (function(n) {
   if ((n === 0)) {
     return this.s_util_Success__f_value;
   }
-  throw $ct_jl_IndexOutOfBoundsException__T__(new $c_jl_IndexOutOfBoundsException(), ("" + n));
+  throw $ct_jl_IndexOutOfBoundsException__I__(new $c_jl_IndexOutOfBoundsException(), n);
 });
 $c_s_util_Success.prototype.get__O = (function() {
   return this.s_util_Success__f_value;
@@ -10090,7 +10033,7 @@ $c_s_None$.prototype.productPrefix__T = (function() {
   return "None";
 });
 $c_s_None$.prototype.productElement__I__O = (function(n) {
-  throw $ct_jl_IndexOutOfBoundsException__T__(new $c_jl_IndexOutOfBoundsException(), ("" + n));
+  throw $ct_jl_IndexOutOfBoundsException__I__(new $c_jl_IndexOutOfBoundsException(), n);
 });
 $c_s_None$.prototype.get__E = (function() {
   throw $ct_ju_NoSuchElementException__T__(new $c_ju_NoSuchElementException(), "None.get");
@@ -10152,7 +10095,7 @@ $c_s_Some.prototype.productElement__I__O = (function(n) {
   if ((n === 0)) {
     return this.s_Some__f_value;
   }
-  throw $ct_jl_IndexOutOfBoundsException__T__(new $c_jl_IndexOutOfBoundsException(), ("" + n));
+  throw $ct_jl_IndexOutOfBoundsException__I__(new $c_jl_IndexOutOfBoundsException(), n);
 });
 $c_s_Some.prototype.get__O = (function() {
   return this.s_Some__f_value;
@@ -10959,8 +10902,7 @@ $c_s_concurrent_impl_Promise$DefaultPromise.prototype.completeWith__s_concurrent
       } else {
         var this$1 = $n(other);
         var this$2 = $n($m_s_Option$().apply__O__s_Option($p_s_concurrent_impl_Promise$DefaultPromise__value0__s_util_Try(this$1)));
-        var ev = $m_s_$less$colon$less$().s_$less$colon$less$__f_singleton;
-        var resolved = $as_s_util_Try((this$2.isEmpty__Z() ? ($n(ev), null) : this$2.get__O()));
+        var resolved = $as_s_util_Try((this$2.isEmpty__Z() ? null : this$2.get__O()));
       }
       if ((resolved !== null)) {
         this.tryComplete0__O__s_util_Try__Z(state, resolved);
@@ -13374,7 +13316,7 @@ $c_sci_$colon$colon.prototype.productElement__I__O = (function(n) {
   if ((n === 1)) {
     return this.sci_$colon$colon__f_next;
   }
-  throw $ct_jl_IndexOutOfBoundsException__T__(new $c_jl_IndexOutOfBoundsException(), ("" + n));
+  throw $ct_jl_IndexOutOfBoundsException__I__(new $c_jl_IndexOutOfBoundsException(), n);
 });
 $c_sci_$colon$colon.prototype.head__O = (function() {
   return this.sci_$colon$colon__f_head;
@@ -13435,7 +13377,7 @@ $c_sci_Nil$.prototype.productPrefix__T = (function() {
   return "Nil";
 });
 $c_sci_Nil$.prototype.productElement__I__O = (function(n) {
-  throw $ct_jl_IndexOutOfBoundsException__T__(new $c_jl_IndexOutOfBoundsException(), ("" + n));
+  throw $ct_jl_IndexOutOfBoundsException__I__(new $c_jl_IndexOutOfBoundsException(), n);
 });
 $c_sci_Nil$.prototype.head__E = (function() {
   throw $ct_ju_NoSuchElementException__T__(new $c_ju_NoSuchElementException(), "head of empty list");
