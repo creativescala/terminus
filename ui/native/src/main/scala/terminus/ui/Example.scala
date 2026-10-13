@@ -260,10 +260,12 @@ private def staticText(s: String) = Signal.constant(text.Text(s))
   // full terminal width. The column's own default Align.Stretch then widens
   // the Line to match.
   val app = FullScreen.withLayout(_.withAlign(Align.Start)) { ctx ?=>
+    println("a")
     val action = ctx.signal(text.Line(""))
     val enabled = action.map(_.isNonEmpty)
     val output = ctx.signal(text.Line.empty)
 
+    println("b")
     Column(Size.wrapContent) {
       Row(Size.wrapContent) {
         TextInput(
@@ -291,4 +293,7 @@ private def staticText(s: String) = Signal.constant(text.Text(s))
     }
   }
 
-  app.unsafeRun(using NativeTerminal)
+  import cats.effect.*
+  import cats.effect.unsafe.implicits.global
+  app.use(f => IO.blocking(f.run(using NativeTerminal))).unsafeRunSync()
+  // app.unsafeRun(using NativeTerminal)

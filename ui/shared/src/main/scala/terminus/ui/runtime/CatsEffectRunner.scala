@@ -30,6 +30,7 @@ import terminus.effect
 import java.util.concurrent.ArrayBlockingQueue
 import java.util.concurrent.BlockingQueue
 import scala.concurrent.duration.*
+import cats.effect.Resource
 
 /** A [[Runner]] that uses Cats Effect.
   *
@@ -105,12 +106,9 @@ final class CatsEffectRunner(
     dispatcher.unsafeRunAndForget(ceEffect)
     outQueue
 object CatsEffectRunner:
-  def apply: IO[CatsEffectRunner] =
-    val dispatcherResource = Dispatcher.parallel[IO]
-    val queue = Queue.bounded[IO, Stream[IO, Runnable]](128)
-
-    dispatcherResource.use { dispatcher =>
-      Supervisor[IO].use { supervisor =>
-        queue.map { new CatsEffectRunner(dispatcher, _, supervisor) }
-      }
-    }
+  def apply: Resource[IO, CatsEffectRunner] =
+    for
+      dispatcher <- Dispatcher.parallel[IO]
+      supervisor <- Supervisor[IO]
+      queue <- Queue.bounded[IO, Stream[IO, Runnable]](128).toResource
+    yield new CatsEffectRunner(dispatcher, queue, supervisor)

@@ -17,6 +17,7 @@
 package terminus.ui
 
 import cats.effect.IO
+import cats.effect.Resource
 import cats.effect.unsafe.IORuntime
 import terminus.AlternateScreenMode
 import terminus.Cursor
@@ -118,7 +119,7 @@ class FullScreen(runner: Runner, runtime: Runtime, column: Column):
               render()
               loop()
 
-          render()
+          prevBuffer.render
           loop()
         }
       }
@@ -136,12 +137,12 @@ object FullScreen:
         RawMode,
         Writer
 
-  extension (app: IO[FullScreen])
+  extension (app: Resource[IO, FullScreen])
     def unsafeRun(using terminal: InteractiveTerminal): Unit =
       import cats.effect.unsafe.implicits.global
-      app.flatMap(f => IO.blocking(f.run(using terminal))).unsafeRunAndForget()
+      app.use(f => IO.blocking(f.run(using terminal))).unsafeRunAndForget()
 
-  def apply(body: (Layout & React & Timer) ?=> Unit): IO[FullScreen] =
+  def apply(body: (Layout & React & Timer) ?=> Unit): Resource[IO, FullScreen] =
     withLayout(identity)(ctx ?=> body(using ctx))
 
   /** As [[apply]], but also configures the layout of the root column that holds
@@ -156,7 +157,7 @@ object FullScreen:
     */
   def withLayout(style: LayoutProps => LayoutProps)(
       body: (Layout & React & Timer) ?=> Unit
-  ): IO[FullScreen] =
+  ): Resource[IO, FullScreen] =
     CatsEffectRunner.apply.map { runner =>
       val focusId = FocusId.next
       val runtime = DefaultRuntime(runner)
@@ -183,5 +184,5 @@ object FullScreen:
       IORuntime
   ): Unit =
     apply(body)
-      .flatMap(fullScreen => IO.blocking(fullScreen.run))
+      .use(fullScreen => IO.blocking(fullScreen.run))
       .unsafeRunAndForget()

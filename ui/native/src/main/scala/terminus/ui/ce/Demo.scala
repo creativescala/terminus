@@ -24,6 +24,6 @@ import terminus.NativeTerminal
 //
 // The Native twin of the JVM demo; see DemoApp for what it shows.
 object demo extends IOApp.Simple:
-  def run: IO[Unit] = DemoApp.make.flatMap { app =>
+  def run: IO[Unit] = DemoApp.make.use { app =>
     IO.blocking(app.run(using NativeTerminal))
   }

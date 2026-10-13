@@ -18,6 +18,7 @@ package terminus.ui.ce
 
 import cats.effect.IO
 import cats.effect.IOApp
+import cats.syntax.all.*
 import cats.effect.Resource
 import terminus.JLineTerminal
 
@@ -25,9 +26,10 @@ import terminus.JLineTerminal
 //
 // See DemoApp for what the demo shows.
 object demo extends IOApp.Simple:
+  val jlineResource: Resource[IO, JLineTerminal] =
+    Resource.make(IO(JLineTerminal.apply))(terminal => IO(terminal.close()))
+
   def run: IO[Unit] =
-    Resource
-      .make(IO(JLineTerminal.apply))(terminal => IO(terminal.close()))
-      .use(terminal =>
-        DemoApp.make.flatMap(app => IO.blocking(app.run(using terminal)))
-      )
+    (jlineResource, DemoApp.make).tupled.use((terminal, app) =>
+      IO.blocking(app.run(using terminal))
+    )

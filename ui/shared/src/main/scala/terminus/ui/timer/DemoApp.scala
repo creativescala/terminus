@@ -17,6 +17,7 @@
 package terminus.ui.ce
 
 import cats.effect.IO
+import cats.effect.Resource
 import terminus.Key
 import terminus.ui.FullScreen
 import terminus.ui.component.Column
@@ -36,7 +37,7 @@ import scala.concurrent.duration.*
 private[ce] object DemoApp:
   val frames = Vector("⠋", "⠙", "⠹", "⠸", "⠼", "⠴", "⠦", "⠧", "⠇", "⠏")
 
-  def make: IO[FullScreen] =
+  def make: Resource[IO, FullScreen] =
     FullScreen { ctx ?=>
       val count = ctx.signal(0)
       val ticks = ctx.every(100.millis)
