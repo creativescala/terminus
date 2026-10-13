@@ -33,7 +33,7 @@ ThisBuild / developers := List(
   tlGitHubDev("noelwelsh", "Noel Welsh")
 )
 
-lazy val scala3 = "3.9.0"
+lazy val scala3 = "3.10.0"
 
 ThisBuild / crossScalaVersions := List(scala3)
 ThisBuild / githubWorkflowJavaVersions := List(JavaSpec.temurin("17"))
